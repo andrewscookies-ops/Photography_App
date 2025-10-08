@@ -1012,6 +1012,7 @@ var camerasDigitalBuiltin=[
   {name:"Sony A7 III",mount:"sony_e",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'},
   {name:"Canon EOS R6",mount:"canon_rf",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'},
   {name:"Nikon Z6 II",mount:"nikon_z",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'},
+  {name:"Nikon Zf",mount:"nikon_z",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'},
   {name:"Fujifilm X-T4",mount:"fujifilm_x",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'},
   {name:"Panasonic Lumix S5",mount:"l_mount",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'},
   {name:"Canon 5D Mark IV",mount:"canon_eos",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'}
@@ -1037,8 +1038,36 @@ var lensesDigitalBuiltin=[
   {name:"Sony 50mm f/1.8",mount:"sony_e",type:"prime",focal_mm:50,max_aperture:1.8,min_aperture:16},
   {name:"Canon RF 50mm f/1.8",mount:"canon_rf",type:"prime",focal_mm:50,max_aperture:1.8,min_aperture:22},
   {name:"Nikon Z 24-70mm f/4",mount:"nikon_z",type:"zoom",focal_min_mm:24,focal_max_mm:70,max_aperture_wide:4,min_aperture:22},
+  {name:"Nikon Z 40mm f/2",mount:"nikon_z",type:"prime",focal_mm:40,max_aperture:2,min_aperture:16},
   {name:"Fujifilm 35mm f/2",mount:"fujifilm_x",type:"prime",focal_mm:35,max_aperture:2,min_aperture:16}
 ];
+
+function currentCaptureMode(){
+  return document.getElementById('captureMode')?.value || 'film';
+}
+function showAllBuiltinsEnabled(){
+  return !!document.getElementById('showAllBuiltins')?.checked;
+}
+function builtinCamerasForMode(mode, showAll){
+  if(showAll || mode==='all'){ return camerasBuiltin.concat(camerasDigitalBuiltin); }
+  return mode==='digital' ? camerasDigitalBuiltin : camerasBuiltin;
+}
+function builtinLensesForMode(mode, showAll){
+  if(showAll || mode==='all'){ return lensesBuiltin.concat(lensesDigitalBuiltin); }
+  return mode==='digital' ? lensesDigitalBuiltin : lensesBuiltin;
+}
+function availableCameras(){
+  return (loadUserStore().cameras||[]).concat(builtinCamerasForMode(currentCaptureMode(), showAllBuiltinsEnabled()));
+}
+function availableLenses(){
+  return (loadUserStore().lenses||[]).concat(builtinLensesForMode(currentCaptureMode(), showAllBuiltinsEnabled()));
+}
+function findCameraByName(name){
+  return availableCameras().find(function(c){ return c.name===name; });
+}
+function findLensByName(name){
+  return availableLenses().find(function(l){ return l.name===name; });
+}
 var filmsBuiltin=[
   {name:"Kodak Portra 160",brand:"Kodak Portra",box_iso:160,push_limit:2,pull_limit:1},
   {name:"Kodak Portra 400",brand:"Kodak Portra",box_iso:400,push_limit:2,pull_limit:1},
@@ -1572,7 +1601,8 @@ function getSelectedISO(){
 function recommend(ev,film,lens,focal,camera){
   ev = ev + (parseFloat(document.getElementById('evBias')?.value)||0);
   var ci=getCI();
-  var iso=getSelectedISO()||film.box_iso;
+  var selectedISO = getSelectedISO();
+  var iso = selectedISO || (film?.box_iso) || 400;
   var isoLock=true; // ISO is controlled by user via dropdown; do not auto-adjust in algorithm
   var ap=lensApertureAtFocal(lens,focal);
   // DOF bias: interpolate between ~f/11 and the lens' max aperture (wider)
@@ -1640,8 +1670,8 @@ function recommend(ev,film,lens,focal,camera){
 // ===== Alternatives =====
 function buildCompactAlternatives(ev,film,lens,focal,camera,main){
   var ap=lensApertureAtFocal(lens,focal),
-    iso=getSelectedISO()||film.box_iso,
-      isos=[iso],
+      baseISO=getSelectedISO()||(film?.box_iso)||400,
+      isos=[baseISO],
       rows=[];
   for(var i=0;i<isos.length;i++){
     var iso=Math.round(isos[i]),
@@ -1678,8 +1708,8 @@ function buildCompactAlternatives(ev,film,lens,focal,camera,main){
 }
 function buildFullAlternatives(ev,film,lens,focal,camera){
   var ap=lensApertureAtFocal(lens,focal),
-    iso=getSelectedISO()||film.box_iso,
-      isos=[iso],
+      baseISO=getSelectedISO()||(film?.box_iso)||400,
+      isos=[baseISO],
       Ns=[],cur=ap.minA;
   while(cur<=ap.maxA+1e-9){Ns.push(parseFloat(cur.toFixed(1)));cur*=Math.SQRT2}
   var rows=[];
@@ -1697,7 +1727,11 @@ function buildFullAlternatives(ev,film,lens,focal,camera){
     if(a.N!==b.N)return a.N-b.N;
     return a.t-b.t
   });
-  if(rows.length===0){ rows.push({iso:film.box_iso,N:lensApertureAtFocal(lens,focal).minA,t:nearestShutterForCamera(camera, requiredShutter(ev,film.box_iso,lensApertureAtFocal(lens,focal).minA))}); }
+  if(rows.length===0){
+    var fallbackN=lensApertureAtFocal(lens,focal).minA;
+    var fallbackISO=getSelectedISO()||(film?.box_iso)||400;
+    rows.push({iso:fallbackISO,N:fallbackN,t:nearestShutterForCamera(camera, requiredShutter(ev,fallbackISO,fallbackN))});
+  }
   return rows
 }
 // Helper: enforce focal input constraints based on lens
@@ -1725,7 +1759,7 @@ function refreshCameras(){
   // Include only built-ins relevant to the selected capture mode, unless user asked to show all built-ins
   var mode=document.getElementById('captureMode')?.value||'film';
   var showAll = !!document.getElementById('showAllBuiltins')?.checked;
-  if(showAll){
+  if(showAll || mode==='all'){
     opts.push('<optgroup label="Built-in (Film)">',camerasBuiltin.map(c=>'<option value="'+c.name+'">'+c.name+'</option>').join(''),'</optgroup>');
     opts.push('<optgroup label="Built-in (Digital)">',camerasDigitalBuiltin.map(c=>'<option value="'+c.name+'">'+c.name+'</option>').join(''),'</optgroup>');
   } else if(mode==='film'){
@@ -1742,8 +1776,10 @@ function refreshCameras(){
   if(customs.length){
     sel.value = customs[0].name;
   } else {
-    var def = (mode==='digital') ? (camerasDigitalBuiltin.find(c=>c.name==='Sony A7 III')||camerasDigitalBuiltin[0]) : (camerasBuiltin.find(c=>c.name==="Pentax K1000")||camerasBuiltin[0]);
-    sel.value = def.name;
+    var builtinPool = builtinCamerasForMode(mode, showAll);
+    var def = (mode==='digital') ? (builtinPool.find(c=>c.name==='Sony A7 III')||builtinPool[0]) : (builtinPool.find(c=>c.name==="Pentax K1000")||builtinPool[0]);
+    if(mode==='all' && !def){ def = builtinPool[0]; }
+    if(def){ sel.value = def.name; }
   }
 }
 function refreshFilms(){
@@ -1775,12 +1811,11 @@ function refreshLenses(){
   var camName=document.getElementById('cameraSelect').value,
       sel=document.getElementById('lensSelect');
   if(camName==='__custom__'){openCustom('camera'); return;}
-  var mode=document.getElementById('captureMode')?.value||'film';
-  var showAll = !!document.getElementById('showAllBuiltins')?.checked;
-  var camList = (loadUserStore().cameras||[]).concat(showAll?camerasBuiltin.concat(camerasDigitalBuiltin):(mode==='digital'?camerasDigitalBuiltin:camerasBuiltin));
-  var cam=camList.find(c=>c.name===camName);
+  var mode=currentCaptureMode();
+  var showAll = showAllBuiltinsEnabled();
+  var cam=findCameraByName(camName);
   if(!cam){sel.innerHTML='';return}
-  var all=(loadUserStore().lenses||[]).concat(showAll?lensesBuiltin.concat(lensesDigitalBuiltin):(mode==='digital'?lensesDigitalBuiltin:lensesBuiltin));
+  var all=(loadUserStore().lenses||[]).concat(builtinLensesForMode(mode, showAll));
   var list=all.filter(l=>l.mount===cam.mount);
   var st=loadUserStore();var customs=(st.lenses||[]).filter(l=>l.mount===cam.mount);
   var opts=[];
@@ -1795,13 +1830,17 @@ function refreshLenses(){
   opts.push('<option value="__custom__">Custom…</option>');
   sel.innerHTML=opts.join('');
   sel.selectedIndex=0;
+  var preferredByCamera={
+    "Nikon F100":"Nikon 50mm f/1.4",
+    "Nikon Zf":"Nikon Z 40mm f/2"
+  };
   var lens;
-  if (camName === "Nikon F100") {
-    lens = list.find(l => l.name === "Nikon 50mm f/1.4") || customs[0] || list[0];
-  } else {
-    lens = customs[0] || list[0];
+  var preferred=preferredByCamera[camName];
+  if(preferred){
+    lens = list.find(function(l){ return l.name===preferred; }) || customs.find(function(l){ return l.name===preferred; });
   }
-    if(lens){ sel.value = lens.name; }
+  if(!lens){ lens = customs[0] || list[0]; }
+  if(lens){ sel.value = lens.name; }
   if(lens){
     var fi=document.getElementById('focalInput');
     if(fi){
@@ -1821,7 +1860,7 @@ function handleSelectCustoms(){
       // Update focal length to suit selected lens
       try{
         var lensName=this.value;
-        var lens=(loadUserStore().lenses||[]).concat(lensesBuiltin).find(l=>l.name===lensName);
+        var lens=findLensByName(lensName);
         if(lens){
           var f=(lens.type==='prime')?lens.focal_mm:Math.round((lens.focal_min_mm+lens.focal_max_mm)/2);
           var fi=document.getElementById('focalInput'); if(fi){ fi.value=f; }
@@ -1864,7 +1903,7 @@ function openCustom(type){
     // Prefill mount from current camera to reduce mismatch issues
     try{
       var camName=document.getElementById('cameraSelect')?.value;
-      var cam=(loadUserStore().cameras||[]).concat(camerasBuiltin).find(c=>c.name===camName);
+      var cam=findCameraByName(camName);
       if(cam&&cam.mount){ var m=document.getElementById('l_mount'); if(m){ m.value=cam.mount; }}
     }catch(e){}
   } else if(type==='film'){
@@ -2009,7 +2048,7 @@ function calcDOF(N,focal_mm,dist_m,coc_mm){
   return{H_m:H/1000,near_m:near_m,far_m:far_m,total_m:total};
 }
 function updateDOF(){
-  var lens=(loadUserStore().lenses||[]).concat(lensesBuiltin).find(l=>l.name===document.getElementById('lensSelect').value);
+  var lens=findLensByName(document.getElementById('lensSelect').value);
   if(!lens){document.getElementById('dofOut').textContent='—';return}
   var focal=(lens.type==='prime')?lens.focal_mm:(parseFloat(document.getElementById('focalInput').value)||50);
   var outTxt=document.getElementById('output').textContent||'';
@@ -2041,8 +2080,8 @@ function updateBracket(){
   var param=document.getElementById('brParam')?.value||'shutter';
   var offs=[];for(var e=-span;e<=span+1e-9;e+=step){offs.push(parseFloat(e.toFixed(3)))}
   var camName=document.getElementById('cameraSelect').value,lensName=document.getElementById('lensSelect').value,filmName=document.getElementById('filmSelect').value;
-  var camera=(loadUserStore().cameras||[]).concat(camerasBuiltin).find(c=>c.name===camName);
-  var lens=(loadUserStore().lenses||[]).concat(lensesBuiltin).find(l=>l.name===lensName);
+  var camera=findCameraByName(camName);
+  var lens=findLensByName(lensName);
   var film=currentFilm();
   if(!camera||!lens||!film){document.getElementById('brOut').textContent='—';return}
   var focal=parseFloat(document.getElementById('focalInput').value)||50;
@@ -2092,8 +2131,8 @@ function updateReciprocity(){
   var film=currentFilm();
   if(!film){document.getElementById('recipOut').textContent='—';return}
   var camName=document.getElementById('cameraSelect').value,lensName=document.getElementById('lensSelect').value;
-  var camera=(loadUserStore().cameras||[]).concat(camerasBuiltin).find(c=>c.name===camName);
-  var lens=(loadUserStore().lenses||[]).concat(lensesBuiltin).find(l=>l.name===lensName);
+  var camera=findCameraByName(camName);
+  var lens=findLensByName(lensName);
   if(!camera||!lens){document.getElementById('recipOut').textContent='—';return}
   var focal=parseFloat(document.getElementById('focalInput').value)||50;
   var evEff=effectiveEV();
@@ -2330,12 +2369,14 @@ function recalc(){
       filmName=document.getElementById('filmSelect').value,
       output=document.getElementById('output'),
       warn=document.getElementById('warning');
-  if(!camName||!lensName||!filmName||camName==='__custom__'||lensName==='__custom__'||filmName==='__custom__'){
+  var mode=currentCaptureMode();
+  var requireFilm = mode!=='digital';
+  if(!camName||!lensName||camName==='__custom__'||lensName==='__custom__'||(requireFilm && (!filmName||filmName==='__custom__'))){
     output.textContent="Select camera, lens, and film.";warn.textContent="";return;
   }
-  var camera=(loadUserStore().cameras||[]).concat(camerasBuiltin).find(c=>c.name===camName),
-      lens=(loadUserStore().lenses||[]).concat(lensesBuiltin).find(l=>l.name===lensName),
-      film=currentFilm();
+  var camera=findCameraByName(camName),
+      lens=findLensByName(lensName),
+      film=requireFilm?currentFilm():null;
   var focal=parseFloat(document.getElementById('focalInput').value)||50;
   var evEff=effectiveEV();
   // Clamp focal to lens capability
