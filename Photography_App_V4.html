@@ -1,0 +1,2566 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Photography App — FULL</title>
+<style>
+  /* Creative Intent toggle: match section headers */
+  #creativeToggle {
+    display: inline-block;
+    width: auto;
+    font-size: 1em; /* match .section-header */
+    font-weight: 650;
+    padding: 0; /* headers have no extra padding */
+    margin: 0 0 8px 0;
+    background: none;
+    color: var(--text);
+    border: none;
+    text-align: left;
+    border-radius: 0;
+    box-shadow: none;
+    cursor: pointer;
+    transition: none;
+    letter-spacing: 0;
+  }
+  #creativeToggle:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--ring);
+    border-radius: 6px;
+  }
+  .section-header {
+    font-weight: 650;
+    margin-bottom: 8px;
+    color: var(--text);
+    font-size: 1em;
+    border: none;
+    padding: 0;
+    background: none;
+    letter-spacing: 0;
+  }
+  @media (max-width: 600px) {
+    .wrap { padding: 6px; }
+    .card { padding: 8px; margin-bottom: 10px; }
+    .row { gap: 6px; }
+    .col { min-width: 120px; }
+    .output-main { font-size: 18px; }
+    button, input, select, textarea { font-size: 16px; padding: 12px 10px; }
+    .ev-control { height: 44px; padding: 8px 4px; }
+    .ev-descriptor { flex-direction: column; gap: 4px; padding: 6px 6px; }
+    #exposureTriangle { max-width: 98vw; }
+    .incident-dial { width: 60px; height: 60px; }
+    .incident-center { width: 16px; height: 16px; }
+    .incident-readouts .value { font-size: 12px; }
+    .section-header { font-size: 15px; }
+  }
+  :root{
+    --pad:12px;
+    --bg:#f7f7f9;
+    --card:#ffffff;
+    --text:#111318;
+    --muted:#667085;
+    --border:#e6e8ec;
+    --accent:#0d6efd;
+    --accent-contrast:#ffffff;
+    --ring: rgba(13,110,253,.25);
+    --shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.10);
+    --shadow-lg: 0 10px 30px rgba(16,24,40,.12);
+    --radius:12px;
+    /* UI tokens */
+    --btn-bg:#f4f6f8;
+    --btn-bg-hover:#eef2f6;
+    --tableHead:#f8fafc;
+    --rowHover:#fafbff;
+    --chipBg:#fafafa;
+    --track:#d0d5dd;
+    --border-strong:#dce2e8;
+    --slider-gutter: 9px;
+    --flash-bg-light:#fffbe6;
+    --flash-glow-light:#ffe08a;
+    --flash-glow-outer-light:#ffe08a44;
+    --flash-bg:var(--flash-bg-light);
+    --flash-glow:var(--flash-glow-light);
+    --flash-glow-outer:var(--flash-glow-outer-light);
+    color-scheme: light dark;
+  }
+  *{box-sizing:border-box}
+  body{font-family:ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;margin:0;background:var(--bg);color:var(--text)}
+  header{padding:12px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card);z-index:10;display:flex;justify-content:space-between;align-items:center;backdrop-filter:saturate(180%) blur(6px)}
+  h1{font-size:18px;margin:0;font-weight:650;letter-spacing:.2px}
+  .wrap{max-width:1100px;margin:0 auto;padding:16px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;padding:14px;box-shadow:var(--shadow);transition:box-shadow .2s ease,border-color .2s ease}
+  .card:hover{box-shadow:var(--shadow-lg)}
+  .section-header{font-weight:650;margin-bottom:8px;color:var(--text)}
+  .row{display:flex;flex-wrap:wrap;gap:12px}
+  .col{flex:1;min-width:180px}
+  label{font-size:12px;display:block;margin-bottom:6px;color:var(--muted);text-transform:none;letter-spacing:.2px}
+  input,select,button:not(.info-btn),textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:14px;background:var(--card);color:var(--text);transition:border-color .15s ease, box-shadow .15s ease}
+  input:focus,select:focus,textarea:focus,button:focus{outline:none;box-shadow:0 0 0 3px var(--ring);border-color:var(--accent)}
+  input[type=range]{
+    display:block;
+    margin-left:auto;
+    margin-right:auto;
+    width:96%;
+    background:transparent
+  }
+  button{cursor:pointer;background:var(--btn-bg);color:var(--text);border:1px solid var(--border);border-radius:10px}
+  button:hover{background:var(--btn-bg-hover)}
+  button:active{transform:translateY(0.5px)}
+  /* Improve hover contrast for toggle buttons */
+  #advancedToggle, #altToggle, #toggleFull{
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+  }
+  #advancedToggle:hover, #altToggle:hover, #toggleFull:hover{
+    background: var(--accent);
+    color: var(--accent-contrast);
+    border-color: var(--accent);
+  }
+  .icon-btn{width:auto;padding:6px 10px;font-size:18px;line-height:1;border-radius:10px;background:var(--card)}
+  .output-main{font-size:22px;font-weight:750;margin:8px 0}
+  .sub{font-size:12px;color:var(--muted);margin-top:4px}
+  .warning{color:#b00020;margin-top:6px;min-height:2.4em;overflow-wrap:anywhere}
+  .alt-grid{overflow-x:auto;margin-top:10px}
+  table{border-collapse:separate;border-spacing:0;font-size:14px;width:100%;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  thead th{background:var(--tableHead);color:var(--text);font-weight:600}
+  th,td{border-bottom:1px solid var(--border);padding:10px 12px;text-align:left;white-space:nowrap}
+  tbody tr:hover{background:var(--rowHover)}
+  tr.recommended{background:#f0f8ff}
+  .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,.5);justify-content:center;align-items:center;padding:16px;z-index:9999;}
+  .modal-content{background:var(--card);border-radius:14px;padding:16px;max-width:560px;width:96%;max-height:90%;overflow:auto;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
+  footer{text-align:center;padding:10px;font-size:12px;border-top:1px solid var(--border)}
+  footer a{color:var(--muted);text-decoration:none}
+  .settings-menu{display:none;position:absolute;right:16px;top:48px;background:var(--card);border:1px solid var(--border);border-radius:12px;min-width:240px;box-shadow:var(--shadow-lg);padding:8px}
+  .settings-menu button{width:100%;margin:4px 0}
+.divider{height:1px;background:var(--border);margin:6px 0}
+  .ev-label-badge{position:absolute;top:14px;transform:translateX(-50%);font-size:10px;color:var(--muted);background:var(--card);padding:0 4px;border-radius:4px;border:1px solid var(--border)}
+  .ev-wrap{ position:relative; padding-top:36px; }
+.ev-descriptor{margin-top:8px;font-size:12px;color:#333;border:1px solid var(--border);border-radius:12px;padding:12px;background:var(--chipBg);display:flex;flex-direction:column;gap:12px}
+  .ev-headline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:32px}
+  .descriptor-tag{font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:4px 10px;background:var(--card)}
+  #evDescLabel{flex:1 1 clamp(200px,45%,320px);font-weight:600;color:var(--text);display:flex;align-items:center;justify-content:flex-start;min-height:48px;max-height:48px;padding:6px 12px;border:1px solid var(--border);border-radius:10px;background:var(--card);font-variant-numeric:tabular-nums;line-height:1.4;overflow-y:auto;overflow-x:hidden}
+  @media (max-width: 480px){#evDescLabel{flex-basis:100%;min-width:0}}
+  .ev-numeric{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .ev-numeric label{display:flex;align-items:center;gap:6px;margin:0;font-size:12px;color:var(--muted)}
+  .ev-descriptor input{width:auto !important;min-width:5ch;max-width:12ch;display:inline-block;padding:6px 8px;font-family: ui-monospace, SFMono-Regular, Menlo, monospace; text-align:right; font-variant-numeric: tabular-nums;border-radius:8px}
+  .ev-descriptor input#evInput{width:9ch !important}
+  .ev-descriptor input#luxInput{width:10ch !important}
+  .seg{display:flex;border:1px solid var(--border);border-radius:12px;overflow:hidden;flex-wrap:wrap;background:var(--chipBg)}
+  .seg-btn{flex:1 1 33%;min-width:100px;padding:10px;background:transparent;border:0;white-space:normal;line-height:1.2;color:var(--text)}
+  .seg-btn+.seg-btn{border-left:1px solid var(--border)}
+  .seg-btn:hover{background:var(--rowHover)}
+  .seg-btn.active{background:var(--accent);color:var(--accent-contrast);box-shadow:0 0 0 1px var(--accent) inset}
+  .seg-btn.active:hover,
+  .seg-btn.active:focus {
+    color: var(--accent-contrast);
+  }
+  .seg-btn.active:hover,.seg-btn.active:focus{filter:brightness(0.96)}
+  @media (max-width: 480px){.seg-btn{flex-basis:50%}}
+  /* Range slider base */
+  input[type=range]{-webkit-appearance:none;height:22px}
+  input[type=range]{appearance:none}
+  input[type=range]::-webkit-slider-runnable-track{height:4px;background:transparent;border-radius:999px}
+  input[type=range]::-moz-range-track{height:4px;background:transparent;border-radius:999px}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--card);border:1px solid var(--border-strong, var(--border));box-shadow:0 1px 2px rgba(16,24,40,.15);margin-top:-7px;transition:border-color .15s ease, box-shadow .15s ease}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--card);border:1px solid var(--border-strong, var(--border));box-shadow:0 1px 2px rgba(16,24,40,.15);transition:border-color .15s ease, box-shadow .15s ease}
+  input[type=range]:hover::-webkit-slider-thumb, input[type=range]:focus::-webkit-slider-thumb{border-color:var(--accent);box-shadow:0 0 3px 8px var(--ring), 0 1px 2px rgba(16,24,40,.15)}
+  input[type=range]:hover::-moz-range-thumb, input[type=range]:focus::-moz-range-thumb{border-color:var(--accent);box-shadow:0 0 3px 8px var(--ring), 0 1px 2px rgba(16,24,40,.15)}
+
+  /* New Scene Input slider (self-contained visuals) */
+  .ev-slider2{ position:relative; padding:16px 0 12px; }
+  .ev-slider2 .ev-track{
+    position:absolute; left:0; right:0; top:50%; transform:translateY(-50%);
+    height:12px; border-radius:999px;
+    background: linear-gradient(90deg,#1b1b2f 0%, #2a3b6a 15%, #3f7ec0 30%, #66c3ff 45%, #bfefff 60%, #fff3b0 75%, #ffe08a 87%, #ffd35e 100%);
+  }
+  .ev-slider2 .ev-ticks{
+    position:absolute; left:0; right:0; top:50%; transform:translateY(-50%);
+    height:34px; pointer-events:none;
+  }
+  .ev-slider2 .ev-ticks .tick{ position:absolute; bottom:0; width:1px; height:10px; background:var(--border-strong); opacity:.9; transform:translateX(-50%); }
+  .ev-slider2 .ev-ticks .tick.major{ width:2px; height:16px; background:var(--muted); opacity:1; }
+  .ev-slider2 input[type=range]{ position:relative; z-index:2; width:100%; display:block; margin:0 auto; background:transparent }
+
+  /* Unified EV slider: gradient track + tick marks overlay */
+.ev-slider{ position:relative; padding:16px 0 12px; }
+  .ev-slider input[type=range]{
+    width:100%;
+    margin:0 auto;
+    display:block;
+    appearance:none;
+    background:transparent;
+    box-sizing:border-box;
+  }
+
+/* Track uses gradient (both engines) */
+/* Unified EV slider: gradient track + tick marks overlay */
+  .ev-slider input[type=range]::-webkit-slider-runnable-track{
+    width:100%;
+    height:20px; border-radius:10px;
+    background: linear-gradient(90deg,#1b1b2f 0%, #2a3b6a 15%, #3f7ec0 30%, #66c3ff 45%, #bfefff 60%, #fff3b0 75%, #ffe08a 87%, #ffd35e 100%);
+    position:relative;
+    z-index:1;
+  }
+  .ev-slider input[type=range]::-moz-range-track{
+    width:100%;
+    height:20px; border-radius:10px;
+    background: linear-gradient(90deg,#1b1b2f 0%, #2a3b6a 15%, #3f7ec0 30%, #66c3ff 45%, #bfefff 60%, #fff3b0 75%, #ffe08a 87%, #ffd35e 100%);
+    position:relative;
+    z-index:1;
+  }
+
+/* New EV control */
+.ev-control{
+  position:relative; width:100%; height:56px; border-radius:12px;
+  background:var(--chipBg); border:1px solid var(--border); padding:14px 10px;
+  user-select:none; touch-action:none;
+}
+.ev-control:focus{ outline:none; box-shadow:0 0 0 3px var(--ring); border-color:var(--accent); }
+.ev-control .ev-track{
+  position:absolute; left:14px; right:14px; top:50%; height:12px; transform:translateY(-50%);
+  border-radius:999px;
+  background:linear-gradient(90deg,#1b1b2f 0%, #2a3b6a 15%, #3f7ec0 30%, #66c3ff 45%, #bfefff 60%, #fff3b0 75%, #ffe08a 87%, #ffd35e 100%);
+}
+.ev-control .ev-ticks{
+  position:absolute; left:14px; right:14px; top:50%; height:28px; transform:translateY(-50%); pointer-events:none;
+}
+.ev-control .ev-ticks .tick{ position:absolute; bottom:0; width:1px; height:10px; background:var(--border-strong); transform:translateX(-50%); }
+.ev-control .ev-ticks .tick.major{ width:2px; height:18px; background:var(--muted); }
+.ev-control .ev-handle{
+  position:absolute; top:50%; width:6px; height:30px; transform:translate(-50%,-50%);
+  background:var(--accent); border-radius:8px; box-shadow:0 0 6px 6px var(--ring);
+}
+@media (prefers-reduced-motion: no-preference){
+  .ev-control .ev-handle{ transition:left .06s linear; }
+}
+
+/* Rectangular thumb for precise alignment */
+.ev-slider input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:4px; height:28px; margin-top:-8px; border-radius:8px;
+  background: var(--accent); box-shadow:0 0 4px 6px var(--ring);
+}
+.ev-slider input[type=range]::-moz-range-thumb{
+  width:4px; height:28px; border:0; border-radius:8px;
+  background: var(--accent); box-shadow:0 0 4px 6px var(--ring);
+}
+
+  /* Tick overlay: minor every 1 EV (20 divisions across -4..16), major every 2 EV (10 divisions) */
+  .ev-scale{
+    position:absolute;
+    top:50%;
+    left:0;
+    width:100%;
+    transform:translateY(-50%);
+    height:40px;
+    pointer-events:none;
+    mix-blend-mode:difference;
+    z-index:3;
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .ev-scale .tick{
+    position:absolute; top:50%; transform:translateY(-50%);
+    width:1px; height:24px; background:#fff;
+    margin-left:-0.5px;
+  }
+  .ev-scale .tick.major{ width:2px; height:34px; }
+  /* Desktop improvements */
+  @media (min-width: 900px){
+    .wrap{max-width:1200px}
+    .col{min-width:220px}
+    .row{align-items:flex-end}
+  }
+  /* Table cells wrap on small screens, stay tidy on desktop */
+  th,td{white-space:nowrap}
+
+  /* Prefer dark scheme styles */
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#04112a;
+      --card:#0e1525;
+      --text:#e6edf3;
+      --muted:#9aa7b5;
+      --border:#1f2a3a;
+      --accent:#60a5fa;
+      --accent-contrast:#07111f;
+      --ring: rgba(186, 217, 255, 0.35);
+      --btn-bg:#152036;
+      --btn-bg-hover:hsl(221, 37%, 32%);
+      --tableHead:#293956;
+      --rowHover:#0f1c31;
+      --chipBg:#0f172a;
+      --track:#2a3b52;
+      --border-strong:#657080;
+      --recommended-bg:rgba(37,99,235,0.18);
+      --flash-bg:rgba(48,76,128,0.28);
+      --flash-glow:rgba(59,130,246,0.6);
+      --flash-glow-outer:rgba(59,130,246,0.2);
+    }
+    header{background:linear-gradient(180deg, rgba(96,165,250,0.06), rgba(14,21,37,0)) , var(--card); border-bottom-color:var(--border)}
+    .card{background:var(--card); border-color:var(--border)}
+    .icon-btn{background:var(--card); color:var(--text); border-color:var(--border)}
+    input,select,textarea{background:var(--card);color:var(--text);border-color:var(--border)}
+    button{background:var(--btn-bg);color:var(--text);border-color:var(--border)}
+    button:hover{background:var(--btn-bg-hover)}
+    table{background:var(--card);border-color:var(--border)}
+    thead th{background:var(--tableHead);color:var(--text)}
+    tbody tr:hover{background:var(--rowHover)}
+    .settings-menu{background:var(--card);border-color:var(--border)}
+    .divider{background:var(--border)}
+    .ev-descriptor{background:var(--chipBg);border-color:var(--border);color:var(--text)}
+    .ev-label-badge{background:var(--card);border-color:var(--border);color:var(--muted)}
+    .modal{background:rgba(5,9,17,.7)}
+    .modal-content{background:var(--card);color:var(--text);border-color:var(--border)}
+    .seg{background:var(--chipBg);border-color:var(--border)}
+    .seg-btn:hover{background:var(--btn-bg-hover)}
+  }
+  /* Manual theme overrides via data-theme attribute */
+  :root[data-theme="dark"]{
+    --bg:#0b1220;
+    --card:#0e1525;
+    --text:#e6edf3;
+    --muted:#9aa7b5;
+    --border:#1f2a3a;
+    --accent:#60a5fa;
+    --accent-contrast:#07111f;
+    --ring: rgba(96,165,250,.35);
+    --btn-bg:#152036;
+    --btn-bg-hover:#1a2742;
+    --tableHead:#121c2f;
+    --rowHover:#0f1c31;
+    --chipBg:#0f172a;
+    --track:#2a3b52;
+    --border-strong:#3a4b65;
+    --recommended-bg:rgba(37,99,235,0.18);
+    --flash-bg:rgba(48,76,128,0.28);
+    --flash-glow:rgba(59,130,246,0.6);
+    --flash-glow-outer:rgba(59,130,246,0.2);
+  }
+  
+  :root[data-theme="light"]{
+    --bg:#f7f7f9;
+    --card:#ffffff;
+    --text:#111318;
+    --muted:#667085;
+    --border:#e6e8ec;
+    --accent:#0d6efd;
+    --accent-contrast:#ffffff;
+    --ring: rgba(13,110,253,.25);
+    --btn-bg:#f4f6f8;
+    --btn-bg-hover:#eef2f6;
+    --tableHead:#f8fafc;
+    --rowHover:#fafbff;
+    --chipBg:#fafafa;
+    --track:#d0d5dd;
+    --border-strong:#dce2e8;
+    --flash-bg:var(--flash-bg-light);
+    --flash-glow:var(--flash-glow-light);
+    --flash-glow-outer:var(--flash-glow-outer-light);
+  }
+  /* High-contrast hover overrides (placed last for priority) */
+  #advancedToggle:hover,
+  #altToggle:hover,
+  #toggleFull:hover,
+  .settings-menu button:hover{
+    background: var(--accent) !important;
+    color: var(--accent-contrast) !important;
+    border-color: var(--accent) !important;
+  }
+  /* Ensure selected Creative Intent segments stay readable on hover */
+  .seg-btn.active:hover,
+  .seg-btn.active:focus{
+    background: var(--accent) !important;          /* keep the same base */
+    color: var(--accent-contrast) !important;      /* keep strong contrast */
+    /* very subtle darken overlay to indicate hover without big shift */
+    box-shadow: 0 0 0 1px var(--accent) inset, inset 0 0 0 1000px rgba(0,0,0,0.05) !important;
+    filter: none !important;                       /* avoid dimming text */
+  }
+  /* Make segmented toggle hover more obvious */
+  .seg-btn:hover{
+    box-shadow: 0 0 0 1px var(--accent) inset;
+  }
+  /* Highlight expandable section headers on hover */
+  details > summary{
+    display:flex; align-items:center; gap:6px;
+    cursor:pointer; border-radius:8px; padding:4px 6px;
+  }
+  details > summary:hover{
+    background: var(--rowHover);
+  }
+  /* Keep native marker; lay out: [marker] [title] [i] */
+  details > summary{ gap:8px; }
+  .summary-label{ flex:1 1 auto; }
+  .info-btn{ flex:0 0 18px; }
+  .info-btn{ pointer-events:auto; }
+  /* Compact inline info buttons next to Advanced summaries */
+  button.info-btn{width:auto;padding:0}
+  .info-btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:18px !important; height:18px !important; padding:0 !important;
+    border-radius:50%; font-size:12px; line-height:1;
+    background:var(--btn-bg); color:var(--text); border:1px solid var(--border);
+  }
+  .info-btn:hover{ background:var(--btn-bg-hover); }
+  .info-pop{
+    position:fixed; z-index:9999; max-width:280px;
+    background:var(--card); color:var(--text); border:1px solid var(--border);
+    border-radius:10px; box-shadow:var(--shadow-lg); padding:10px 12px; font-size:13px;
+  }
+  .info-inline{margin:4px 0 6px 0;font-size:12px;color:var(--muted);font-style:italic;min-height:1em}
+  .ambient-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:8px}
+  .ambient-buttons{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-start;flex:0 0 auto}
+  .ambient-buttons button{flex:1 1 auto;white-space:nowrap;min-width:0}
+  @media (max-width: 640px){
+    .ambient-actions{flex-direction:column;align-items:stretch}
+    .ambient-buttons{justify-content:flex-start}
+    .incident-readouts{width:100%;max-width:none}
+  }
+  .incident-card{max-width:360px}
+  .incident-wrap{display:flex;flex-direction:column;gap:8px;margin-top:8px;padding-top:4px}
+  .incident-wrap label{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .incident-dial-box{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.incident-dial{width:78px;height:78px;border-radius:50%;position:relative;background:radial-gradient(circle at 35% 35%, rgba(255,255,255,0.3), rgba(0,0,0,0.25));border:1px solid var(--border);box-shadow:0 4px 12px rgba(15,23,42,0.18), inset 0 2px 4px rgba(255,255,255,0.15);transition:box-shadow .15s ease, border-color .15s ease;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:none;user-select:none}
+  .incident-dial::before{content:'';position:absolute;inset:9px;border-radius:50%;background:radial-gradient(circle, rgba(255,255,255,0.4), rgba(0,0,0,0.25));opacity:0.7;pointer-events:none}
+  .incident-pointer{position:absolute;left:50%;top:50%;width:5px;height:44%;background:var(--accent);border-radius:999px;transform-origin:50% 90%;transform:translate(-50%, -90%) rotate(-135deg);box-shadow:0 0 6px rgba(13,110,253,0.35);transition:transform .08s ease;pointer-events:none}
+  .incident-dial.incident-empty .incident-pointer{background:var(--muted);box-shadow:none;opacity:0.7}
+  .incident-center{position:absolute;left:50%;top:50%;width:22px;height:22px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle, rgba(255,255,255,0.85), rgba(0,0,0,0.3));border:1px solid var(--border);box-shadow:inset 0 2px 4px rgba(0,0,0,0.3);pointer-events:none}
+  .incident-readouts{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted);flex:0 0 auto;width:clamp(180px,32vw,220px);min-height:110px;max-height:110px;padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--chipBg);overflow:hidden}
+  .incident-readouts div{display:flex;align-items:baseline;justify-content:space-between}
+  .incident-readouts .label{text-transform:uppercase;letter-spacing:.6px;font-size:10px;flex:0 0 auto}
+  .incident-readouts .value{font-size:14px;font-weight:600;color:var(--text);flex:0 0 auto;min-width:6ch;text-align:right;font-variant-numeric:tabular-nums}
+  #incidentClear{width:auto;padding:6px 10px;font-size:12px;background:var(--btn-bg);border:1px solid var(--border);border-radius:8px}
+  #incidentClear:hover{background:var(--btn-bg-hover)}
+  .incident-descriptor-group{margin-top:10px;display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted)}
+  .incident-note{font-size:12px;color:var(--muted);line-height:1.4;word-break:break-word;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<header>
+  <h1>Photography App</h1>
+  <div style="position:relative;display:flex;gap:8px;align-items:center">
+    <button id="helpBtn" class="icon-btn" title="Quick Start & Help" aria-label="Quick Start and Help" style="font-size:18px;width:auto;">❓</button>
+    <button id="settingsBtn" class="icon-btn" title="Settings">⋮</button>
+    <div id="settingsMenu" class="settings-menu">
+     <button id="manageBtn">Manage custom gear</button>
+        <button id="saveAppBtn">Save updated app (embed custom gear)</button>
+        <button id="themeBtn">Theme: Auto</button>
+        <div class="divider"></div>
+        <button id="aboutBtn">About</button>
+        <button id="closeSettings">Close</button>
+    </div>
+  </div>
+</header>
+
+<div id="helpModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="modal-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
+      <div id="helpTitle" style="font-weight:600">Quick Start & Help</div>
+      <button id="helpClose" class="icon-btn" style="width:auto" aria-label="Close Help">✕</button>
+    </div>
+    <div style="font-size:15px;line-height:1.6">
+      <b>1. Set your gear:</b> Choose your camera, lens, focal length, film, and ISO.<br>
+      <b>2. Meter the light:</b> Use the EV slider for ambient (reflected) light, or open the Incident Meter for direct subject light.<br>
+      <b>3. Set your creative intent:</b> Pick your desired depth of field, motion blur, and grain.<br>
+      <b>4. Get your settings:</b> See recommended ISO, aperture, and shutter. Tap <b>Show Alternatives</b> for more options.<br>
+      <b>5. Advanced:</b> Open Advanced for bracketing, reciprocity, push/pull, and more.<br>
+      <hr>
+      <b>Tips:</b>
+      <ul style="margin-top:0">
+        <li>Tap <b>Calibrate to camera meter</b> to match your camera’s reading.</li>
+        <li>Use <b>Copy</b> to save or send your settings.</li>
+        <li>All controls work on desktop and mobile. Use keyboard for fast navigation.</li>
+      </ul>
+      <div style="font-size:13px;color:#888;margin-top:8px">For more help, see the About section or contact the developer.</div>
+    </div>
+  </div>
+</div>
+<!-- About Modal -->
+<div id="aboutModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" style="display:none;">
+  <div class="modal-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
+      <div id="aboutTitle" style="font-weight:600">About This App</div>
+      <button id="aboutClose" class="icon-btn" style="width:auto" aria-label="Close About">✕</button>
+    </div>
+    <div style="font-size:15px;line-height:1.6">
+      <b>Photography Exposure App</b><br>
+      Version 4.0.7 — October 2025<br><br>
+      This tool helps photographers quickly determine optimal camera settings for any scene, balancing light, creative intent, and film/camera gear. All calculations run locally in your browser. No data is sent or stored externally.<br><br>
+      <b>Author:</b> Andrew H.<br>
+      <b>Contact:</b> <a href="mailto:ajlh.photography@gmail.com">ajlh.photography@gmail.com</a><br>
+      <b>Source:</b> <a href="https://github.com/andrewh/photo-exposure-app" target="_blank">GitHub</a>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+  <!-- Gear, Scene, Recommended, Advanced UI blocks go here -->
+  <div class="card"><div class="section-header">Gear Setup</div>
+    <!-- Capture Mode placed under the Gear Setup header for quick access -->
+    <div style="margin-bottom:8px;">
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Capture Mode</label>
+      <select id="captureMode" aria-label="Capture mode">
+        <option value="film" selected>Film</option>
+        <option value="digital">Digital</option>
+        <option value="all">All built-ins</option>
+      </select>
+    </div>
+    
+    <div class="row">
+      <div class="col"><label>Camera</label><select id="cameraSelect"></select></div>
+      <div class="col"><label>Lens</label><select id="lensSelect"></select></div>
+      <div class="col"><label>Focal length (mm)</label><input type="number" id="focalInput" value="50"></div>
+      <!-- Capture Mode moved below Gear Setup so it sits just under the card -->
+      <div class="col" id="filmCol"><label>Film Brand</label><select id="filmSelect"></select></div>
+      <div class="col" id="isoCol"><label>ISO</label>
+        <select id="isoSelect">
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="200">200</option>
+          <option value="400" selected>400</option>
+          <option value="800">800</option>
+          <option value="1600">1600</option>
+          <option value="3200">3200</option>
+        </select>
+        <input type="number" id="isoNumeric" aria-label="ISO numeric input" style="display:none;margin-top:6px;" value="400" min="1">
+      </div>
+    </div>
+  </div>
+  
+
+  <div class="card"><div class="section-header">Light Input</div>
+    <div class="sub" style="margin-bottom:6px;color:#0d6efd;font-weight:500;">
+      <span style="color:#0d6efd">Tip:</span> Use the <b>EV slider</b> for ambient (scene) light, or tap <b>Open Incident Meter</b> to measure light falling directly on your subject.
+    </div>
+    <div id="evCtrl" class="ev-control" role="slider"
+  aria-label="Ambient Light Exposure Value" aria-valuemin="-4" aria-valuemax="16" aria-valuenow="13" tabindex="0">
+      <div class="ev-track"></div>
+      <div class="ev-ticks"></div>
+      <div class="ev-handle"></div>
+    </div>
+    <!-- Hidden range keeps legacy code paths working -->
+    <input type="range" id="evSlider" min="-4" max="16" step="0.1" value="13"
+          style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" aria-hidden="true">
+    <div id="evDescriptor" class="ev-descriptor">
+      <div class="ev-headline">
+        <span class="descriptor-tag">Ambient</span>
+        <span id="evDescLabel">—</span>
+      </div>
+      <div class="ev-numeric">
+        <label>EV<input type="number" id="evInput" value="13" step="0.1"></label>
+        <label>lux<input type="number" id="luxInput" value="20480"></label>
+      </div>
+      <div class="ambient-actions">
+        <div class="ambient-buttons">
+          <button id="calBtn" style="width:auto;padding:4px 8px">Calibrate to camera meter</button>
+          <button id="incidentToggle" style="width:auto;padding:4px 8px;min-width:unset;" class="secondary" aria-label="Toggle incident meter">Open Incident Meter</button>
+        </div>
+      </div>
+      <div id="incidentDrawer" style="display:none;" class="incident-wrap incident-compact">
+        <div class="incident-dial-box">
+          <div id="incidentDial" class="incident-dial" role="slider" aria-label="Incident EV" aria-valuemin="-4" aria-valuemax="16" aria-valuenow="13" tabindex="0">
+            <div class="incident-pointer" id="incidentPointer"></div>
+            <div class="incident-center"></div>
+          </div>
+          <div class="incident-readouts">
+            <div><span class="label">EV</span><span class="value" id="incidentEvReadout">—</span></div>
+            <div><span class="label">Lux</span><span class="value" id="incidentLuxReadout">—</span></div>
+            <button type="button" id="incidentClear">Clear</button>
+          </div>
+        </div>
+        <input type="hidden" id="incidentEvInput">
+        <input type="hidden" id="incidentLuxInput">
+        <div class="incident-descriptor-group">
+          <div class="incident-note" id="incidentNote">Incident meter EV —. Set the dial to describe light falling on the subject.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button id="creativeToggle" style="margin-bottom:8px;">Show Creative Intent</button>
+  <div class="card" id="creativeCard" style="display:none;">
+  <div class="section-header">Creative Intent</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px 12px;align-items:flex-end;justify-content:space-between;padding:4px 0 0 0;">
+    <div style="flex:2 1 180px;min-width:120px;">
+      <label style="font-size:12px;margin-bottom:4px;color:#667085;">Depth of field</label>
+      <div class="seg" id="ciBlurSeg" style="margin-bottom:0;">
+        <button class="seg-btn" data-val="vdeep">Very deep</button>
+        <button class="seg-btn" data-val="deep">Deep</button>
+        <button class="seg-btn active" data-val="balanced">Balanced</button>
+        <button class="seg-btn" data-val="shallow">Shallow</button>
+        <button class="seg-btn" data-val="vshallow">Very shallow</button>
+      </div>
+    </div>
+    <div style="flex:2 1 180px;min-width:120px;">
+      <label style="font-size:12px;margin-bottom:4px;color:#667085;">Motion blur</label>
+      <div class="seg" id="ciMoveSeg" style="margin-bottom:0;">
+        <button class="seg-btn" data-val="blur">Blurred</button>
+        <button class="seg-btn" data-val="slow">Slight blur</button>
+        <button class="seg-btn active" data-val="balanced">Neutral</button>
+        <button class="seg-btn" data-val="fast">Sharp</button>
+        <button class="seg-btn" data-val="freeze">Frozen</button>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;margin:6px 0 0 0;align-items:center;flex-wrap:wrap;">
+    <label style="font-size:12px;display:flex;align-items:center;gap:4px;margin:0;">Tripod <input type="checkbox" id="ciTripod2" style="margin:0;vertical-align:middle;"></label>
+    <label style="font-size:12px;display:flex;align-items:center;gap:4px;margin:0;">Panning <input type="checkbox" id="ciPanning2" style="margin:0;vertical-align:middle;"></label>
+  </div>
+  <div class="sub" id="ciSummary" style="margin-top:4px;">Balanced DOF • Balanced motion • Balanced grain</div>
+</div>
+  
+  <div class="card"><div class="section-header">Recommended Settings</div>
+    <div id="output" class="output-main">—</div>
+    <style>
+      .flash-animate {
+        animation: flashHighlight 0.7s cubic-bezier(.4,0,.2,1);
+      }
+      @keyframes flashHighlight {
+        0% { background: var(--flash-bg); box-shadow: 0 0 0 0 var(--flash-glow); }
+        40% { background: var(--flash-bg); box-shadow: 0 0 0 8px var(--flash-glow-outer); }
+        100% { background: none; box-shadow: none; }
+      }
+    </style>
+    <div id="warning" class="warning"></div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">
+      <button id="altToggle">Show Alternatives</button>
+    </div>
+    <div id="altSection" style="display:none;margin-top:8px;">
+      <div class="alt-grid">
+        <table id="altTable">
+          <thead><tr><th>ISO</th><th>Aperture</th><th>Shutter</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div style="margin-top:8px;">
+        <button id="toggleFull">Show All Alternatives</button>
+        <div id="fullAlt" style="display:none;margin-top:8px" class="alt-grid">
+          <table id="altTableFull">
+            <thead><tr><th>ISO</th><th>Aperture</th><th>Shutter</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button id="advancedToggle">Open Advanced</button>
+  <div class="card" id="advancedDrawer" style="display:none;">
+    <div class="section-header">Advanced</div>
+    <div id="exposureTriangle" style="margin:18px auto 0 auto;max-width:320px;text-align:center;">
+      <svg width="100%" height="120" viewBox="0 0 220 120" aria-label="Exposure triangle diagram" style="max-width:220px;">
+        <polygon points="110,20 30,100 190,100" fill="#f8fafc" stroke="#b0b8c0" stroke-width="2"/>
+        <text x="110" y="38" text-anchor="middle" font-size="15" fill="#0d6efd" font-weight="bold">ISO</text>
+        <text x="40" y="110" text-anchor="middle" font-size="15" fill="#0d6efd" font-weight="bold">Aperture</text>
+        <text x="180" y="110" text-anchor="middle" font-size="15" fill="#0d6efd" font-weight="bold">Shutter</text>
+      </svg>
+      <div style="font-size:13px;color:#667085;margin-top:4px;">Exposure is a balance of ISO, aperture, and shutter speed.</div>
+    </div>
+    <details>
+  <summary><span class="summary-label">Depth of Field</span></summary>
+      <div class="info-inline" data-info-desc="dof"></div>
+      <div id="dofOut">—</div>
+    </details>
+    <details>
+  <summary><span class="summary-label">Motion & Panning</span></summary>
+      <div class="info-inline" data-info-desc="motion"></div>
+      <div id="motOut">—</div>
+    </details>
+    <details>
+  <summary><span class="summary-label">Bracketing Helper</span></summary>
+      <div class="info-inline" data-info-desc="bracket"></div>
+      <div id="brOut">—</div>
+    </details>
+    <details>
+  <summary><span class="summary-label">Reciprocity Correction</span></summary>
+      <div class="info-inline" data-info-desc="reciprocity"></div>
+      <div id="recipOut">—</div>
+    </details>
+    <details>
+  <summary><span class="summary-label">Push / Pull Planner</span></summary>
+      <div class="info-inline" data-info-desc="pushpull"></div>
+      <div id="ppOut">—</div>
+    </details>
+  </div>
+</div>
+<!-- Calibrate Modal -->
+<div id="calModal" class="modal" role="dialog" aria-modal="true">
+  <div class="modal-content" tabindex="0" aria-label="Calibrate to camera meter dialog">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
+      <div style="font-weight:600">Calibrate to camera meter</div>
+      <button id="calClose" class="icon-btn" style="width:auto">✕</button>
+    </div>
+    <div>
+      <label>Working ISO (defaults to current ISO)</label>
+      <input id="calISO" type="number" min="3" max="25600" step="1" value="400">
+      <label>Aperture f/N</label>
+      <input id="calN" type="number" min="0.7" max="64" step="0.1" value="1.8">
+      <label>Shutter time</label>
+      <input id="calT" type="text" value="1/125">
+      <div class="sub">Examples: 1/60, 1/1000, 0.5, 2</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button id="calApply">Set EV from meter</button>
+      <button id="calReset" title="Reset EV to default">Reset</button>
+      <button id="calCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+<!-- Custom Gear Modal -->
+<div id="customModal" class="modal" role="dialog" aria-modal="true">
+  <div class="modal-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
+      <div id="customTitle" style="font-weight:600">Add Custom</div>
+      <button id="customClose" class="icon-btn" style="width:auto">✕</button>
+    </div>
+    <div id="customForm"></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button id="customSave">Save</button>
+      <button id="customCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+<!-- Manage Custom Gear Modal -->
+<div id="manageModal" class="modal" role="dialog" aria-modal="true">
+  <div class="modal-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
+      <div style="font-weight:600">Manage custom gear</div>
+      <button id="manageClose" class="icon-btn" style="width:auto">✕</button>
+    </div>
+    <div class="sub">Add or delete items you previously added. Built-ins cannot be deleted.</div>
+    <div style="margin-top:10px">
+      <details open>
+        <summary>Cameras</summary>
+        <div id="manageCameras"></div>
+        <button id="addCameraBtn">+ Add Camera</button>
+      </details>
+      <details open>
+        <summary>Lenses</summary>
+        <div id="manageLenses"></div>
+        <button id="addLensBtn">+ Add Lens</button>
+      </details>
+      <details open>
+        <summary>Films</summary>
+        <div id="manageFilms"></div>
+        <button id="addFilmBtn">+ Add Film</button>
+      </details>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <button id="manageDeleteAll" style="background:#b00020;color:#fff">Delete ALL custom items</button>
+      <button id="manageDone">Done</button>
+    </div>
+  </div>
+</div>
+<!-- BEGIN compat shim: insert BEFORE your main <script> -->
+<script>
+// About modal logic
+document.getElementById('aboutBtn')?.addEventListener('click',function(){ openModal('aboutModal'); });
+document.getElementById('aboutClose')?.addEventListener('click',function(){ closeModal('aboutModal'); });
+document.getElementById('aboutModal')?.addEventListener('click',function(e){
+  if(e.target===this){ closeModal('aboutModal'); }
+});
+(function(){
+  try{
+    var creativeToggle = document.getElementById('creativeToggle');
+    var creativeCard = document.getElementById('creativeCard');
+    if(!creativeToggle || !creativeCard) return;
+    creativeToggle.addEventListener('click', function() {
+      var cs = window.getComputedStyle(creativeCard);
+      var visible = cs.display !== 'none';
+      creativeCard.style.display = visible ? 'none' : 'block';
+      creativeToggle.setAttribute('aria-expanded', String(!visible));
+      creativeToggle.textContent = visible ? 'Show Creative Intent' : 'Hide Creative Intent';
+    });
+  }catch(e){ /* ignore */ }
+})();
+// Hide helpBtn when help modal is open, restore when closed
+document.getElementById('helpBtn')?.addEventListener('click',function(){ this.style.display='none'; openModal('helpModal'); });
+document.getElementById('helpClose')?.addEventListener('click',function(){ document.getElementById('helpBtn').style.display=''; closeModal('helpModal'); });
+// Also hide helpBtn if modal is closed by clicking outside or Escape
+document.getElementById('helpModal')?.addEventListener('click',function(e){
+  if(e.target===this){ document.getElementById('helpBtn').style.display=''; closeModal('helpModal'); }
+});
+document.addEventListener('keydown',function(e){
+  var modal=document.getElementById('helpModal');
+  if(modal && modal.style.display==='flex' && (e.key==='Escape'||e.key==='Esc')){
+    document.getElementById('helpBtn').style.display='';
+    closeModal('helpModal');
+  }
+});
+(function(){
+// Copy/share logic for recommended settings
+document.getElementById('copyBtn')?.addEventListener('click',function(){
+  var out=document.getElementById('output')?.textContent||'';
+  if(!out){alert('No settings to copy.');return;}
+  navigator.clipboard.writeText(out).then(function(){
+    document.getElementById('copyBtn').textContent='Copied!';
+    setTimeout(function(){document.getElementById('copyBtn').textContent='Copy';},1200);
+  },function(){alert('Copy failed.');});
+});
+document.getElementById('shareBtn')?.addEventListener('click',function(){
+  var out=document.getElementById('output')?.textContent||'';
+  var url=window.location.href;
+  var summary='Recommended settings: '+out+'\n'+url;
+  if(navigator.share){
+    navigator.share({title:'Photo Settings',text:out,url:url});
+  }else{
+    // Fallback: show a dialog with the summary to copy
+    var dlg=document.createElement('div');
+    dlg.style.position='fixed';dlg.style.left='0';dlg.style.top='0';dlg.style.width='100vw';dlg.style.height='100vh';dlg.style.background='rgba(0,0,0,0.4)';dlg.style.display='flex';dlg.style.justifyContent='center';dlg.style.alignItems='center';dlg.style.zIndex='9999';
+    var inner=document.createElement('div');
+    inner.style.background='#fff';inner.style.padding='18px';inner.style.borderRadius='12px';inner.style.maxWidth='90vw';inner.style.boxShadow='0 8px 32px rgba(0,0,0,0.18)';
+    inner.innerHTML='<div style="font-weight:600;margin-bottom:8px">Share Settings</div>'+
+      '<textarea style="width:320px;max-width:80vw;height:60px;resize:none;font-size:14px">'+summary+'</textarea>'+
+      '<div style="margin-top:10px;text-align:right"><button id="closeShareDlg">Close</button></div>';
+    dlg.appendChild(inner);
+    document.body.appendChild(dlg);
+    inner.querySelector('textarea').select();
+    inner.querySelector('#closeShareDlg').onclick=function(){document.body.removeChild(dlg);};
+  }
+});
+// Help modal open/close logic
+document.getElementById('helpBtn')?.addEventListener('click',function(){ openModal('helpModal'); });
+document.getElementById('helpClose')?.addEventListener('click',function(){ closeModal('helpModal'); });
+// Close help modal on Escape key
+document.addEventListener('keydown',function(e){
+  var modal=document.getElementById('helpModal');
+  if(modal && modal.style.display==='flex' && (e.key==='Escape'||e.key==='Esc')){
+    closeModal('helpModal');
+  }
+});
+  function hiddenNumber(id,val){
+    if(document.getElementById(id)) return;
+    var i=document.createElement('input');
+    i.type='number'; i.id=id; i.value=val; i.style.display='none';
+    document.body.appendChild(i);
+  }
+  function hiddenSelect(id, values){
+    if(document.getElementById(id)) return;
+    var s=document.createElement('select'); s.id=id; s.style.display='none';
+    values.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)});
+    document.body.appendChild(s);
+  }
+
+  // Needed by recommend()/advanced helpers
+  hiddenNumber('evBias', 0);
+
+  // DOF
+  hiddenNumber('dofDist', 3);
+  hiddenNumber('dofCoC', 0.03);
+
+  // Motion
+  hiddenNumber('motDist', 10);
+  hiddenSelect('motSpeed', ['1.4','5','8','15','27','40']);
+  hiddenSelect('motDir', ['across','toward']);
+
+  // Bracketing
+  hiddenNumber('brSpan', 1);
+  hiddenSelect('brStep', ['1/3','1/2','1']);
+  hiddenSelect('brParam', ['shutter','aperture','iso']);
+
+  // Push/Pull
+  hiddenNumber('ppStops', 0);
+})();
+</script>
+<!-- END compat shim -->
+<script>
+
+// ---- Restored helpers to prevent init crashes and populate selects ----
+function brandOfFilm(f){
+  return f && f.brand ? f.brand : '';
+}
+function allFilms(){
+  var st = loadUserStore();
+  return (st.films || []).concat(filmsBuiltin);
+}
+function refreshISOForSelectedBrand(){
+  var brand = document.getElementById('filmSelect')?.value;
+  var isoSel = document.getElementById('isoSelect');
+  if(!isoSel) return;
+  var films = allFilms().filter(function(f){ return f.brand === brand; });
+  var isos = films.map(function(f){ return f.box_iso; })
+                   .filter(function(x){ return typeof x === 'number' && !isNaN(x); })
+                   .filter(function(x, i, a){ return a.indexOf(x) === i; })
+                   .sort(function(a,b){ return a-b; });
+  if(isos.length === 0){
+    // fallback list so the control never ends up empty
+    isos = [50,100,200,400,800,1600,3200];
+  }
+  isoSel.innerHTML = isos.map(function(i){ return '<option value="'+i+'">'+i+'</option>'; }).join('');
+  var cur = parseInt(isoSel.value||'0',10);
+  if(isos.indexOf(cur) === -1){
+    // choose closest available ISO to current selection, else first
+    var closest = isos[0];
+    for(var k=1;k<isos.length;k++){
+      if(Math.abs(isos[k]-cur) < Math.abs(closest-cur)) closest = isos[k];
+    }
+    isoSel.value = String(closest);
+  }
+}
+// Basic modal helpers used by settings/custom dialogs. Safe if modals are absent.
+function openModal(id){ var el = document.getElementById(id); if(el){ el.style.display = 'flex'; } }
+function closeModal(id){ var el = document.getElementById(id); if(el){ el.style.display = 'none'; } }
+// Modal close wiring (safe if elements absent)
+document.addEventListener('click',function(e){
+   if(e.target && (e.target.id==='customClose' || e.target.id==='customCancel')){
+    closeModal('customModal');
+    var manage=document.getElementById('manageModal');
+    if(manage && manage.getAttribute('data-return')==='1'){
+        manage.removeAttribute('data-return');
+        openModal('manageModal');
+    }
+}  if(e.target && (e.target.id==='calClose' || e.target.id==='calCancel')){ closeModal('calModal'); }
+  if(e.target && (e.target.id==='manageClose' || e.target.id==='manageDone')){ closeModal('manageModal'); }
+});
+// ===== Storage =====
+// Embedded store: lives inside this HTML file for portable customs
+function getEmbeddedNode(){
+  var n=document.getElementById('embeddedUserData');
+  if(!n){
+    n=document.createElement('script');
+    n.id='embeddedUserData';
+    n.type='application/json';
+    n.textContent='{"cameras":[],"lenses":[],"films":[]}';
+    document.body.appendChild(n);
+  }
+  return n;
+}
+function loadUserStore(){
+  try{
+    var n=getEmbeddedNode();
+    var txt=n.textContent||n.innerText||'{}';
+    var obj=JSON.parse(txt);
+    if(!obj||typeof obj!=='object') obj={};
+    obj.cameras=obj.cameras||[]; obj.lenses=obj.lenses||[]; obj.films=obj.films||[];
+    return obj;
+  }catch(e){ return {cameras:[],lenses:[],films:[]}; }
+}
+function saveUserStore(obj){
+  try{
+    var n=getEmbeddedNode();
+    n.textContent=JSON.stringify({
+      cameras: obj.cameras||[],
+      lenses: obj.lenses||[],
+      films: obj.films||[]
+    });
+  }catch(e){}
+}
+// Download a new HTML with embedded customs
+function downloadUpdatedHTML(){
+  try{
+    var store=loadUserStore(); saveUserStore(store);
+    var html='<!doctype html>\n'+document.documentElement.outerHTML;
+    var blob=new Blob([html],{type:'text/html'});
+    var a=document.createElement('a');
+    var ts=new Date().toISOString().replace(/[:.]/g,'-');
+    a.download='Photography_App_V2_custom_'+ts+'.html';
+    a.href=URL.createObjectURL(blob);
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href); a.remove();},0);
+  }catch(e){ alert('Could not save file: '+e.message); }
+}
+// Persist a custom item into the embedded store
+function addToStore(kind, obj){
+  try{
+    var st = loadUserStore();
+    if(!st[kind]) st[kind]=[];
+    var key = obj && obj.name;
+    st[kind] = st[kind].filter(function(x){ return x && x.name !== key; });
+    st[kind].unshift(obj);
+    saveUserStore(st);
+  }catch(e){ console.warn('addToStore failed', e); }
+}
+function delFromStore(kind, name){
+  try{
+    var st=loadUserStore();
+    if(Array.isArray(st[kind])){
+      st[kind]=st[kind].filter(function(x){ return x && x.name !== name; });
+      saveUserStore(st);
+    }
+  }catch(e){ console.warn('delFromStore failed', e); }
+}
+function renderManageList(){
+  var st=loadUserStore();
+  function render(kind, elId){
+    var host=document.getElementById(elId); if(!host) return;
+    var arr=Array.isArray(st[kind])?st[kind]:[];
+    if(!arr.length){ host.innerHTML='<div class="sub">No custom '+kind+' added.</div>'; return; }
+    host.innerHTML='';
+    arr.forEach(function(item){
+      var row=document.createElement('div');
+      row.style.display='flex'; row.style.justifyContent='space-between'; row.style.alignItems='center'; row.style.gap='8px'; row.style.padding='6px 0';
+      var name=document.createElement('div'); name.textContent=item.name; name.style.flex='1';
+      var btn=document.createElement('button'); btn.textContent='Delete'; btn.style.width='auto';
+      btn.addEventListener('click',function(){
+        delFromStore(kind,item.name);
+        renderManageList(); refreshCameras(); refreshFilms(); refreshLenses(); recalc();
+      });
+      row.appendChild(name); row.appendChild(btn); host.appendChild(row);
+    });
+  }
+  render('cameras','manageCameras');
+  render('lenses','manageLenses');
+  render('films','manageFilms');
+}
+// ===== Built-ins =====
+var camerasBuiltin=[
+  {name:"Nikon F100",mount:"nikon_f",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'},
+  {name:"Nikon FE2",mount:"nikon_f",max_shutter_den:4000,aperture_step:'full',shutter_step:'full'},
+  {name:"Canon AE-1",mount:"canon_fd",max_shutter_den:1000,aperture_step:'full',shutter_step:'full'},
+  {name:"Pentax K1000",mount:"pentax_k",max_shutter_den:1000,aperture_step:'full',shutter_step:'full'},
+  {name:"Minolta X-700",mount:"minolta_sr",max_shutter_den:1000,aperture_step:'full',shutter_step:'full'},
+  {name:"Olympus OM-1",mount:"olympus_om",max_shutter_den:1000,aperture_step:'full',shutter_step:'full'}
+];
+// Modern digital cameras (kept as built-in options but only shown when Digital is selected)
+var camerasDigitalBuiltin=[
+  {name:"Sony A7 III",mount:"sony_e",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'},
+  {name:"Canon EOS R6",mount:"canon_rf",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'},
+  {name:"Nikon Z6 II",mount:"nikon_z",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'},
+  {name:"Fujifilm X-T4",mount:"fujifilm_x",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'},
+  {name:"Panasonic Lumix S5",mount:"l_mount",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'},
+  {name:"Canon 5D Mark IV",mount:"canon_eos",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'}
+];
+var lensesBuiltin=[
+  {name:"Nikon 50mm f/1.8",mount:"nikon_f",type:"prime",focal_mm:50,max_aperture:1.8,min_aperture:16},
+  {name:"Nikon 50mm f/1.4",mount:"nikon_f",type:"prime",focal_mm:50,max_aperture:1.4,min_aperture:16},
+  {name:"Nikon 28mm f/2.8",mount:"nikon_f",type:"prime",focal_mm:28,max_aperture:2.8,min_aperture:22},
+  {name:"Nikon 85mm f/1.8",mount:"nikon_f",type:"prime",focal_mm:85,max_aperture:1.8,min_aperture:22},
+  {name:"Nikon 70-210mm f/4",mount:"nikon_f",type:"zoom",focal_min_mm:70,focal_max_mm:210,max_aperture_wide:4,min_aperture:32},
+  {name:"Nikon 24-50mm f/3.3-4.5",mount:"nikon_f",type:"zoom",focal_min_mm:24,focal_max_mm:50,max_aperture_wide:3.3,max_aperture_tele:4.5,min_aperture:22},
+  {name:"Nikon 70-200mm f/2.8",mount:"nikon_f",type:"zoom",focal_min_mm:70,focal_max_mm:200,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Canon 50mm f/1.8",mount:"canon_fd",type:"prime",focal_mm:50,max_aperture:1.8,min_aperture:16},
+  {name:"Canon 28mm f/2.8",mount:"canon_fd",type:"prime",focal_mm:28,max_aperture:2.8,min_aperture:22},
+  {name:"Canon 85mm f/1.8",mount:"canon_fd",type:"prime",focal_mm:85,max_aperture:1.8,min_aperture:22},
+  {name:"Canon 70-210mm f/4",mount:"canon_fd",type:"zoom",focal_min_mm:70,focal_max_mm:210,max_aperture_wide:4,min_aperture:32},
+  {name:"Pentax 50mm f/1.8",mount:"pentax_k",type:"prime",focal_mm:50,max_aperture:1.8,min_aperture:16},
+  {name:"Minolta 50mm f/1.7",mount:"minolta_sr",type:"prime",focal_mm:50,max_aperture:1.7,min_aperture:16},
+  {name:"Olympus 50mm f/1.8",mount:"olympus_om",type:"prime",focal_mm:50,max_aperture:1.8,min_aperture:16}
+];
+// Add a few common modern digital-mount lenses to the builtin list (they won't be removed for film mode)
+var lensesDigitalBuiltin=[
+  {name:"Sony 50mm f/1.8",mount:"sony_e",type:"prime",focal_mm:50,max_aperture:1.8,min_aperture:16},
+  {name:"Canon RF 50mm f/1.8",mount:"canon_rf",type:"prime",focal_mm:50,max_aperture:1.8,min_aperture:22},
+  {name:"Nikon Z 24-70mm f/4",mount:"nikon_z",type:"zoom",focal_min_mm:24,focal_max_mm:70,max_aperture_wide:4,min_aperture:22},
+  {name:"Fujifilm 35mm f/2",mount:"fujifilm_x",type:"prime",focal_mm:35,max_aperture:2,min_aperture:16}
+];
+var filmsBuiltin=[
+  {name:"Kodak Portra 160",brand:"Kodak Portra",box_iso:160,push_limit:2,pull_limit:1},
+  {name:"Kodak Portra 400",brand:"Kodak Portra",box_iso:400,push_limit:2,pull_limit:1},
+  {name:"Kodak Portra 800",brand:"Kodak Portra",box_iso:800,push_limit:2,pull_limit:0},
+  {name:"Kodak Ektar 100",brand:"Kodak Ektar",box_iso:100,push_limit:2,pull_limit:1},
+  {name:"Kodak Gold 200",brand:"Kodak Gold",box_iso:200,push_limit:1,pull_limit:1},
+  {name:"Kodak Ultramax 400",brand:"Kodak Ultramax",box_iso:400,push_limit:1,pull_limit:1},
+  {name:"Kodak Tri-X 400",brand:"Kodak Tri-X",box_iso:400,push_limit:3,pull_limit:1},
+  {name:"Kodak T-Max 100",brand:"Kodak T-Max",box_iso:100,push_limit:2,pull_limit:1},
+  {name:"Kodak T-Max 400",brand:"Kodak T-Max",box_iso:400,push_limit:2,pull_limit:1},
+
+  {name:"Fujifilm Pro 400H",brand:"Fujifilm Pro",box_iso:400,push_limit:1,pull_limit:1},
+  {name:"Fujifilm Superia 200",brand:"Fujifilm Superia",box_iso:200,push_limit:2,pull_limit:1},
+  {name:"Fujifilm Superia 400",brand:"Fujifilm Superia",box_iso:400,push_limit:2,pull_limit:1},
+  {name:"Fujifilm Superia 800",brand:"Fujifilm Superia",box_iso:800,push_limit:1,pull_limit:0},
+  {name:"Fujifilm Acros 100",brand:"Fujifilm Acros",box_iso:100,push_limit:2,pull_limit:1},
+
+  {name:"Ilford HP5+ 400",brand:"Ilford HP5+",box_iso:400,push_limit:3,pull_limit:1},
+  {name:"Ilford FP4+ 125",brand:"Ilford FP4+",box_iso:125,push_limit:1,pull_limit:1},
+  {name:"Ilford Delta 100",brand:"Ilford Delta",box_iso:100,push_limit:2,pull_limit:1},
+  {name:"Ilford Delta 400",brand:"Ilford Delta",box_iso:400,push_limit:2,pull_limit:1},
+  {name:"Ilford Delta 3200",brand:"Ilford Delta",box_iso:3200,push_limit:1,pull_limit:0},
+  {name:"Ilford Pan F 50",brand:"Ilford Pan F",box_iso:50,push_limit:1,pull_limit:1},
+
+  {name:"Cinestill 50D",brand:"Cinestill Daylight",box_iso:50,push_limit:1,pull_limit:1},
+  {name:"Cinestill 800T",brand:"Cinestill Tungsten",box_iso:800,push_limit:1,pull_limit:0}
+];
+
+// --- EV constants (true range) and a tiny visual fudge so the thumb can reach notches at both ends
+var EV_MIN = -4;
+var EV_MAX = 16;
+
+var ambientEvStored = 13;
+var incidentEvStored = null;
+function storeAmbientEV(ev){
+  ambientEvStored = Math.max(EV_MIN, Math.min(EV_MAX, parseFloat(ev)||ambientEvStored));
+}
+function ambientEV(){
+  return Math.max(EV_MIN, Math.min(EV_MAX, parseFloat(document.getElementById('evInput')?.value)||ambientEvStored));
+}
+function incidentEV(){
+  return isFinite(incidentEvStored)?incidentEvStored:null;
+}
+function effectiveEV(){
+  var amb=ambientEV();
+  var inc=incidentEV();
+  if(inc===null) return amb;
+  return Math.max(EV_MIN, Math.min(EV_MAX, (amb+inc)/2));
+}
+function updateIncidentNote(){
+  var note=document.getElementById('incidentNote');
+  if(!note) return;
+  var inc=incidentEV();
+  if(!(typeof inc === 'number' && isFinite(inc))){
+    note.textContent='Incident meter not set. Dial to match the light falling on the subject.';
+  }else{
+    var desc = INCIDENT_DESC[String(Math.round(inc))] || ('Incident EV '+inc.toFixed(1));
+    note.textContent='Incident meter EV '+inc.toFixed(1)+' • '+desc;
+  }
+}
+
+function incidentEvToAngle(ev){
+  var t=(ev-EV_MIN)/(EV_MAX-EV_MIN);
+  t=Math.max(0, Math.min(1,t));
+  return -135 + t*270; // sweep 270°
+}
+function updateIncidentDial(ev){
+  var dial=document.getElementById('incidentDial');
+  var pointer=document.getElementById('incidentPointer');
+  var evRead=document.getElementById('incidentEvReadout');
+  var luxRead=document.getElementById('incidentLuxReadout');
+  var descEl=document.getElementById('incidentDescLabel');
+  var has = (typeof ev === 'number') && isFinite(ev);
+  if(evRead) evRead.textContent = has?ev.toFixed(1):'—';
+  if(luxRead) luxRead.textContent = has?Math.round(evToLux(ev)):'—';
+  if(!dial || !pointer){ return; }
+  var base;
+  if(has){
+    base = Math.max(EV_MIN, Math.min(EV_MAX, ev));
+    pointer.style.transform='translate(-50%, -90%) rotate('+incidentEvToAngle(base)+'deg)';
+    var baseNorm=(base-EV_MIN)/(EV_MAX-EV_MIN);
+    var val;
+    if(base<=0){
+      // Map EV_MIN..0 to black..18% gray
+      var ratio=(base - EV_MIN)/(0 - EV_MIN);
+      val=Math.round(46 * ratio);
+    }else{
+      // Map 0..EV_MAX to 18% gray .. white
+      var ratio=(base - 0)/(EV_MAX - 0);
+      val=Math.round(46 + (255-46)*ratio);
+    }
+    val=Math.max(0, Math.min(255, val));
+    pointer.style.background='rgb('+val+','+val+','+val+')';
+  }else{
+    base = 0; // show 0 EV when not set
+    pointer.style.transform='translate(-50%, -90%) rotate(-90deg)';
+    pointer.style.background='rgb(46,46,46)';
+  }
+  pointer.style.border='1px solid rgba(0,0,0,0.6)';
+  pointer.style.boxShadow='0 0 0 1px rgba(255,255,255,0.6)';
+  if(has){
+    dial.classList.remove('incident-empty');
+    dial.setAttribute('aria-valuenow', base.toFixed(1));
+    dial.setAttribute('aria-valuetext', 'Incident EV '+base.toFixed(1));
+    if(descEl){
+      var desc=INCIDENT_DESC[String(Math.round(base))]||('Incident EV '+base.toFixed(1));
+      descEl.textContent=desc;
+    }
+  }else{
+    dial.classList.add('incident-empty');
+    dial.setAttribute('aria-valuenow', base.toFixed(1));
+    dial.setAttribute('aria-valuetext', 'No incident reading; ambient '+base.toFixed(1));
+    if(descEl){ descEl.textContent='—'; }
+  }
+}
+function setIncidentEV(ev, opts){
+  var evInput=document.getElementById('incidentEvInput');
+  var luxInput=document.getElementById('incidentLuxInput');
+  if(ev===null || !isFinite(ev)){
+    incidentEvStored = null;
+    if(evInput) evInput.value='';
+    if(luxInput) luxInput.value='';
+  }else{
+    var clamped=Math.max(EV_MIN, Math.min(EV_MAX, ev));
+    incidentEvStored = clamped;
+    if(evInput) evInput.value=clamped.toFixed(1);
+    if(luxInput) luxInput.value=Math.round(evToLux(clamped));
+  }
+  updateIncidentDial(incidentEvStored);
+  updateIncidentNote();
+  if(!opts || !opts.skipRecalc){ recalc(); }
+}
+function initIncidentDial(){
+  var dial=document.getElementById('incidentDial');
+  var clearBtn=document.getElementById('incidentClear');
+  if(clearBtn && clearBtn.getAttribute('data-dial-init')!=='1'){
+    clearBtn.addEventListener('click', function(){ setIncidentEV(null); });
+    clearBtn.setAttribute('data-dial-init','1');
+  }
+  if(!dial || dial.getAttribute('data-dial-init')==='1') return;
+  dial.setAttribute('data-dial-init','1');
+  var pointer=document.getElementById('incidentPointer');
+  if(!pointer) return;
+  var dragging=false;
+  var dragStartY=0;
+  var dragStartEv=0;
+  var moved=false;
+  var sensitivity=0.02; // base sensitivity for small motions
+  function adjust(delta){
+    var current=incidentEV();
+    if(current===null) current=0;
+    setIncidentEV(current + delta);
+  }
+  function beginDrag(y){
+    dragging=true;
+    dragStartY=y;
+    dragStartEv=incidentEV();
+    if(dragStartEv===null) dragStartEv=0;
+    var rect=dial.getBoundingClientRect();
+    var ratio=(y-rect.top)/Math.max(1, rect.height);
+    dragStartEv = Math.max(EV_MIN, Math.min(EV_MAX, EV_MIN + ratio*(EV_MAX-EV_MIN)));
+    moved=false;
+  }
+  function moveDrag(y){
+    if(!dragging) return;
+    var delta = dragStartY - y;
+    if(Math.abs(delta) < 1) return;
+    moved=true;
+    var base = Math.abs(delta)*sensitivity;
+    var ev = dragStartEv + Math.sign(delta) * (base + 2*Math.pow(base, 1.5));
+    setIncidentEV(ev,{source:'drag'});
+  }
+  function endDrag(){
+    if(!dragging) return;
+    if(!moved){ setIncidentEV(null); }
+    dragging=false;
+  }
+  dial.addEventListener('pointerdown', function(e){
+    if(e.pointerType==='mouse' && e.button!==0) return;
+    if(e.isPrimary===false) return;
+    if(typeof dial.setPointerCapture==='function'){
+      try{ dial.setPointerCapture(e.pointerId); }catch(_e){}
+    }
+    beginDrag(e.clientY);
+    moveDrag(e.clientY);
+    e.preventDefault();
+  });
+  dial.addEventListener('pointermove', function(e){
+    if(!dragging) return;
+    moveDrag(e.clientY);
+    e.preventDefault();
+  });
+  dial.addEventListener('pointerup', function(e){
+    if(typeof dial.releasePointerCapture==='function'){
+      try{ dial.releasePointerCapture(e.pointerId); }catch(_e){}
+    }
+    endDrag();
+    e.preventDefault();
+  });
+  dial.addEventListener('pointercancel', function(e){
+    if(typeof dial.releasePointerCapture==='function'){
+      try{ dial.releasePointerCapture(e.pointerId); }catch(_e){}
+    }
+    endDrag();
+  });
+  // Scroll wheel intentionally ignored to avoid accidental changes
+  dial.addEventListener('keydown', function(e){
+    var step=e.shiftKey?0.5:0.1;
+    if(e.key==='ArrowLeft' || e.key==='ArrowDown'){ adjust(-step); e.preventDefault(); }
+    else if(e.key==='ArrowRight' || e.key==='ArrowUp'){ adjust(step); e.preventDefault(); }
+    else if(e.key==='PageDown'){ adjust(-1); e.preventDefault(); }
+    else if(e.key==='PageUp'){ adjust(1); e.preventDefault(); }
+    else if(e.key==='Home'){ setIncidentEV(EV_MIN); e.preventDefault(); }
+    else if(e.key==='End'){ setIncidentEV(EV_MAX); e.preventDefault(); }
+  });
+  updateIncidentDial(incidentEV());
+  updateIncidentNote();
+}
+
+// New EV ticks builder and interactions (no geometry coupling)
+function buildEVScale(){
+  var host = document.querySelector('.ev-slider2 .ev-ticks');
+  if(!host) return;
+  host.innerHTML = '';
+  for(var ev=EV_MIN; ev<=EV_MAX+1e-9; ev+=0.5){
+    var t = document.createElement('div');
+    var isInt = Math.abs(ev - Math.round(ev)) < 1e-6;
+    t.className = 'tick' + (isInt ? ' major' : '');
+    t.style.left = ((ev - EV_MIN)/(EV_MAX - EV_MIN)*100) + '%';
+    host.appendChild(t);
+  }
+}
+
+function bindEVSliderClicks(){
+  var box = document.querySelector('.ev-slider2');
+  if(!box) return;
+  function posToEV(x){
+    var rect = box.getBoundingClientRect();
+    var t = (x - rect.left)/Math.max(1, rect.width);
+    t = Math.max(0, Math.min(1, t));
+    var ev = EV_MIN + t*(EV_MAX - EV_MIN);
+    return Math.round(ev*10)/10;
+  }
+  box.addEventListener('click', function(e){
+    var ev = posToEV(e.clientX);
+    var s = document.getElementById('evSlider');
+    if(s){ s.value = ev; s.dispatchEvent(new Event('input', {bubbles:true})); }
+  });
+  box.addEventListener('mousemove', function(e){ var ev = posToEV(e.clientX); showEVBadge(ev); });
+  box.addEventListener('mouseleave', function(){ showEVBadge(null); });
+  box.addEventListener('touchstart', function(e){ if(e.cancelable) e.preventDefault(); var ev=posToEV((e.touches[0]||{}).clientX||0); showEVBadge(ev); }, {passive:false});
+  box.addEventListener('touchmove', function(e){ if(e.cancelable) e.preventDefault(); var ev=posToEV((e.touches[0]||{}).clientX||0); showEVBadge(ev); }, {passive:false});
+  box.addEventListener('touchend', function(e){ showEVBadge(null); var t=(e.changedTouches||[])[0]; if(!t) return; var ev=posToEV(t.clientX); var s=document.getElementById('evSlider'); if(s){ s.value=ev; s.dispatchEvent(new Event('input', {bubbles:true})); }});
+  box.addEventListener('touchcancel', function(){ showEVBadge(null); });
+}
+var EV_FUDGE = 0; // allow extra thumb travel; we clamp computed EV to true range
+// Visual width scale for EV bar (relative to thumb center travel)
+var EV_BAR_SCALE = 0.96; // reduce width a bit to align exactly with slider ends
+// Horizontal calibration for EV bar vs slider (positive shifts bar to the right)
+// ===== Math =====
+function luxToEV(lux){return Math.log2(Math.max(1e-6,lux)/2.5);}
+function evToLux(ev){return Math.pow(2,ev)*2.5;}
+var shuttersThird=[30,25,20,15,13,10,8,6,5,4,3.2,2.5,2,1.6,1.3,1,0.8,0.6,0.5,0.4,1/3,1/4,1/5,1/6,1/8,1/10,1/13,1/15,1/20,1/25,1/30,1/40,1/50,1/60,1/80,1/100,1/125,1/160,1/200,1/250,1/320,1/400,1/500,1/640,1/800,1/1000,1/1250,1/1600,1/2000,1/2500,1/3200,1/4000,1/5000,1/6400,1/8000];
+function nearestShutterThird(t){
+  var b=shuttersThird[0],d=Math.abs(b-t);
+  for(var i=0;i<shuttersThird.length;i++){
+    var s=shuttersThird[i],dd=Math.abs(s-t);
+    if(dd<d){d=dd;b=s}
+  }
+  return b
+}
+// Common full-stop shutter values (seconds)
+var shuttersFull=[30,15,8,4,2,1,0.5,0.25,1/8,1/15,1/30,1/60,1/125,1/250,1/500,1/1000,1/2000,1/4000,1/8000];
+function nearestShutterForCamera(camera,t){
+  try{
+    var step = (camera && camera.shutter_step) || 'third';
+    var list = (step==='full') ? shuttersFull : shuttersThird;
+    var b=list[0],d=Math.abs(b-t);
+    for(var i=0;i<list.length;i++){ var s=list[i],dd=Math.abs(s-t); if(dd<d){d=dd;b=s} }
+    return b;
+  }catch(e){ return nearestShutterThird(t); }
+}
+function fmtSh(s){return s>=1?(Math.round(s)+'s'):('1/'+Math.round(1/s))}
+function requiredShutter(ev100,iso,N){return (N*N)/(Math.pow(2,ev100)*(iso/100));}
+// === Meter calibration helpers ===
+function parseShutterText(txt){
+  txt = String(txt||'').trim();
+  if(!txt) return NaN;
+  if(/^([0-9]*\.?[0-9]+)s?$/.test(txt)){
+    var v=parseFloat(RegExp.$1); return isFinite(v)?v:NaN;
+  }
+  if(/^1\s*\/\s*([0-9]+)$/.test(txt)){
+    var d=parseFloat(RegExp.$1); return isFinite(d)&&d>0 ? 1/d : NaN;
+  }
+  return NaN;
+}
+function evFromExposure(N, t, ISO){
+  if(!(N>0) || !(t>0) || !(ISO>0)) return NaN;
+  return Math.log2((N*N)/(t*(ISO/100)));
+}
+function handholdLimit(focal){return 1/Math.max(1,focal)}
+function lensApertureAtFocal(lens,focal){
+  if(lens.type==='prime')return{minA:lens.max_aperture,maxA:lens.min_aperture};
+  var t=(focal-lens.focal_min_mm)/(lens.focal_max_mm-lens.focal_min_mm);
+  var w=lens.max_aperture_wide,te=(lens.max_aperture_tele||w),c=Math.max(0,Math.min(1,isFinite(t)?t:0));
+  var maxA=w+c*(te-w);
+  return{minA:maxA,maxA:lens.min_aperture}
+}
+
+// Snap aperture to camera-supported increments. camera.aperture_step === 'full'|'third'
+function nearestAperture(N, lens, camera){
+  try{
+    var step = (camera && camera.aperture_step) || 'third';
+    var log = Math.log2(N);
+    var quant = (step==='full') ? 1 : (1/3);
+    var q = Math.round(log/quant) * quant;
+    var snapped = Math.pow(2, q);
+    // clamp to lens limits
+    var ap = lensApertureAtFocal(lens, parseFloat(document.getElementById('focalInput')?.value||'50'));
+    snapped = Math.max(ap.minA, Math.min(ap.maxA, snapped));
+    // round to one decimal for display consistency
+    return parseFloat(snapped.toFixed(1));
+  }catch(e){ return parseFloat(N.toFixed(1)); }
+}
+
+// ===== EV descriptors =====
+var EV_DESC = {
+  "-4":"Starlight",
+  "-3":"Moonless night",
+  "-2":"Candlelight",
+  "-1":"Dim candles",
+  "0":"Very dim interior",
+  "1":"Night street",
+  "2":"Dim indoor",
+  "3":"Living room lamps",
+  "4":"Bright indoor / TV studio",
+  "5":"Window light",
+  "6":"Deep shade, dusk",
+  "7":"Cloudy shade",
+  "8":"Open shade",
+  "9":"Cloudy bright",
+  "10":"Heavy overcast",
+  "11":"Light overcast",
+  "12":"Open shade, sunny",
+  "13":"Clear daylight",
+  "14":"Hazy sun",
+  "15":"Bright sun (Sunny 16)",
+  "16":"Snow/sand in sun"
+};
+
+var INCIDENT_DESC = {
+  "-4":"Subject under starlight",
+  "-3":"Moonlit outline",
+  "-2":"Lantern glow",
+  "-1":"Candle face",
+  "0":"Low-key keylight",
+  "1":"Soft stage spot",
+  "2":"Bright interior key",
+  "3":"Office overhead",
+  "4":"Window-side key",
+  "5":"Soft daylight on subject",
+  "6":"Open shade on subject",
+  "7":"Soft front sun",
+  "8":"Balanced sunlight",
+  "9":"Diffuse sun wash",
+  "10":"Edge-back sun",
+  "11":"Hard midday sun",
+  "12":"Reflector fill",
+  "13":"Specular highlight",
+  "14":"Harsh sun glint",
+  "15":"Brilliant glare",
+  "16":"Blown highlight"
+};
+
+// ...
+function updateEvDescriptor(ev){
+  var lbl=document.getElementById('evDescLabel'); if(!lbl) return;
+  var desc=EV_DESC[String(Math.round(ev))]||('EV '+ev.toFixed(1));
+  lbl.textContent=desc;
+  var ambientNote=document.getElementById('reflectedNote');
+  if(ambientNote){
+    ambientNote.textContent='Reflected meter EV '+ev.toFixed(1)+' • '+desc;
+  }
+}
+function restoreEVDescriptor(){
+  var s=document.getElementById('evSlider');
+  var ev=parseFloat(s&&s.value||13);
+  updateEvDescriptor(ev);
+}
+function showEVBadge(ev){
+  if(ev===null||ev===undefined){ restoreEVDescriptor(); return; }
+  updateEvDescriptor(ev);
+}
+
+// ===== Recommendation =====
+var intent='neutral'; // legacy; concise intent below supersedes this
+function segActiveValue(id){
+  var wrap=document.getElementById(id); if(!wrap) return null;
+  var btn=wrap.querySelector('.seg-btn.active');
+  return btn?btn.getAttribute('data-val'):null;
+}
+function getCI(){
+  // Map segment choices to 0..1 scales
+  var blurVal=segActiveValue('ciBlurSeg');
+  var moveVal=segActiveValue('ciMoveSeg');
+  var grainVal=segActiveValue('ciGrainSeg');
+  // DOF scale (0 = very deep, 1 = very shallow)
+  var blurMap={vdeep:0.0, deep:0.25, balanced:0.5, shallow:0.75, vshallow:1.0};
+  var blur=(blurMap[blurVal]!==undefined)?blurMap[blurVal]:0.5;
+  // Motion target scale
+  var freezeMap={blur:0.0, slow:0.25, balanced:0.5, fast:0.75, freeze:1.0};
+  var freeze=(freezeMap[moveVal]!==undefined)?freezeMap[moveVal]:0.5;
+  // Grain tolerance scale
+  var grainMap={clean:0.0, low:0.25, balanced:0.5, high:0.75, gritty:1.0};
+  var grain=(grainMap[grainVal]!==undefined)?grainMap[grainVal]:0.5;
+  var tripod=!!document.getElementById('ciTripod2')?.checked;
+  var panning=!!document.getElementById('ciPanning2')?.checked;
+  return {blur,freeze,grain,tripod,panning};
+}
+  // Calibrate to meter handlers
+  (function(){
+    var btn=document.getElementById('calBtn'); if(!btn) return;
+    btn.addEventListener('click',function(){
+      try{
+        var isoSel=document.getElementById('isoSelect');
+        var iso=parseInt(isoSel?.value,10)||400;
+        document.getElementById('calISO').value=iso;
+        // Prefill from current recommendation if parsable
+        var out=document.getElementById('output')?.textContent||'';
+        var Nm=parseFloat(out.match(/f\/([0-9.]+)/)?.[1]);
+        var tm=out.match(/\b(\d+\/\d+|[0-9]*\.?[0-9]+s?)\b/);
+        document.getElementById('calN').value = isFinite(Nm)?Nm:1.8;
+        document.getElementById('calT').value = tm?tm[1]:'1/125';
+      }catch(e){}
+      openModal('calModal');
+    });
+    var apply=document.getElementById('calApply'); if(apply){
+      apply.addEventListener('click',function(){
+        try{
+          var ISO=parseInt(document.getElementById('calISO').value,10)||400;
+          var N=parseFloat(document.getElementById('calN').value)||1.8;
+          var t=parseShutterText(document.getElementById('calT').value);
+          if(!(t>0)){ alert('Enter shutter like 1/60 or 0.5'); return; }
+          var ev = evFromExposure(N,t,ISO);
+          if(!isFinite(ev)){ alert('Could not compute EV'); return; }
+          ev = Math.max(-4, Math.min(16, ev));
+          if(typeof window.setEvControlValue==='function'){
+            window.setEvControlValue(ev, 'cal');
+          }else{
+            document.getElementById('evSlider').value=ev;
+            document.getElementById('evInput').value=ev.toFixed(1);
+            document.getElementById('luxInput').value=Math.round(evToLux(ev));
+            if(typeof storeAmbientEV==='function'){ storeAmbientEV(ev); }
+            updateEvDescriptor(ev);
+            recalc();
+          }
+          closeModal('calModal');
+        }catch(err){ alert('Calibration failed: '+err.message); }
+      });
+    }
+        var reset=document.getElementById('calReset'); if(reset){
+      reset.addEventListener('click',function(){
+        try{
+          var ev=13; // default EV
+          if(typeof window.setEvControlValue==='function'){
+            window.setEvControlValue(ev, 'cal');
+          }else{
+            document.getElementById('evSlider').value=ev;
+            document.getElementById('evInput').value=ev.toFixed(1);
+            document.getElementById('luxInput').value=Math.round(evToLux(ev));
+            if(typeof storeAmbientEV==='function'){ storeAmbientEV(ev); }
+            updateEvDescriptor(ev);
+            recalc();
+          }
+          closeModal('calModal');
+        }catch(err){ alert('Reset failed: '+err.message); }
+      });
+    }
+  })();
+function updateCISummary(){
+  var c=getCI();
+  var words=[];
+  // DOF phrasing
+  words.push(c.blur>0.8?'Very shallow DOF':(c.blur>0.6?'Shallow DOF':(c.blur<0.2?'Very deep DOF':(c.blur<0.4?'Deep DOF':'Balanced DOF'))));
+  // Motion phrasing (less specific)
+  words.push(c.freeze>0.8?'Frozen':(c.freeze>0.6?'Sharp':(c.freeze<0.2?'Blurred':(c.freeze<0.4?'Slight blur':'Neutral motion'))));
+  // Grain/texture derived from chosen ISO (not a control)
+  try{
+  var iso=getSelectedISO()||400;
+    var grainWord = (iso<=200)?'Grain: Clean':(iso<=400)?'Grain: Moderate':(iso<=800)?'Grain: High':'Grain: Gritty';
+    words.push(grainWord);
+  }catch(e){}
+  if(c.tripod) words.push('Tripod');
+  if(c.panning) words.push('Panning');
+  var el=document.getElementById('ciSummary'); if(el) el.textContent=words.join(' • ');
+}
+function getSelectedISO(){
+  var mode=document.getElementById('captureMode')?.value||'film';
+  if(mode==='digital'){
+    var n=document.getElementById('isoNumeric');
+    return Math.max(1, parseInt(n?.value,10) || parseInt(document.getElementById('isoSelect')?.value,10) || 400);
+  }else{
+    return parseInt(document.getElementById('isoSelect')?.value,10) || 400;
+  }
+}
+
+(function(){
+  var modeSel=document.getElementById('captureMode');
+  var filmCol=document.getElementById('filmCol');
+  var isoSel=document.getElementById('isoSelect');
+  var isoNum=document.getElementById('isoNumeric');
+  if(!modeSel) return;
+  function setMode(){
+    var m=modeSel.value;
+    if(m==='digital'){
+      if(filmCol) filmCol.style.display='none';
+      if(isoSel) isoSel.style.display='none';
+      if(isoNum) isoNum.style.display='inline-block';
+    }else{
+      if(filmCol) filmCol.style.display='';
+      if(isoSel) isoSel.style.display='';
+      if(isoNum) isoNum.style.display='none';
+    }
+    try{ recalc(); }catch(e){}
+  }
+  modeSel.addEventListener('change', setMode);
+  if(isoSel) isoSel.addEventListener('change', function(){ try{ recalc(); }catch(e){} });
+  if(isoNum) isoNum.addEventListener('input', function(){ try{ recalc(); }catch(e){} });
+  setMode();
+})();
+function recommend(ev,film,lens,focal,camera){
+  ev = ev + (parseFloat(document.getElementById('evBias')?.value)||0);
+  var ci=getCI();
+  var iso=getSelectedISO()||film.box_iso;
+  var isoLock=true; // ISO is controlled by user via dropdown; do not auto-adjust in algorithm
+  var ap=lensApertureAtFocal(lens,focal);
+  // DOF bias: interpolate between ~f/11 and the lens' max aperture (wider)
+  var deepTarget=Math.min(Math.max(11,ap.minA),ap.maxA);
+  var shallowTarget=ap.minA;
+  var N_target= Math.max(ap.minA, Math.min(ap.maxA, deepTarget + (shallowTarget-deepTarget)*ci.blur));
+  var N=N_target;
+  // DOF priority window: limit how far aperture may deviate from target
+  var allowedOpenStops = 0.5 + 1.5*ci.blur;   // deep→0.5, shallow→2.0
+  var allowedStopStops = 2.0 - 1.5*ci.blur;   // deep→2.0, shallow→0.5
+  var N_open_min = Math.max(ap.minA, N_target/Math.pow(Math.SQRT2, allowedOpenStops));
+  var N_stop_max = Math.min(ap.maxA, N_target*Math.pow(Math.SQRT2, allowedStopStops));
+  if(ci.aperturePickN){ N = Math.max(ap.minA, Math.min(ap.maxA, ci.aperturePickN)); }
+  // Grain preference -> advisory only (no ISO auto-change)
+  var isoFloor=100, isoCeil=3200;
+  // ISO remains as selected.
+  // Motion preference -> target threshold
+  var targets=[1/8,1/30,1/60,1/250,1/500,1/1000];
+  var idx=Math.round(ci.freeze*5);
+  var tGoal=targets[Math.max(0,Math.min(5,idx))];
+  if(ci.panning) tGoal*=3; // allow ~1.5 stops slower for panning
+  if(ci.shutterPickT){ tGoal = ci.shutterPickT; }
+  var t=requiredShutter(ev,iso,N);
+  // If too slow for freeze, first open aperture, then raise ISO up to ceil
+  if(t>tGoal){
+    // open toward allowed limit
+    while(t>tGoal && N>N_open_min){ N=Math.max(N_open_min, N/Math.SQRT2); t=requiredShutter(ev,iso,N); }
+    // Do not change ISO automatically; user controls ISO.
+  }
+  // If faster than desired and user prefers blur/neutral, slow toward tGoal by stopping down then lowering ISO
+  if(t<tGoal && ci.freeze<=0.6){
+    while(t<tGoal && N<N_stop_max){ N=Math.min(N_stop_max, N*Math.SQRT2); t=requiredShutter(ev,iso,N);} 
+    // Do not change ISO automatically; user controls ISO.
+  }
+  var tMin=1/camera.max_shutter_den,warning="",ndAdvice="";
+  if(t<tMin){
+    var stops=Math.ceil(Math.log2(tMin/t));
+    var nd=Math.pow(2,stops);
+    warning="Current data exceeds camera capability.";
+    ndAdvice="Use ND"+nd+" ("+stops+" stops) or lower ISO / stop down.";
+    t=tMin;
+  }
+  var hh=handholdLimit(focal),hhWarn=(t>hh && !ci.tripod)?("Handheld risk. Use ≥ "+fmtSh(hh)+" or a tripod."):"";
+  var apLimitWarn=(Math.abs(N-ap.minA)<1e-6)?"Aperture limit: lens cannot open wider." : ((Math.abs(N-ap.maxA)<1e-6)?"Aperture limit: lens cannot stop down further.":"");
+  var pp="";
+  if(film){
+    try{
+      var filmBox = film.box_iso || 100;
+      var pushStops=Math.log2(iso/filmBox);
+      if(Math.abs(pushStops)>=0.25){
+        var dir=pushStops>0?"push":"pull";
+        var limit=pushStops>0?(film.push_limit||0):(film.pull_limit||0);
+        var abs=Math.abs(pushStops).toFixed(1);
+        var over=Math.abs(pushStops)>(limit||0)?" (beyond lab limit)":"";
+        var def=pushStops>0?"Underexpose in camera, develop longer.":"Overexpose in camera, develop shorter.";
+        pp=dir+" ~"+abs+" stops"+over+" — "+def;
+      }
+    }catch(e){ pp=""; }
+  }
+  // Snap to camera-supported aperture steps for display
+  var displayN = nearestAperture(N, lens, camera);
+  return{iso:Math.round(iso),N:displayN,t:nearestShutterForCamera(camera,t),warns:[warning,ndAdvice,hhWarn,apLimitWarn,pp].filter(Boolean).join(" • ")}
+}
+
+// ===== Alternatives =====
+function buildCompactAlternatives(ev,film,lens,focal,camera,main){
+  var ap=lensApertureAtFocal(lens,focal),
+    iso=getSelectedISO()||film.box_iso,
+      isos=[iso],
+      rows=[];
+  for(var i=0;i<isos.length;i++){
+    var iso=Math.round(isos[i]),
+        aps=[main.N/2,main.N,main.N*2,ap.minA,ap.maxA].map(x=>Math.min(Math.max(x,ap.minA),ap.maxA)),
+        seen={},uniq=[];
+    aps.forEach(x=>{var k=x.toFixed(1);if(!seen[k]){seen[k]=1;uniq.push(parseFloat(k))}});
+    for(var k=0;k<uniq.length;k++){
+      var Nraw=uniq[k];
+      var N=nearestAperture(Nraw, lens, camera);
+      var t=requiredShutter(ev,iso,N),tMin=1/camera.max_shutter_den;
+      if(t<tMin)continue;
+      rows.push({iso:iso,N:N,t:nearestShutterForCamera(camera,t)})
+    }
+  }
+  var ci=getCI();
+  rows.sort(function(a,b){
+    if(ci.blur>0.66) return a.N-b.N;         // prefer wider apertures
+    if(ci.freeze>0.66) return (1/b.t)-(1/a.t); // prefer faster shutters
+    if(ci.grain<0.34) return a.iso-b.iso;    // prefer lower ISO
+    if(ci.grain>0.66) return b.iso-a.iso;    // prefer higher ISO
+    // default: closeness to main shutter speed
+    return Math.abs(1/a.t-1/main.t)-Math.abs(1/b.t-1/main.t)
+  });
+  var out=[],set={};
+  for(var r=0;r<rows.length;r++){
+    var key=rows[r].iso+'-'+rows[r].N+'-'+rows[r].t;
+    if(!set[key]){out.push(rows[r]);set[key]=1;}
+    if(out.length>=5)break
+  }
+  if(out.length===0 && main){
+    out.push({iso:main.iso,N:main.N,t:main.t});
+  }
+  return out
+}
+function buildFullAlternatives(ev,film,lens,focal,camera){
+  var ap=lensApertureAtFocal(lens,focal),
+    iso=getSelectedISO()||film.box_iso,
+      isos=[iso],
+      Ns=[],cur=ap.minA;
+  while(cur<=ap.maxA+1e-9){Ns.push(parseFloat(cur.toFixed(1)));cur*=Math.SQRT2}
+  var rows=[];
+  for(var i=0;i<isos.length;i++){
+      for(var j=0;j<Ns.length;j++){
+      var Nraw=Ns[j];
+      var N=nearestAperture(Nraw, lens, camera);
+      var t=requiredShutter(ev,isos[i],N),tMin=1/camera.max_shutter_den;
+      if(t<tMin)continue;
+      rows.push({iso:isos[i],N:N,t:nearestShutterForCamera(camera,t)})
+    }
+  }
+  rows.sort(function(a,b){
+    if(a.iso!==b.iso)return a.iso-b.iso;
+    if(a.N!==b.N)return a.N-b.N;
+    return a.t-b.t
+  });
+  if(rows.length===0){ rows.push({iso:film.box_iso,N:lensApertureAtFocal(lens,focal).minA,t:nearestShutterForCamera(camera, requiredShutter(ev,film.box_iso,lensApertureAtFocal(lens,focal).minA))}); }
+  return rows
+}
+// Helper: enforce focal input constraints based on lens
+function updateFocalConstraint(lens){
+  var fi=document.getElementById('focalInput'); if(!fi||!lens) return;
+  if(lens.type==='prime'){
+    fi.readOnly=true; fi.min=lens.focal_mm; fi.max=lens.focal_mm; fi.step=1; fi.value=String(lens.focal_mm);
+  }else{
+    fi.readOnly=false; fi.min=lens.focal_min_mm; fi.max=lens.focal_max_mm; fi.step=1;
+    var v=parseFloat(fi.value)||lens.focal_min_mm;
+    v=Math.max(lens.focal_min_mm, Math.min(lens.focal_max_mm, v));
+    fi.value=String(Math.round(v));
+  }
+}
+// ===== Dropdowns =====
+function refreshCameras(){
+  var sel=document.getElementById('cameraSelect');
+  var st=loadUserStore();var customs=(st.cameras||[]);
+  var opts=[];
+  if(customs.length){
+    opts.push('<optgroup label="Custom / Recent">', 
+      customs.map(c=>'<option value="'+c.name+'">'+c.name+'</option>').join(''),
+      '</optgroup>');
+  }
+  // Include only built-ins relevant to the selected capture mode, unless user asked to show all built-ins
+  var mode=document.getElementById('captureMode')?.value||'film';
+  var showAll = !!document.getElementById('showAllBuiltins')?.checked;
+  if(showAll){
+    opts.push('<optgroup label="Built-in (Film)">',camerasBuiltin.map(c=>'<option value="'+c.name+'">'+c.name+'</option>').join(''),'</optgroup>');
+    opts.push('<optgroup label="Built-in (Digital)">',camerasDigitalBuiltin.map(c=>'<option value="'+c.name+'">'+c.name+'</option>').join(''),'</optgroup>');
+  } else if(mode==='film'){
+    opts.push('<optgroup label="Built-in">',
+      camerasBuiltin.map(c=>'<option value="'+c.name+'">'+c.name+'</option>').join(''),
+      '</optgroup>');
+  }else{
+    opts.push('<optgroup label="Built-in">',
+      camerasDigitalBuiltin.map(c=>'<option value="'+c.name+'">'+c.name+'</option>').join(''),
+      '</optgroup>');
+  }
+  opts.push('<option value="__custom__">Custom…</option>');
+  sel.innerHTML=opts.join('');
+  if(customs.length){
+    sel.value = customs[0].name;
+  } else {
+    var def = (mode==='digital') ? (camerasDigitalBuiltin.find(c=>c.name==='Sony A7 III')||camerasDigitalBuiltin[0]) : (camerasBuiltin.find(c=>c.name==="Pentax K1000")||camerasBuiltin[0]);
+    sel.value = def.name;
+  }
+}
+function refreshFilms(){
+  var sel=document.getElementById('filmSelect');
+  var st=loadUserStore();var customs=(st.films||[]);
+  var opts=[];
+  function uniqueBrands(list){
+    var seen={}; var out=[]; list.forEach(function(f){ var b=brandOfFilm(f); if(b && !seen[b]){ seen[b]=1; out.push(b);} });
+    return out;
+  }
+  var customBrands=uniqueBrands(customs);
+  var builtinBrands=uniqueBrands(filmsBuiltin);
+  if(customBrands.length){
+    opts.push('<optgroup label="Custom / Recent">', 
+      customBrands.map(b=>'<option value="'+b+'">'+b+'</option>').join(''),
+      '</optgroup>');
+  }
+  opts.push('<optgroup label="Built-in">',
+    builtinBrands.map(b=>'<option value="'+b+'">'+b+'</option>').join(''),
+    '</optgroup>');
+  opts.push('<option value="__custom__">Custom…</option>');
+  sel.innerHTML=opts.join('');
+  var defBrand = customBrands[0] || 'Ilford HP5+';
+  if(builtinBrands.indexOf(defBrand)===-1){ defBrand = builtinBrands[0] || ''; }
+  sel.value = defBrand;
+  try{ refreshISOForSelectedBrand(); }catch(e){}
+}
+function refreshLenses(){
+  var camName=document.getElementById('cameraSelect').value,
+      sel=document.getElementById('lensSelect');
+  if(camName==='__custom__'){openCustom('camera'); return;}
+  var mode=document.getElementById('captureMode')?.value||'film';
+  var showAll = !!document.getElementById('showAllBuiltins')?.checked;
+  var camList = (loadUserStore().cameras||[]).concat(showAll?camerasBuiltin.concat(camerasDigitalBuiltin):(mode==='digital'?camerasDigitalBuiltin:camerasBuiltin));
+  var cam=camList.find(c=>c.name===camName);
+  if(!cam){sel.innerHTML='';return}
+  var all=(loadUserStore().lenses||[]).concat(showAll?lensesBuiltin.concat(lensesDigitalBuiltin):(mode==='digital'?lensesDigitalBuiltin:lensesBuiltin));
+  var list=all.filter(l=>l.mount===cam.mount);
+  var st=loadUserStore();var customs=(st.lenses||[]).filter(l=>l.mount===cam.mount);
+  var opts=[];
+  if(customs.length){
+    opts.push('<optgroup label="Custom / Recent">',
+      customs.map(l=>'<option value="'+l.name+'">'+l.name+'</option>').join(''),
+      '</optgroup>');
+  }
+  opts.push('<optgroup label="Built-in">',
+    list.map(l=>'<option value="'+l.name+'">'+l.name+'</option>').join(''),
+    '</optgroup>');
+  opts.push('<option value="__custom__">Custom…</option>');
+  sel.innerHTML=opts.join('');
+  sel.selectedIndex=0;
+  var lens;
+  if (camName === "Nikon F100") {
+    lens = list.find(l => l.name === "Nikon 50mm f/1.4") || customs[0] || list[0];
+  } else {
+    lens = customs[0] || list[0];
+  }
+    if(lens){ sel.value = lens.name; }
+  if(lens){
+    var fi=document.getElementById('focalInput');
+    if(fi){
+      fi.value=(lens.type==='prime')?lens.focal_mm:Math.round((lens.focal_min_mm+lens.focal_max_mm)/2);
+    }
+    updateFocalConstraint(lens);
+  }
+}
+function handleSelectCustoms(){
+  document.getElementById('cameraSelect').addEventListener('change',function(){
+    if(this.value==='__custom__'){openCustom('camera');}
+    else { refreshLenses(); recalc(); }
+  });
+  document.getElementById('lensSelect').addEventListener('change',function(){
+    if(this.value==='__custom__'){openCustom('lens');}
+    else {
+      // Update focal length to suit selected lens
+      try{
+        var lensName=this.value;
+        var lens=(loadUserStore().lenses||[]).concat(lensesBuiltin).find(l=>l.name===lensName);
+        if(lens){
+          var f=(lens.type==='prime')?lens.focal_mm:Math.round((lens.focal_min_mm+lens.focal_max_mm)/2);
+          var fi=document.getElementById('focalInput'); if(fi){ fi.value=f; }
+          updateFocalConstraint(lens);
+        }
+      }catch(e){}
+      recalc();
+    }
+  });
+  document.getElementById('filmSelect').addEventListener('change',function(){
+    if(this.value==='__custom__'){openCustom('film');}
+    else {
+      try{ refreshISOForSelectedBrand(); }catch(e){}
+      recalc();
+    }
+  });
+}
+
+// ===== Custom Modal =====
+function openCustom(type){
+  var titleMap={camera:'Add Custom Camera', lens:'Add Custom Lens', film:'Add Custom Film'};
+  document.getElementById('customTitle').textContent=titleMap[type]||'Add Custom';
+  var form=document.getElementById('customForm'); form.innerHTML='';
+  if(type==='camera'){
+    form.innerHTML='<label>Name</label><input id="c_name">'
+      +'<label>Mount (e.g., nikon_f, canon_fd)</label><input id="c_mount">'
+      +'<label>Max shutter (1/x)</label><input id="c_shutter" type="number" value="1000">';
+  } else if(type==='lens'){
+    form.innerHTML='<label>Name</label><input id="l_name">'
+      +'<label>Mount</label><input id="l_mount">'
+      +'<label>Type</label><select id="l_type"><option value="prime">Prime</option><option value="zoom">Zoom</option></select>'
+      +'<div id="l_prime"><label>Focal (mm)</label><input id="l_focal" type="number" value="50">'
+      +'<label>Max aperture</label><input id="l_max" type="number" step="0.1" value="1.8">'
+      +'<label>Min aperture</label><input id="l_min" type="number" step="0.1" value="16"></div>'
+      +'<div id="l_zoom" style="display:none"><label>Focal min (mm)</label><input id="l_fmin" type="number" value="24">'
+      +'<label>Focal max (mm)</label><input id="l_fmax" type="number" value="70">'
+      +'<label>Max aperture @wide</label><input id="l_maxw" type="number" step="0.1" value="3.5">'
+      +'<label>Max aperture @tele</label><input id="l_maxt" type="number" step="0.1" value="5.6">'
+      +'<label>Min aperture</label><input id="l_minz" type="number" step="0.1" value="22"></div>';
+    // Prefill mount from current camera to reduce mismatch issues
+    try{
+      var camName=document.getElementById('cameraSelect')?.value;
+      var cam=(loadUserStore().cameras||[]).concat(camerasBuiltin).find(c=>c.name===camName);
+      if(cam&&cam.mount){ var m=document.getElementById('l_mount'); if(m){ m.value=cam.mount; }}
+    }catch(e){}
+  } else if(type==='film'){
+    form.innerHTML='<label>Brand</label><input id="f_brand">'
+      +'<label>Stock name (unique)</label><input id="f_name" placeholder="e.g., YourBrand 400">'
+      +'<label>ISO (box speed)</label><input id="f_iso" type="number" value="400">'
+      +'<label>Push limit (stops)</label><input id="f_push" type="number" value="2">'
+      +'<label>Pull limit (stops)</label><input id="f_pull" type="number" value="1">';
+  }
+    var manage=document.getElementById('manageModal');
+  var wasManageOpen = manage && manage.style.display!=='none';
+  if(wasManageOpen){
+    manage.setAttribute('data-return','1');
+    closeModal('manageModal');
+  }
+  openModal('customModal');
+  var lt=document.getElementById('l_type');
+  if(lt){lt.addEventListener('change',function(){
+    document.getElementById('l_prime').style.display=this.value==='prime'?'block':'none';
+    document.getElementById('l_zoom').style.display=this.value==='zoom'?'block':'none';
+  });}
+  document.getElementById('customSave').onclick=function(){
+    try{
+      if(type==='camera'){
+        var obj={name:document.getElementById('c_name').value.trim(),
+                 mount:document.getElementById('c_mount').value.trim(),
+                 max_shutter_den:parseInt(document.getElementById('c_shutter').value,10)||1000};
+        if(!obj.name||!obj.mount){alert('Name and mount required');return}
+        addToStore('cameras',obj);
+        refreshCameras();
+        document.getElementById('cameraSelect').value=obj.name;
+        refreshLenses();
+        try{ renderManageList(); }catch(e){}      } else if(type==='lens'){
+        var isPrime=(document.getElementById('l_type').value==='prime');
+        var obj={name:document.getElementById('l_name').value.trim(),
+                 mount:document.getElementById('l_mount').value.trim(),
+                 type:isPrime?'prime':'zoom'};
+        if(isPrime){
+          obj.focal_mm=parseFloat(document.getElementById('l_focal').value)||50;
+          obj.max_aperture=parseFloat(document.getElementById('l_max').value)||2;
+          obj.min_aperture=parseFloat(document.getElementById('l_min').value)||16;
+        } else {
+          obj.focal_min_mm=parseFloat(document.getElementById('l_fmin').value)||24;
+          obj.focal_max_mm=parseFloat(document.getElementById('l_fmax').value)||70;
+          obj.max_aperture_wide=parseFloat(document.getElementById('l_maxw').value)||3.5;
+          obj.max_aperture_tele=parseFloat(document.getElementById('l_maxt').value)||5.6;
+          obj.min_aperture=parseFloat(document.getElementById('l_minz').value)||22;
+        }
+        if(!obj.name||!obj.mount){alert('Name and mount required');return}
+        addToStore('lenses',obj);
+        refreshLenses();
+        document.getElementById('lensSelect').value=obj.name;
+        try{ renderManageList(); }catch(e){}
+  } else if(type==='film'){
+        var obj={name:document.getElementById('f_name').value.trim(),
+                 brand:(document.getElementById('f_brand').value.trim()||document.getElementById('f_name').value.trim()),
+                 box_iso:parseInt(document.getElementById('f_iso').value,10)||400,
+                 push_limit:parseFloat(document.getElementById('f_push').value)||0,
+                 pull_limit:parseFloat(document.getElementById('f_pull').value)||0};
+        if(!obj.name||!obj.brand){alert('Brand and stock required');return}
+        addToStore('films',obj);
+        refreshFilms();
+        document.getElementById('filmSelect').value=obj.brand;
+        try{refreshISOForSelectedBrand()}catch(e){}
+        try{ renderManageList(); }catch(e){}  }
+      closeModal('customModal'); recalc();
+            var manage=document.getElementById('manageModal');
+      if(manage && manage.getAttribute('data-return')==='1'){
+        manage.removeAttribute('data-return');
+        openModal('manageModal');
+      }
+      try{ if(confirm('Embed this custom gear into the HTML file now?')){ downloadUpdatedHTML(); } }catch(e){}
+    }catch(e){alert('Could not save: '+e.message)}
+  };
+}
+
+// ===== Settings menu =====
+(function(){
+  var btn=document.getElementById('settingsBtn');
+  var menu=document.getElementById('settingsMenu');
+  btn.addEventListener('click',function(){menu.style.display=menu.style.display==='block'?'none':'block'});
+  document.getElementById('closeSettings').addEventListener('click',function(){menu.style.display='none'});
+  document.getElementById('aboutBtn').addEventListener('click',function(){menu.style.display='none';alert('© 2025 Andrew Harris. Created with AI assistance.')});
+  var saveBtn=document.getElementById('saveAppBtn');
+  if(saveBtn){ saveBtn.addEventListener('click',function(){ menu.style.display='none'; downloadUpdatedHTML(); }); }
+  // Theme toggle
+  var THEME_KEY='photoAppTheme_v1';
+  function applyTheme(mode){
+    var root=document.documentElement;
+    if(mode==='light'){ root.setAttribute('data-theme','light'); }
+    else if(mode==='dark'){ root.setAttribute('data-theme','dark'); }
+    else { root.removeAttribute('data-theme'); mode='auto'; }
+    try{ localStorage.setItem(THEME_KEY, mode); }catch(e){}
+    var tb=document.getElementById('themeBtn');
+    if(tb){ tb.textContent = 'Theme: '+ (mode==='auto'?'Auto':(mode==='dark'?'Dark':'Light')); }
+    // No geometry coupling in new slider; optional rebuild of ticks
+    try{ requestAnimationFrame(buildEVScale); }catch(_e){ try{ setTimeout(buildEVScale,0); }catch(__e){} }
+  }
+  function currentTheme(){ try{ return localStorage.getItem(THEME_KEY)||'auto'; }catch(e){ return 'auto'; } }
+  var themeBtn=document.getElementById('themeBtn');
+  if(themeBtn){
+    // initialize label/state
+    applyTheme(currentTheme());
+    themeBtn.addEventListener('click',function(){
+      var cur=currentTheme();
+      var next = cur==='auto' ? 'dark' : (cur==='dark' ? 'light' : 'auto');
+      applyTheme(next);
+    });
+  }
+  var manage=document.getElementById('manageBtn');
+  if(manage){
+    manage.addEventListener('click',function(){
+      menu.style.display='none';
+      renderManageList();
+      openModal('manageModal');
+    });
+  }
+  var delAll=document.getElementById('manageDeleteAll');
+  if(delAll){
+    delAll.addEventListener('click',function(){
+      if(confirm('Delete ALL custom cameras, lenses, and films?')){
+        var st=loadUserStore(); st.cameras=[]; st.lenses=[]; st.films=[]; saveUserStore(st);
+        renderManageList(); refreshCameras(); refreshFilms(); refreshLenses(); recalc();
+      }
+    });
+  }
+    var addCam=document.getElementById('addCameraBtn');
+  if(addCam){ addCam.addEventListener('click',function(){ openCustom('camera'); }); }
+  var addLens=document.getElementById('addLensBtn');
+  if(addLens){ addLens.addEventListener('click',function(){ openCustom('lens'); }); }
+  var addFilm=document.getElementById('addFilmBtn');
+  if(addFilm){ addFilm.addEventListener('click',function(){ openCustom('film'); }); }
+})();
+// ===== Advanced: DOF =====
+function calcDOF(N,focal_mm,dist_m,coc_mm){
+  var f=focal_mm,s=dist_m*1000,H=(f*f)/(N*coc_mm)+f;
+  var near=(H*s)/(H+(s-f));
+  var far=(H*s)/(H-(s-f));
+  var near_m=near/1000;
+  var far_m=(H<=(s-f))?Infinity:far/1000;
+  var total=(far_m===Infinity)?Infinity:(far_m-near_m);
+  return{H_m:H/1000,near_m:near_m,far_m:far_m,total_m:total};
+}
+function updateDOF(){
+  var lens=(loadUserStore().lenses||[]).concat(lensesBuiltin).find(l=>l.name===document.getElementById('lensSelect').value);
+  if(!lens){document.getElementById('dofOut').textContent='—';return}
+  var focal=(lens.type==='prime')?lens.focal_mm:(parseFloat(document.getElementById('focalInput').value)||50);
+  var outTxt=document.getElementById('output').textContent||'';
+  var N=parseFloat(outTxt.match(/f\/([0-9.]+)/)?.[1])||lens.max_aperture;
+  var dist=parseFloat(document.getElementById('dofDist')?.value)||3;
+  var coc=parseFloat(document.getElementById('dofCoC')?.value)||0.03;
+  var d=calcDOF(N,focal,dist,coc);
+  function m(v){return v===Infinity?'∞':v.toFixed(2)+' m'}
+  document.getElementById('dofOut').textContent='H ≈ '+m(d.H_m)+' • Near ≈ '+m(d.near_m)+' • Far ≈ '+m(d.far_m)+' • Total ≈ '+(d.total_m===Infinity?'∞':d.total_m.toFixed(2)+' m');
+}
+
+// ===== Advanced: Motion =====
+function updateMotion(){
+  var v=parseFloat(document.getElementById('motSpeed')?.value)||1.4;
+  var d=parseFloat(document.getElementById('motDist')?.value)||10;
+  var dir=document.getElementById('motDir')?.value||'across';
+  var omega=(dir==='across')?(v/d):(v/d)*0.3;
+  var a_freeze=0.001,t_freeze=a_freeze/Math.max(omega,1e-6);
+  var a_pan=0.02,t_pan=a_pan/Math.max(omega,1e-6);
+  function fmt(t){return t>=1?(t.toFixed(1)+'s'):('1/'+Math.round(1/t))}
+  document.getElementById('motOut').textContent='Freeze ≈ '+fmt(t_freeze)+' • Pan ≈ '+fmt(t_pan);
+}
+
+// ===== Advanced: Bracketing =====
+function evStepValue(s){return s==='1/3'?1/3:(s==='1/2'?1/2:1)}
+function updateBracket(){
+  var span=parseFloat(document.getElementById('brSpan')?.value)||1;
+  var step=evStepValue(document.getElementById('brStep')?.value||'1');
+  var param=document.getElementById('brParam')?.value||'shutter';
+  var offs=[];for(var e=-span;e<=span+1e-9;e+=step){offs.push(parseFloat(e.toFixed(3)))}
+  var camName=document.getElementById('cameraSelect').value,lensName=document.getElementById('lensSelect').value,filmName=document.getElementById('filmSelect').value;
+  var camera=(loadUserStore().cameras||[]).concat(camerasBuiltin).find(c=>c.name===camName);
+  var lens=(loadUserStore().lenses||[]).concat(lensesBuiltin).find(l=>l.name===lensName);
+  var film=currentFilm();
+  if(!camera||!lens||!film){document.getElementById('brOut').textContent='—';return}
+  var focal=parseFloat(document.getElementById('focalInput').value)||50;
+  var evEff=effectiveEV();
+  var base=recommend(evEff,film,lens,focal,camera);
+  var seq=offs.map(function(o){
+    if(param==='shutter'){
+      var t=base.t*Math.pow(2,o);
+      return fmtSh(nearestShutterThird(t));
+    }else if(param==='aperture'){
+      var N=base.N*Math.pow(Math.SQRT2,o);
+      return 'f/'+(Math.round(N*10)/10).toFixed(1);
+    }else{
+      var iso=Math.round(base.iso*Math.pow(2,o));
+      return String(iso);
+    }
+  });
+  var label=(param==='shutter'?'Shutter':param==='aperture'?'Aperture':'ISO');
+  document.getElementById('brOut').textContent='Frames: '+offs.length+' • '+label+' → '+seq.join(', ');
+}
+
+// ===== Advanced: Reciprocity =====
+var RECIP_TABLE={
+  "Kodak Tri-X 400":t=>t<1?t:Math.pow(t,1.26),
+  "Ilford HP5+ 400":t=>t<1?t:Math.pow(t,1.3),
+  "Kodak Portra 400":t=>t<1?t:Math.pow(t,1.2),
+  "Kodak Portra 160":t=>t<1?t:Math.pow(t,1.2),
+  "Kodak Portra 800":t=>t<1?t:Math.pow(t,1.2),
+  "Cinestill 800T":t=>t<1?t:Math.pow(t,1.15),
+  "Cinestill 50D":t=>t<1?t:Math.pow(t,1.12),
+  "Fujifilm Superia 200":t=>t<1?t:Math.pow(t,1.25),
+  "Fujifilm Superia 400":t=>t<1?t:Math.pow(t,1.25),
+  "Kodak Ektar 100":t=>t<1?t:Math.pow(t,1.2),
+  "Kodak Gold 200":t=>t<1?t:Math.pow(t,1.25)
+};
+function currentFilm(){
+  var mode=document.getElementById('captureMode')?.value||'film';
+  if(mode==='digital') return null;
+  var brand=document.getElementById('filmSelect')?.value;
+  var isoSel=document.getElementById('isoSelect'); var iso=parseInt(isoSel?.value,10)||NaN;
+  var films=allFilms().filter(f=>f.brand===brand);
+  if(!films.length) return null;
+  var byIso=films.find(f=>f.box_iso===iso);
+  return byIso||films[0];
+}
+function updateReciprocity(){
+  var film=currentFilm();
+  if(!film){document.getElementById('recipOut').textContent='—';return}
+  var camName=document.getElementById('cameraSelect').value,lensName=document.getElementById('lensSelect').value;
+  var camera=(loadUserStore().cameras||[]).concat(camerasBuiltin).find(c=>c.name===camName);
+  var lens=(loadUserStore().lenses||[]).concat(lensesBuiltin).find(l=>l.name===lensName);
+  if(!camera||!lens){document.getElementById('recipOut').textContent='—';return}
+  var focal=parseFloat(document.getElementById('focalInput').value)||50;
+  var evEff=effectiveEV();
+  var base=recommend(evEff,film,lens,focal,camera),t=base.t,fn=RECIP_TABLE[film.name];
+  if(t<1){document.getElementById('recipOut').textContent='Not needed below 1s.';return}
+  var corr=fn?fn(t):t;
+  document.getElementById('recipOut').textContent='Metered '+fmtSh(t)+' → Reciprocity corrected ≈ '+fmtSh(corr);
+}
+
+// ===== Advanced: Push/Pull =====
+function updatePushPull(){
+  var film=currentFilm();
+  if(!film){document.getElementById('ppOut').textContent='—';return}
+  var stops=parseFloat(document.getElementById('ppStops')?.value)||0;
+  var action=stops>0?('Push +'+stops+' stops'):(stops<0?('Pull '+stops+' stops'):'No change');
+  var def=stops>0?'Underexpose in camera, develop longer.':(stops<0?'Overexpose in camera, develop shorter.':'');
+  var limit=(stops>0?film.push_limit:film.pull_limit)||0;
+  var over=Math.abs(stops)>(limit)?' (beyond lab limit)':'';
+  document.getElementById('ppOut').textContent=action+over+' — '+def;
+}
+
+
+/* ----- New EV Control ----- */
+(function(){
+  var MIN=EV_MIN, MAX=EV_MAX;
+  var ctrl, track, ticks, handle, tip, hidden;
+  var dragging=false;
+  var initialized=false;
+  var dragRecalcTimer=null;
+
+  function clamp(v){ return Math.max(MIN, Math.min(MAX, v)); }
+  function evToT(ev){ return (clamp(ev)-MIN)/(MAX-MIN); }
+  function tToEv(t){ return MIN + t*(MAX-MIN); }
+  function pxToT(x){
+    var r = track.getBoundingClientRect();
+    return Math.max(0, Math.min(1, (x - r.left)/Math.max(1, r.width)));
+  }
+  function fmtLux(ev){ return Math.round(Math.pow(2,ev)*2.5); }
+
+  function scheduleDragRecalc(){
+    if(dragRecalcTimer!==null) return;
+    dragRecalcTimer=setTimeout(function(){
+      dragRecalcTimer=null;
+      try{ recalc(); }catch(_e){}
+      if(dragging){ scheduleDragRecalc(); }
+    }, 80);
+  }
+
+  function setEV(ev, source){
+    ev = clamp(+ev || 0);
+    var t = evToT(ev);
+    var left = 14 + t*(ctrl.clientWidth-28); // 14px side padding
+    handle.style.left = left + 'px';
+    if(tip){
+      tip.style.left    = left + 'px';
+      var inc=incidentEV();
+      if(inc===null){
+        tip.textContent   = 'Ambient EV '+ev.toFixed(1)+' • '+fmtLux(ev)+' lx';
+      }else{
+        var eff=effectiveEV();
+        tip.textContent   = 'Ambient '+ev.toFixed(1)+' / Incident '+inc.toFixed(1)+' → Eff '+eff.toFixed(1)+' • '+fmtLux(eff)+' lx';
+      }
+    }
+    var evInput=document.getElementById('evInput');
+    var luxInput=document.getElementById('luxInput');
+    if(evInput && document.activeElement!==evInput){ evInput.value = ev.toFixed(1); }
+    if(luxInput && document.activeElement!==luxInput){ luxInput.value = fmtLux(ev); }
+    ctrl.setAttribute('aria-valuenow', ev.toFixed(1));
+    if(hidden){ hidden.value = ev; }
+    if(typeof storeAmbientEV === 'function'){ storeAmbientEV(ev); }
+    updateEvDescriptor(ev);
+    updateIncidentNote();
+    if(source==='drag'){
+      scheduleDragRecalc();
+    }else if(source==='kb'){
+      try{ recalc(); }catch(_e){}
+    }else if(source!=='input' && hidden){
+      hidden.dispatchEvent(new Event('input', {bubbles:true}));
+    }
+  }
+
+  function buildTicks(){
+    ticks.innerHTML = '';
+    for(var ev=MIN; ev<=MAX+1e-9; ev+=0.5){
+      var d=document.createElement('div');
+      var isInt = Math.abs(ev - Math.round(ev)) < 1e-6;
+      d.className='tick'+(isInt?' major':'');
+      d.style.left = (evToT(ev)*100)+'%';
+      ticks.appendChild(d);
+    }
+  }
+
+  function startDrag(clientX){
+    setEV(tToEv(pxToT(clientX)), 'drag');
+    if(tip){ tip.removeAttribute('aria-hidden'); }
+    dragging=true;
+  }
+  function moveDrag(clientX){ if(dragging) setEV(tToEv(pxToT(clientX)), 'drag'); }
+  function endDrag(){
+    if(!dragging) return;
+    dragging=false;
+    if(tip){ tip.setAttribute('aria-hidden','true'); }
+    scheduleDragRecalc();
+  }
+
+  function bind(){
+    var activePointerId=null;
+    var captureSupported = typeof ctrl.setPointerCapture==='function';
+
+    function pointerMoveHandler(e){
+      if(activePointerId!==null && e.pointerId!==activePointerId) return;
+      if(!dragging) return;
+      moveDrag(e.clientX);
+      e.preventDefault();
+    }
+    function pointerUpHandler(e){
+      if(activePointerId===null || e.pointerId!==activePointerId) return;
+      if(captureSupported && typeof ctrl.releasePointerCapture==='function'){
+        try{ ctrl.releasePointerCapture(e.pointerId); }catch(_e){}
+      }else{
+        window.removeEventListener('pointermove', pointerMoveHandler, true);
+        window.removeEventListener('pointerup', pointerUpHandler, true);
+        window.removeEventListener('pointercancel', pointerCancelHandler, true);
+      }
+      activePointerId=null;
+      endDrag();
+      e.preventDefault();
+    }
+    function pointerCancelHandler(e){
+      if(activePointerId===null || e.pointerId!==activePointerId) return;
+      if(captureSupported && typeof ctrl.releasePointerCapture==='function'){
+        try{ ctrl.releasePointerCapture(e.pointerId); }catch(_e){}
+      }else{
+        window.removeEventListener('pointermove', pointerMoveHandler, true);
+        window.removeEventListener('pointerup', pointerUpHandler, true);
+        window.removeEventListener('pointercancel', pointerCancelHandler, true);
+      }
+      activePointerId=null;
+      endDrag();
+    }
+
+    ctrl.addEventListener('pointerdown', function(e){
+      if(e.pointerType==='mouse' && e.button!==0) return;
+      if(e.isPrimary===false) return;
+      activePointerId=e.pointerId;
+      if(captureSupported){
+        try{ ctrl.setPointerCapture(e.pointerId); }catch(_e){}
+      }else{
+        window.addEventListener('pointermove', pointerMoveHandler, true);
+        window.addEventListener('pointerup', pointerUpHandler, true);
+        window.addEventListener('pointercancel', pointerCancelHandler, true);
+      }
+      startDrag(e.clientX);
+      e.preventDefault();
+    });
+    ctrl.addEventListener('pointermove', pointerMoveHandler);
+    ctrl.addEventListener('pointerup', pointerUpHandler);
+    ctrl.addEventListener('pointercancel', pointerCancelHandler);
+
+    ctrl.addEventListener('keydown', function(e){
+      var step = (e.shiftKey?1:0.1);
+      var cur = parseFloat(hidden.value)||13;
+      if(e.key==='ArrowLeft' || e.key==='ArrowDown'){ setEV(cur - step, 'kb'); e.preventDefault(); }
+      else if(e.key==='ArrowRight' || e.key==='ArrowUp'){ setEV(cur + step, 'kb'); e.preventDefault(); }
+      else if(e.key==='PageDown'){ setEV(cur - 1, 'kb'); e.preventDefault(); }
+      else if(e.key==='PageUp'){ setEV(cur + 1, 'kb'); e.preventDefault(); }
+      else if(e.key==='Home'){ setEV(MIN, 'kb'); e.preventDefault(); }
+      else if(e.key==='End'){ setEV(MAX, 'kb'); e.preventDefault(); }
+    });
+
+    window.addEventListener('resize', function(){ buildTicks(); setEV(parseFloat(hidden.value)||13, 'resize'); });
+  }
+
+  // Public init
+  window.initEvControl = function(){
+    if(initialized) return;
+    ctrl   = document.getElementById('evCtrl');
+    if(!ctrl) return;
+    track  = ctrl.querySelector('.ev-track');
+    ticks  = ctrl.querySelector('.ev-ticks');
+    handle = ctrl.querySelector('.ev-handle');
+    tip    = document.getElementById('evTip');
+    hidden = document.getElementById('evSlider'); // legacy bridge
+
+    buildTicks();
+    bind();
+      setEV(parseFloat(hidden.value)||13, 'init');
+
+      // Keep sync with number/lux inputs and always recalc
+      var evIn=document.getElementById('evInput');
+      var lxIn=document.getElementById('luxInput');
+      if(evIn){
+        evIn.addEventListener('input', function(){
+          var ev = clamp(parseFloat(this.value)||0);
+          this.value = ev.toFixed(1);
+          setEV(ev, 'input');
+          recalc();
+        });
+      }
+      if(lxIn){
+        lxIn.addEventListener('input', function(){
+          var lx = Math.max(0, parseFloat(this.value)||0);
+          var ev = clamp(Math.log2(Math.max(1e-6,lx)/2.5));
+          setEV(ev, 'input');
+          recalc();
+        });
+      }
+      // Also keep hidden slider in sync with custom slider
+      if(hidden){
+        hidden.addEventListener('input', function(){
+          var ev = clamp(parseFloat(this.value)||0);
+          setEV(ev, 'input');
+          recalc();
+        });
+      }
+      initialized=true;
+  };
+
+  window.setEvControlValue = function(ev, source){
+    if(!ctrl){ window.initEvControl(); }
+    if(!ctrl) return;
+    setEV(ev, source||'api');
+  };
+
+  // Make old helpers no-ops so existing calls won’t break
+  window.buildEVScale = function(){};
+  window.bindEVSliderClicks = function(){};
+})();
+
+// ===== Recalc & Init =====
+function recalc(){
+  var camName=document.getElementById('cameraSelect').value,
+      lensName=document.getElementById('lensSelect').value,
+      filmName=document.getElementById('filmSelect').value,
+      output=document.getElementById('output'),
+      warn=document.getElementById('warning');
+  if(!camName||!lensName||!filmName||camName==='__custom__'||lensName==='__custom__'||filmName==='__custom__'){
+    output.textContent="Select camera, lens, and film.";warn.textContent="";return;
+  }
+  var camera=(loadUserStore().cameras||[]).concat(camerasBuiltin).find(c=>c.name===camName),
+      lens=(loadUserStore().lenses||[]).concat(lensesBuiltin).find(l=>l.name===lensName),
+      film=currentFilm();
+  var focal=parseFloat(document.getElementById('focalInput').value)||50;
+  var evEff=effectiveEV();
+  // Clamp focal to lens capability
+  try{
+    var fi=document.getElementById('focalInput');
+    var lensNow=lens;
+    if(lensNow && fi){
+      if(lensNow.type==='prime'){
+        fi.readOnly=true; fi.min=lensNow.focal_mm; fi.max=lensNow.focal_mm; fi.step=1; fi.value=String(lensNow.focal_mm);
+        focal=lensNow.focal_mm;
+      } else {
+        fi.readOnly=false; fi.min=lensNow.focal_min_mm; fi.max=lensNow.focal_max_mm; fi.step=1;
+        var fv=Math.max(lensNow.focal_min_mm, Math.min(lensNow.focal_max_mm, focal));
+        if(fv!==focal){ focal=fv; fi.value=String(Math.round(fv)); }
+      }
+    }
+  }catch(e){}
+  var rec=recommend(evEff,film,lens,focal,camera);
+  var newText = 'ISO '+rec.iso+' • f/'+rec.N.toFixed(1)+' • '+fmtSh(rec.t);
+  if (output.textContent !== newText) {
+    output.textContent = newText;
+    output.classList.remove('flash-animate');
+    void output.offsetWidth; // force reflow
+    output.classList.add('flash-animate');
+  } else {
+    output.textContent = newText;
+  }
+  warn.textContent=rec.warns;
+  // Alternatives: populate tables
+  try{
+    var comp=buildCompactAlternatives(evEff,film,lens,focal,camera,rec);
+    var tb=document.querySelector('#altTable tbody');
+    if(tb){
+      tb.innerHTML='';
+      comp.forEach(function(r){
+        var tr=document.createElement('tr');
+        tr.innerHTML='<td>'+r.iso+'</td><td>f/'+r.N.toFixed(1)+'</td><td>'+fmtSh(r.t)+'</td>';
+        tb.appendChild(tr);
+      });
+    }
+    var full=buildFullAlternatives(evEff,film,lens,focal,camera);
+    var tbf=document.querySelector('#altTableFull tbody');
+    if(tbf){
+      tbf.innerHTML='';
+      full.forEach(function(r){
+        var tr=document.createElement('tr');
+        tr.innerHTML='<td>'+r.iso+'</td><td>f/'+r.N.toFixed(1)+'</td><td>'+fmtSh(r.t)+'</td>';
+        tbf.appendChild(tr);
+      });
+    }
+  }catch(e){ /* no-op to keep UI resilient */ }
+  updateDOF();updateMotion();updateBracket();updateReciprocity();updatePushPull();
+}
+
+function wireInfoButtons(){
+  try{
+    var btns = document.querySelectorAll('#advancedDrawer button.info-btn');
+    btns.forEach(function(b){
+      // Avoid duplicate bindings
+      if(b.getAttribute('data-wired')==='1') return;
+      b.setAttribute('data-wired','1');
+      b.addEventListener('click', function(ev){
+        ev.preventDefault(); ev.stopPropagation();
+        var key = b.getAttribute('data-info');
+        var container = b.closest('details')?.querySelector('.info-inline[data-info-desc="'+key+'"]');
+        if(container){
+          if(container.getAttribute('data-active')==='1'){
+            container.textContent='';
+            container.setAttribute('data-active','0');
+          }else{
+            container.textContent = (window.INFO && window.INFO[key]) || 'No description available.';
+            container.setAttribute('data-active','1');
+          }
+        }
+      }, true);
+    });
+  }catch(e){ /* no-op */ }
+}
+
+function initApp(){
+  refreshCameras();refreshFilms();refreshLenses();
+  initEvControl();
+  // Allow slight overtravel to counter sub‑pixel rounding; values are clamped to EV_MIN..EV_MAX
+  var s = document.getElementById('evSlider');
+  if(s){ s.min = EV_MIN; s.max = EV_MAX; }
+  // Default to a common light level: EV 13 (clear daylight)
+  var EV_DEFAULT = 13;
+  document.getElementById('evSlider').value = EV_DEFAULT;
+  document.getElementById('evInput').value = EV_DEFAULT;
+  document.getElementById('luxInput').value = Math.round(evToLux(EV_DEFAULT));
+  try{ document.getElementById('evSlider').focus(); }catch(e){}
+  // Old EV bar/notch logic removed
+  // function clampEV(v){ return Math.max(EV_MIN, Math.min(EV_MAX, v)); }
+  // Already handled in initEvControl above for robust sync
+  // While dragging the slider, descriptor follows the thumb; on release it stays at the final value
+  (function(){
+    var s=document.getElementById('evSlider'); if(!s) return;
+    var dragging=false;
+    function follow(){ if(!dragging) return; var ev=parseFloat(s.value)||0; updateEvDescriptor(ev); }
+    s.addEventListener('pointerdown',function(){ dragging=true; follow(); });
+    s.addEventListener('pointermove',follow);
+    function up(){ if(!dragging) return; dragging=false; restoreEVDescriptor(); }
+    s.addEventListener('pointerup',up);
+    s.addEventListener('pointercancel',up);
+  })();
+  // Already handled in initEvControl above for robust sync
+  initIncidentDial();
+  var isoSel=document.getElementById('isoSelect'); if(isoSel){ isoSel.addEventListener('change',recalc) }
+  // EI controls: show/hide Rated EI when 'Rate this roll' is on
+  function updateEIRow(){
+    var rr=document.getElementById('rateRoll'); var wrap=document.getElementById('eiWrap');
+    if(wrap){ wrap.style.display = rr && rr.checked ? 'inline-block' : 'none'; }
+  }
+  var rr=document.getElementById('rateRoll'); if(rr){ rr.addEventListener('change',function(){updateEIRow();recalc();}) }
+  var rei=document.getElementById('ratedEI'); if(rei){ rei.addEventListener('input',recalc) }
+  updateEIRow();
+  // Concise Creative Intent: segmented controls + toggles
+  handleSelectCustoms();
+  function bindSeg(id){
+    var wrap=document.getElementById(id); if(!wrap) return;
+    wrap.querySelectorAll('.seg-btn').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        wrap.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));
+        this.classList.add('active');
+        updateCISummary();
+        recalc();
+      });
+    });
+  }
+  bindSeg('ciBlurSeg');
+  bindSeg('ciMoveSeg');
+  bindSeg('ciGrainSeg');
+  var t2=document.getElementById('ciTripod2'); if(t2){ t2.addEventListener('input',function(){updateCISummary();recalc()}) }
+  var p2=document.getElementById('ciPanning2'); if(p2){ p2.addEventListener('input',function(){updateCISummary();recalc()}) }
+  // Capture mode wiring: show/hide film controls and refresh gear lists
+  (function(){
+    var modeSel=document.getElementById('captureMode');
+    function applyMode(){
+      var mode=modeSel?.value||'film';
+      var filmCol=document.getElementById('filmCol');
+      var isoNum=document.getElementById('isoNumeric');
+      if(filmCol) filmCol.style.display = (mode==='film') ? 'block' : 'none';
+      if(isoNum) isoNum.style.display = (mode==='digital') ? 'block' : 'none';
+      try{ refreshCameras(); refreshLenses(); refreshFilms(); }catch(e){}
+      try{ recalc(); }catch(e){}
+    }
+    if(modeSel){ modeSel.addEventListener('change', applyMode); applyMode(); }
+    var isoNum=document.getElementById('isoNumeric'); if(isoNum){ isoNum.addEventListener('input', recalc); }
+    var showAll=document.getElementById('showAllBuiltins'); if(showAll){ showAll.addEventListener('change', function(){ try{ refreshCameras(); refreshLenses(); }catch(e){} }); }
+  })();
+  document.getElementById('focalInput').addEventListener('input',function(){
+    try{
+      var lensName=document.getElementById('lensSelect').value;
+      var lens=(loadUserStore().lenses||[]).concat(lensesBuiltin).find(l=>l.name===lensName);
+      if(lens){ updateFocalConstraint(lens); }
+    }catch(e){}
+    recalc();
+  });
+  (function(){
+    var btn=document.getElementById('advancedToggle');
+    var drawer=document.getElementById('advancedDrawer');
+    // Always start closed
+    drawer.style.display = 'none';
+    btn.textContent = 'Open Advanced';
+    btn.addEventListener('click',function(){
+      if(drawer.style.display==='none'){
+        drawer.style.display='block';
+        btn.textContent='Close Advanced';
+      }else{
+        drawer.style.display='none';
+        btn.textContent='Open Advanced';
+      }
+    });
+  })();
+  // Alternatives section toggle inside Recommended card
+  (function(){
+    var btn=document.getElementById('altToggle');
+    var sec=document.getElementById('altSection');
+    if(btn&&sec){
+      var setL=function(){btn.textContent=(sec.style.display==='none'||sec.style.display==='')?'Show Alternatives':'Hide Alternatives'};
+      btn.addEventListener('click',function(){sec.style.display=(sec.style.display==='none'||sec.style.display==='')?'block':'none';setL()});
+      setL();
+    }
+  })();
+  // Alternatives full toggle
+  (function(){
+    var btn=document.getElementById('toggleFull');
+    var full=document.getElementById('fullAlt');
+    if(btn&&full){
+      var setL=function(){btn.textContent=(full.style.display==='none'||full.style.display==='')?'Show All Alternatives':'Hide All Alternatives'};
+      btn.addEventListener('click',function(){full.style.display=(full.style.display==='none'||full.style.display==='')?'block':'none';setL()});
+      setL();
+    }
+  })();
+  updateCISummary();
+  showEVBadge(EV_DEFAULT); updateEvDescriptor(EV_DEFAULT);
+  updateIncidentDial(incidentEV());
+  updateIncidentNote();
+  (function(){
+    var btn=document.getElementById('incidentToggle');
+    var drawer=document.getElementById('incidentDrawer');
+    if(btn&&drawer){
+      var setLabel=function(){
+        var open=(drawer.style.display!=='none' && drawer.style.display!=='');
+        btn.textContent=open?'Close Incident Meter':'Open Incident Meter';
+      };
+      btn.addEventListener('click',function(){
+        drawer.style.display=(drawer.style.display==='none'||drawer.style.display==='')?'block':'none';
+        setLabel();
+      });
+      drawer.style.display='none';
+      setLabel();
+    }
+  })();
+  // Build new EV scale and bind interactions
+  buildEVScale();
+  bindEVSliderClicks();
+  recalc();
+
+  // Ensure Advanced info buttons are wired
+  wireInfoButtons();
+}
+document.addEventListener('DOMContentLoaded',function(){try{initApp()}catch(e){alert('Init error: '+e.message)}});
+
+</script>
+<script id="embeddedUserData" type="application/json">{"cameras":[],"lenses":[],"films":[]}</script>
+</body>
+</html>
