@@ -299,6 +299,13 @@
     .modal-content{background:var(--card);color:var(--text);border-color:var(--border)}
     .seg{background:var(--chipBg);border-color:var(--border)}
     .seg-btn:hover{background:var(--btn-bg-hover)}
+    .recommendation-float{
+      background:rgba(12,20,36,0.96);
+      border:1px solid rgba(96,165,250,0.25);
+      box-shadow:0 18px 36px rgba(5,11,24,0.65),0 2px 10px rgba(12,24,40,0.5);
+      color:var(--text);
+    }
+    .recommendation-float .float-label{color:rgba(148,181,222,0.9);}
   }
   /* Manual theme overrides via data-theme attribute */
   :root[data-theme="dark"]{
@@ -322,6 +329,13 @@
     --flash-glow:rgba(59,130,246,0.6);
     --flash-glow-outer:rgba(59,130,246,0.2);
   }
+  :root[data-theme="dark"] .recommendation-float{
+    background:rgba(12,20,36,0.96);
+    border:1px solid rgba(96,165,250,0.25);
+    box-shadow:0 18px 36px rgba(5,11,24,0.65),0 2px 10px rgba(12,24,40,0.5);
+    color:var(--text);
+  }
+  :root[data-theme="dark"] .recommendation-float .float-label{color:rgba(148,181,222,0.9);}
   
   :root[data-theme="light"]{
     --bg:#f7f7f9;
@@ -342,6 +356,11 @@
     --flash-bg:var(--flash-bg-light);
     --flash-glow:var(--flash-glow-light);
     --flash-glow-outer:var(--flash-glow-outer-light);
+  }
+  :root[data-theme="light"] .recommendation-float{
+    background:rgba(255,255,255,0.96);
+    border:1px solid rgba(16,24,40,0.14);
+    box-shadow:0 14px 28px rgba(16,24,40,0.14),0 2px 8px rgba(16,24,40,0.08);
   }
   /* High-contrast hover overrides (placed last for priority) */
   #advancedToggle:hover,
@@ -400,6 +419,31 @@
     .ambient-actions{flex-direction:column;align-items:stretch}
     .ambient-buttons{justify-content:flex-start}
     .incident-readouts{width:100%;max-width:none}
+  }
+  .recommendation-float{
+    position:fixed;left:0;top:0;
+    display:flex;align-items:center;gap:6px;
+    padding:6px 12px;border-radius:999px;font-size:13px;
+    pointer-events:none;opacity:0;visibility:hidden;transition:opacity .18s ease;
+    background:rgba(255,255,255,0.96);border:1px solid rgba(16,24,40,0.14);
+    box-shadow:0 14px 28px rgba(16,24,40,0.14),0 2px 8px rgba(16,24,40,0.08);
+    color:var(--text);z-index:40;white-space:nowrap;max-width:60vw;overflow:hidden;text-overflow:ellipsis;
+  }
+  .recommendation-float[data-visible="1"]{opacity:1;visibility:visible;pointer-events:auto;cursor:grab;}
+  .recommendation-float .float-label{
+    text-transform:uppercase;font-size:10px;font-weight:600;letter-spacing:.6px;color:var(--muted);
+  }
+  .recommendation-float .float-icon{display:none;font-size:14px;}
+  .recommendation-float[data-collapsed="1"]{
+    padding:6px;max-width:40px;justify-content:center;
+  }
+  .recommendation-float[data-collapsed="1"] .float-label,
+  .recommendation-float[data-collapsed="1"] #recommendationFloatText{display:none;}
+  .recommendation-float[data-collapsed="1"] .float-icon{display:block;}
+  .recommendation-float.dragging{cursor:grabbing;}
+  @media (max-width: 480px){
+    .recommendation-float{max-width:calc(100vw - 32px);padding:5px 10px;font-size:12px;gap:4px;}
+    .recommendation-float[data-collapsed="1"]{max-width:36px;padding:5px;}
   }
   .incident-card{max-width:360px}
   .incident-wrap{display:flex;flex-direction:column;gap:8px;margin-top:8px;padding-top:4px}
@@ -604,7 +648,7 @@
     </div>
   </div>
 
-  <div class="card"><div class="section-header">Recommended Settings</div>
+  <div class="card" id="recommendedCard"><div class="section-header">Recommended Settings</div>
     <div id="output" class="output-main">—</div>
     <style>
       .flash-animate {
@@ -637,6 +681,11 @@
         </div>
       </div>
     </div>
+  </div>
+  <div id="recommendationFloat" class="recommendation-float" role="status" aria-live="polite" aria-expanded="true" data-visible="0" data-collapsed="0">
+    <span class="float-label">Recommended</span>
+    <span id="recommendationFloatText">—</span>
+    <span class="float-icon" aria-hidden="true">⋯</span>
   </div>
   <button id="advancedToggle">Open Advanced</button>
   <div class="card" id="advancedDrawer" style="display:none;">
@@ -1067,6 +1116,7 @@ function findLensByName(name){
   return availableLenses().find(function(l){ return l.name===name; });
 }
 function currentGrainLabel(){
+  // TODO: When capture modes expand (e.g., color vs B&W), revisit terminology defaults per stock brand.
   return currentCaptureMode()==='digital' ? 'Noise' : 'Grain';
 }
 function updateGrainTerminology(){
@@ -1112,6 +1162,9 @@ var EV_MAX = 16;
 
 var ambientEvStored = 13;
 var incidentEvStored = null;
+var recommendationFloatDragged = false;
+var recommendationFloatPos = null;
+var recommendationFloatCollapsedPos = null;
 function storeAmbientEV(ev){
   ambientEvStored = Math.max(EV_MIN, Math.min(EV_MAX, parseFloat(ev)||ambientEvStored));
 }
@@ -2167,6 +2220,165 @@ function updateReciprocity(){
   document.getElementById('recipOut').textContent='Metered '+fmtSh(t)+' → Reciprocity corrected ≈ '+fmtSh(corr);
 }
 
+function setupRecommendationFloat(){
+  var float=document.getElementById('recommendationFloat');
+  var toggle=document.getElementById('creativeToggle');
+  var card=document.getElementById('creativeCard');
+  if(!float || !toggle || !card){ return; }
+
+  var dragState={active:false,startX:0,startY:0,originX:0,originY:0,moved:false};
+  var expandedPos=null;
+
+  float.setAttribute('data-visible','0');
+  float.setAttribute('data-collapsed','0');
+  float.setAttribute('aria-expanded','true');
+
+  function clampPosition(left, top){
+    var width=float.offsetWidth || 120;
+    var height=float.offsetHeight || 36;
+    var minLeft=8;
+    var minTop=8;
+    var maxLeft=window.innerWidth - width - 8;
+    var maxTop=window.innerHeight - height - 8;
+    left=Math.min(Math.max(left,minLeft),maxLeft);
+    top=Math.min(Math.max(top,minTop),maxTop);
+    recommendationFloatPos={left:left,top:top};
+    expandedPos={left:left,top:top};
+    float.style.left = left+'px';
+    float.style.top = top+'px';
+    float.style.right='';
+  }
+  function setCollapsed(collapsed){
+    float.setAttribute('data-collapsed', collapsed ? '1' : '0');
+    float.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    if(collapsed){
+      var topPos = recommendationFloatPos?.top ?? expandedPos?.top ?? 16;
+      recommendationFloatCollapsedPos = {top:topPos};
+      float.style.left='';
+      float.style.right='12px';
+      float.style.top = topPos+'px';
+    }else{
+      var pos = expandedPos || {left:(recommendationFloatPos?.left)|| (window.innerWidth - (float.offsetWidth||120) - 16), top:(recommendationFloatPos?.top)||16};
+      float.style.right='';
+      float.style.left = pos.left+'px';
+      float.style.top = pos.top+'px';
+    }
+  }
+
+  function measureAndPositionNearToggle(){
+    if(recommendationFloatDragged && recommendationFloatPos){
+      clampPosition(recommendationFloatPos.left, recommendationFloatPos.top);
+      return;
+    }
+    var rectToggle = toggle.getBoundingClientRect();
+    var prevVisible=float.getAttribute('data-visible');
+    var prevVisibility=float.style.visibility;
+    var prevPointer=float.style.pointerEvents;
+    var measuring=false;
+    if(float.offsetWidth===0 || float.offsetHeight===0){
+      measuring=true;
+      float.style.visibility='hidden';
+      float.style.pointerEvents='none';
+      float.setAttribute('data-visible','1');
+    }
+    var rectFloat=float.getBoundingClientRect();
+    var width=rectFloat.width||120;
+    var height=rectFloat.height||36;
+    var top=rectToggle.top + (rectToggle.height - height)/2;
+    var left=rectToggle.right + 12;
+    if(left + width + 8 > window.innerWidth){
+      left = rectToggle.left - width - 12;
+    }
+    clampPosition(left, top);
+    if(!recommendationFloatDragged){
+      setCollapsed(false);
+    }
+    if(measuring){
+      float.setAttribute('data-visible', prevVisible || '0');
+      float.style.visibility=prevVisibility;
+      float.style.pointerEvents=prevPointer;
+    }
+  }
+
+  function updateVisibility(){
+    var cardVisible = window.getComputedStyle(card).display !== 'none';
+    var shouldShow = !cardVisible;
+    float.setAttribute('data-visible', shouldShow ? '1' : '0');
+    if(shouldShow){ measureAndPositionNearToggle(); }
+  }
+
+  function pointerDown(e){
+    if(e.button!==undefined && e.button!==0) return;
+    dragState.active=true;
+    dragState.moved=false;
+    dragState.startX=e.clientX;
+    dragState.startY=e.clientY;
+    var rect=float.getBoundingClientRect();
+    dragState.originX=rect.left;
+    dragState.originY=rect.top;
+    float.classList.add('dragging');
+    if(float.setPointerCapture){ float.setPointerCapture(e.pointerId); }
+    e.preventDefault();
+  }
+
+  function pointerMove(e){
+    if(!dragState.active) return;
+    var dx=e.clientX-dragState.startX;
+    var dy=e.clientY-dragState.startY;
+    if(!dragState.moved && Math.abs(dx)+Math.abs(dy)>3){
+      dragState.moved=true;
+      recommendationFloatDragged=true;
+    }
+    if(dragState.moved){
+      clampPosition(dragState.originX+dx, dragState.originY+dy);
+    }
+  }
+
+  function endDrag(e){
+    if(!dragState.active) return;
+    if(float.releasePointerCapture && e.pointerId!==undefined){
+      try{ float.releasePointerCapture(e.pointerId); }catch(_e){}
+    }
+    float.classList.remove('dragging');
+    var wasMoved=dragState.moved;
+    dragState.active=false;
+    dragState.moved=false;
+    if(!wasMoved){
+      var collapsed = float.getAttribute('data-collapsed')==='1';
+      setCollapsed(!collapsed);
+    }
+  }
+
+  float.addEventListener('pointerdown', pointerDown);
+  float.addEventListener('pointermove', pointerMove);
+  float.addEventListener('pointerup', endDrag);
+  float.addEventListener('pointercancel', endDrag);
+
+  window.addEventListener('resize', function(){
+    if(!recommendationFloatDragged && float.getAttribute('data-visible')==='1'){
+      measureAndPositionNearToggle();
+    }
+  });
+  window.addEventListener('scroll', function(){
+    if(!recommendationFloatDragged && float.getAttribute('data-visible')==='1'){
+      measureAndPositionNearToggle();
+    }
+  }, {passive:true});
+
+  toggle.addEventListener('click', function(){
+    // Delay to allow creativeCard display to update
+    setTimeout(function(){
+      if(!recommendationFloatDragged){ measureAndPositionNearToggle(); }
+      updateVisibility();
+    }, 0);
+  });
+
+  updateVisibility();
+  if(float.getAttribute('data-visible')==='1'){
+    measureAndPositionNearToggle();
+  }
+}
+
 // ===== Advanced: Push/Pull =====
 function updatePushPull(){
   var film=currentFilm();
@@ -2429,6 +2641,8 @@ function recalc(){
   } else {
     output.textContent = newText;
   }
+  var floatText=document.getElementById('recommendationFloatText');
+  if(floatText){ floatText.textContent = newText; }
   warn.textContent=rec.warns;
   // Alternatives: populate tables
   try{
@@ -2603,6 +2817,7 @@ function initApp(){
   showEVBadge(EV_DEFAULT); updateEvDescriptor(EV_DEFAULT);
   updateIncidentDial(incidentEV());
   updateIncidentNote();
+  setupRecommendationFloat();
   (function(){
     var btn=document.getElementById('incidentToggle');
     var drawer=document.getElementById('incidentDrawer');
