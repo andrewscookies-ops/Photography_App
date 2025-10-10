@@ -536,6 +536,16 @@
         <button class="seg-btn" data-val="freeze">Frozen</button>
       </div>
     </div>
+    <div style="flex:2 1 180px;min-width:120px;">
+      <label id="grainLabel" style="font-size:12px;margin-bottom:4px;color:#667085;">Grain preference</label>
+      <div class="seg" id="ciGrainSeg" style="margin-bottom:0;">
+        <button class="seg-btn" data-val="clean">Clean</button>
+        <button class="seg-btn" data-val="low">Low</button>
+        <button class="seg-btn active" data-val="balanced">Balanced</button>
+        <button class="seg-btn" data-val="high">High</button>
+        <button class="seg-btn" data-val="gritty">Gritty</button>
+      </div>
+    </div>
   </div>
   <div style="display:flex;gap:10px;margin:6px 0 0 0;align-items:center;flex-wrap:wrap;">
     <label style="font-size:12px;display:flex;align-items:center;gap:4px;margin:0;">Tripod <input type="checkbox" id="ciTripod2" style="margin:0;vertical-align:middle;"></label>
@@ -1063,6 +1073,10 @@ function updateGrainTerminology(){
   var termLower=currentGrainLabel().toLowerCase();
   var quick=document.getElementById('grainTermText');
   if(quick){ quick.textContent = termLower; }
+  var grainLabel=document.getElementById('grainLabel');
+  if(grainLabel){
+    grainLabel.textContent=currentGrainLabel()+' preference';
+  }
 }
 var filmsBuiltin=[
   {name:"Kodak Portra 160",brand:"Kodak Portra",box_iso:160,push_limit:2,pull_limit:1},
@@ -1612,6 +1626,14 @@ function recommend(ev,film,lens,focal,camera){
   var deepTarget=Math.min(Math.max(11,ap.minA),ap.maxA);
   var shallowTarget=ap.minA;
   var N_target= Math.max(ap.minA, Math.min(ap.maxA, deepTarget + (shallowTarget-deepTarget)*ci.blur));
+  // Adjust target based on focal length: longer focal lengths require smaller apertures to achieve similar depth
+  if(focal && isFinite(focal)){
+    var focalRatio = Math.max(20, Math.min(200, focal)) / 50; // normalize around 50mm
+    var focalStops = Math.log2(focalRatio);
+    var adjustStops = focalStops * 0.5; // moderate influence
+    var adjustMultiplier = Math.pow(Math.SQRT2, adjustStops);
+    N_target = Math.max(ap.minA, Math.min(ap.maxA, N_target * adjustMultiplier));
+  }
   var N=N_target;
   // DOF priority window: limit how far aperture may deviate from target
   var allowedOpenStops = 0.5 + 1.5*ci.blur;   // deep→0.5, shallow→2.0
