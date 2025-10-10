@@ -473,7 +473,8 @@
       This tool helps photographers quickly determine optimal camera settings for any scene, balancing light, creative intent, and film/camera gear. All calculations run locally in your browser. No data is sent or stored externally.<br><br>
       <b>Author:</b> Andrew H.<br>
       <b>Contact:</b> <a href="mailto:ajlh.photography@gmail.com">ajlh.photography@gmail.com</a><br>
-      <b>Source:</b> <a href="https://github.com/andrewh/photo-exposure-app" target="_blank">GitHub</a>
+      <b>Source:</b> <a href="https://github.com/andrewh/photo-exposure-app" target="_blank">GitHub</a><br>
+      <b>Credits:</b> Made with AI Assistance
     </div>
   </div>
 </div>
@@ -510,6 +511,38 @@
       </div>
     </div>
   </div>
+  
+  <button id="creativeToggle" style="margin-bottom:8px;">Show Creative Intent</button>
+  <div class="card" id="creativeCard" style="display:none;">
+  <div class="section-header">Creative Intent</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px 12px;align-items:flex-end;justify-content:space-between;padding:4px 0 0 0;">
+    <div style="flex:2 1 180px;min-width:120px;">
+      <label style="font-size:12px;margin-bottom:4px;color:#667085;">Depth of field</label>
+      <div class="seg" id="ciBlurSeg" style="margin-bottom:0;">
+        <button class="seg-btn" data-val="vdeep">Very deep</button>
+        <button class="seg-btn" data-val="deep">Deep</button>
+        <button class="seg-btn active" data-val="balanced">Balanced</button>
+        <button class="seg-btn" data-val="shallow">Shallow</button>
+        <button class="seg-btn" data-val="vshallow">Very shallow</button>
+      </div>
+    </div>
+    <div style="flex:2 1 180px;min-width:120px;">
+      <label style="font-size:12px;margin-bottom:4px;color:#667085;">Motion blur</label>
+      <div class="seg" id="ciMoveSeg" style="margin-bottom:0;">
+        <button class="seg-btn" data-val="blur">Blurred</button>
+        <button class="seg-btn" data-val="slow">Slight blur</button>
+        <button class="seg-btn active" data-val="balanced">Neutral</button>
+        <button class="seg-btn" data-val="fast">Sharp</button>
+        <button class="seg-btn" data-val="freeze">Frozen</button>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;margin:6px 0 0 0;align-items:center;flex-wrap:wrap;">
+    <label style="font-size:12px;display:flex;align-items:center;gap:4px;margin:0;">Tripod <input type="checkbox" id="ciTripod2" style="margin:0;vertical-align:middle;"></label>
+    <label style="font-size:12px;display:flex;align-items:center;gap:4px;margin:0;">Panning <input type="checkbox" id="ciPanning2" style="margin:0;vertical-align:middle;"></label>
+  </div>
+  <div class="sub" id="ciSummary" style="margin-top:4px;">Balanced DOF • Balanced motion • Balanced grain</div>
+</div>
   
 
   <div class="card"><div class="section-header">Light Input</div>
@@ -561,38 +594,6 @@
     </div>
   </div>
 
-  <button id="creativeToggle" style="margin-bottom:8px;">Show Creative Intent</button>
-  <div class="card" id="creativeCard" style="display:none;">
-  <div class="section-header">Creative Intent</div>
-  <div style="display:flex;flex-wrap:wrap;gap:8px 12px;align-items:flex-end;justify-content:space-between;padding:4px 0 0 0;">
-    <div style="flex:2 1 180px;min-width:120px;">
-      <label style="font-size:12px;margin-bottom:4px;color:#667085;">Depth of field</label>
-      <div class="seg" id="ciBlurSeg" style="margin-bottom:0;">
-        <button class="seg-btn" data-val="vdeep">Very deep</button>
-        <button class="seg-btn" data-val="deep">Deep</button>
-        <button class="seg-btn active" data-val="balanced">Balanced</button>
-        <button class="seg-btn" data-val="shallow">Shallow</button>
-        <button class="seg-btn" data-val="vshallow">Very shallow</button>
-      </div>
-    </div>
-    <div style="flex:2 1 180px;min-width:120px;">
-      <label style="font-size:12px;margin-bottom:4px;color:#667085;">Motion blur</label>
-      <div class="seg" id="ciMoveSeg" style="margin-bottom:0;">
-        <button class="seg-btn" data-val="blur">Blurred</button>
-        <button class="seg-btn" data-val="slow">Slight blur</button>
-        <button class="seg-btn active" data-val="balanced">Neutral</button>
-        <button class="seg-btn" data-val="fast">Sharp</button>
-        <button class="seg-btn" data-val="freeze">Frozen</button>
-      </div>
-    </div>
-  </div>
-  <div style="display:flex;gap:10px;margin:6px 0 0 0;align-items:center;flex-wrap:wrap;">
-    <label style="font-size:12px;display:flex;align-items:center;gap:4px;margin:0;">Tripod <input type="checkbox" id="ciTripod2" style="margin:0;vertical-align:middle;"></label>
-    <label style="font-size:12px;display:flex;align-items:center;gap:4px;margin:0;">Panning <input type="checkbox" id="ciPanning2" style="margin:0;vertical-align:middle;"></label>
-  </div>
-  <div class="sub" id="ciSummary" style="margin-top:4px;">Balanced DOF • Balanced motion • Balanced grain</div>
-</div>
-  
   <div class="card"><div class="section-header">Recommended Settings</div>
     <div id="output" class="output-main">—</div>
     <style>
