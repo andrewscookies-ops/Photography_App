@@ -300,6 +300,7 @@
     .modal-content{background:var(--card);color:var(--text);border-color:var(--border)}
     .seg{background:var(--chipBg);border-color:var(--border)}
     .seg-btn:hover{background:var(--btn-bg-hover)}
+    .header-recommendation{color:rgba(148,181,222,0.9);}
   }
   /* Manual theme overrides via data-theme attribute */
   :root[data-theme="dark"]{
@@ -1633,7 +1634,12 @@ function recommend(ev,film,lens,focal,camera){
   var deepTarget=Math.min(Math.max(11,ap.minA),ap.maxA);
   var shallowTarget=ap.minA;
   if(ci.panning){ deepTarget = Math.min(ap.maxA, deepTarget*Math.pow(Math.SQRT2,0.5)); }
+  var grainBiasStops = (ci.grain-0.5)*0.6; // positive -> prefers gritty, negative -> prefers clean
   var N_target= Math.max(ap.minA, Math.min(ap.maxA, deepTarget + (shallowTarget-deepTarget)*ci.blur));
+  if(Math.abs(grainBiasStops)>0.05){
+    var grainAdjust = Math.pow(Math.SQRT2, -grainBiasStops); // gritty -> open wider, clean -> stop down
+    N_target = Math.max(ap.minA, Math.min(ap.maxA, N_target * grainAdjust));
+  }
   // Adjust target based on focal length: longer focal lengths require smaller apertures to achieve similar depth
   if(focal && isFinite(focal)){
     var focalRatio = Math.max(20, Math.min(200, focal)) / 50; // normalize around 50mm
@@ -1646,6 +1652,8 @@ function recommend(ev,film,lens,focal,camera){
   // DOF priority window: limit how far aperture may deviate from target
   var allowedOpenStops = 0.5 + 1.5*ci.blur + (ci.panning?0.3:0);   // allow slightly more opening
   var allowedStopStops = 2.0 - 1.5*ci.blur + (ci.panning?0.5:0);   // allow stopping down more for panning
+  allowedOpenStops += grainBiasStops>0 ? Math.min(0.5, grainBiasStops) : 0;
+  allowedStopStops += grainBiasStops<0 ? Math.min(0.5, -grainBiasStops) : 0;
   var N_open_min = Math.max(ap.minA, N_target/Math.pow(Math.SQRT2, allowedOpenStops));
   var N_stop_max = Math.min(ap.maxA, N_target*Math.pow(Math.SQRT2, allowedStopStops));
   if(ci.aperturePickN){ N = Math.max(ap.minA, Math.min(ap.maxA, ci.aperturePickN)); }
@@ -1718,9 +1726,23 @@ function recommend(ev,film,lens,focal,camera){
       }
     }
   }
+  var grainAdvice="";
+  if(ci.grain<0.3){
+    if(mode==='digital' && selectedISO>200){
+      grainAdvice='Noise tip: drop ISO closer to 200 or add light for a cleaner file.';
+    }else if(film && film.box_iso>200){
+      grainAdvice='Grain tip: consider a slower film stock (ISO ≲ 200) for finer grain.';
+    }
+  }else if(ci.grain>0.7){
+    if(mode==='digital' && selectedISO<800){
+      grainAdvice='Noise tip: raise ISO toward 800+ or underexpose slightly for more texture.';
+    }else if(film && film.box_iso<800){
+      grainAdvice='Grain tip: try a faster film (ISO 800+) or push processing for extra grit.';
+    }
+  }
   // Snap to camera-supported aperture steps for display
   var displayN = nearestAperture(N, lens, camera);
-  return{iso:Math.round(iso),N:displayN,t:nearestShutterForCamera(camera,t),warns:[warning,ndAdvice,hhWarn,apLimitWarn,pp,panAdvice].filter(Boolean).join(" • ")}
+  return{iso:Math.round(iso),N:displayN,t:nearestShutterForCamera(camera,t),warns:[warning,ndAdvice,hhWarn,apLimitWarn,pp,panAdvice,grainAdvice].filter(Boolean).join(" • ")}
 }
 
 // ===== Alternatives =====
