@@ -300,6 +300,7 @@
     .modal-content{background:var(--card);color:var(--text);border-color:var(--border)}
     .seg{background:var(--chipBg);border-color:var(--border)}
     .seg-btn:hover{background:var(--btn-bg-hover)}
+    .header-recommendation{color:rgba(148,181,222,0.9);}
   }
   /* Manual theme overrides via data-theme attribute */
   :root[data-theme="dark"]{
@@ -1624,6 +1625,7 @@ function getSelectedISO(){
 function recommend(ev,film,lens,focal,camera){
   ev = ev + (parseFloat(document.getElementById('evBias')?.value)||0);
   var ci=getCI();
+  var mode=currentCaptureMode();
   var selectedISO = getSelectedISO();
   var iso = selectedISO || (film?.box_iso) || 400;
   var isoLock=true; // ISO is controlled by user via dropdown; do not auto-adjust in algorithm
@@ -1631,6 +1633,7 @@ function recommend(ev,film,lens,focal,camera){
   // DOF bias: interpolate between ~f/11 and the lens' max aperture (wider)
   var deepTarget=Math.min(Math.max(11,ap.minA),ap.maxA);
   var shallowTarget=ap.minA;
+  if(ci.panning){ deepTarget = Math.min(ap.maxA, deepTarget*Math.pow(Math.SQRT2,0.5)); }
   var N_target= Math.max(ap.minA, Math.min(ap.maxA, deepTarget + (shallowTarget-deepTarget)*ci.blur));
   // Adjust target based on focal length: longer focal lengths require smaller apertures to achieve similar depth
   if(focal && isFinite(focal)){
@@ -1642,8 +1645,8 @@ function recommend(ev,film,lens,focal,camera){
   }
   var N=N_target;
   // DOF priority window: limit how far aperture may deviate from target
-  var allowedOpenStops = 0.5 + 1.5*ci.blur;   // deep→0.5, shallow→2.0
-  var allowedStopStops = 2.0 - 1.5*ci.blur;   // deep→2.0, shallow→0.5
+  var allowedOpenStops = 0.5 + 1.5*ci.blur + (ci.panning?0.3:0);   // allow slightly more opening
+  var allowedStopStops = 2.0 - 1.5*ci.blur + (ci.panning?0.5:0);   // allow stopping down more for panning
   var N_open_min = Math.max(ap.minA, N_target/Math.pow(Math.SQRT2, allowedOpenStops));
   var N_stop_max = Math.min(ap.maxA, N_target*Math.pow(Math.SQRT2, allowedStopStops));
   if(ci.aperturePickN){ N = Math.max(ap.minA, Math.min(ap.maxA, ci.aperturePickN)); }
@@ -1677,6 +1680,7 @@ function recommend(ev,film,lens,focal,camera){
     t=tMin;
   }
   var hh=handholdLimit(focal),hhWarn=(t>hh && !ci.tripod)?("Handheld risk. Use ≥ "+fmtSh(hh)+" or a tripod."):"";
+  if(ci.panning){ hhWarn=''; }
   var apLimitWarn=(Math.abs(N-ap.minA)<1e-6)?"Aperture limit: lens cannot open wider." : ((Math.abs(N-ap.maxA)<1e-6)?"Aperture limit: lens cannot stop down further.":"");
   var pp="";
   if(film){
@@ -1693,9 +1697,31 @@ function recommend(ev,film,lens,focal,camera){
       }
     }catch(e){ pp=""; }
   }
+  var panAdvice="";
+  if(ci.panning){
+    var desired=tGoal;
+    if(desired>0 && t<desired){
+      var deficit=Math.log2(desired/t);
+      if(deficit>0.1){
+        if(mode==='digital'){
+          var suggestedISO=Math.max(25, Math.round((selectedISO/Math.pow(2, Math.ceil(deficit)))/10)*10);
+          if(suggestedISO<selectedISO){
+            panAdvice='Panning tip: lower ISO to about '+suggestedISO+' or use ND to reach ≈ '+fmtSh(desired);
+          }else{
+            panAdvice='Panning tip: add ND or stop down further to reach ≈ '+fmtSh(desired);
+          }
+        }else if(film){
+          var suggestedFilmISO=Math.max(25, Math.round((film.box_iso/Math.pow(2, Math.ceil(deficit)))/10)*10);
+          panAdvice='Panning tip: consider slower film (ISO ≲ '+suggestedFilmISO+') or use ND to reach ≈ '+fmtSh(desired);
+        }else{
+          panAdvice='Panning tip: add ND or lower ISO to reach ≈ '+fmtSh(desired);
+        }
+      }
+    }
+  }
   // Snap to camera-supported aperture steps for display
   var displayN = nearestAperture(N, lens, camera);
-  return{iso:Math.round(iso),N:displayN,t:nearestShutterForCamera(camera,t),warns:[warning,ndAdvice,hhWarn,apLimitWarn,pp].filter(Boolean).join(" • ")}
+  return{iso:Math.round(iso),N:displayN,t:nearestShutterForCamera(camera,t),warns:[warning,ndAdvice,hhWarn,apLimitWarn,pp,panAdvice].filter(Boolean).join(" • ")}
 }
 
 // ===== Alternatives =====
@@ -2177,6 +2203,8 @@ function setupHeaderRecommendation(){
   var headerEl=document.getElementById('headerRecommendation');
   var card=document.getElementById('recommendedCard');
   if(!headerEl || !card){ return; }
+  headerEl.textContent='—';
+  headerEl.style.display='none';
   if(headerRecommendationObserver){ headerRecommendationObserver.disconnect(); }
   headerRecommendationObserver=new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
