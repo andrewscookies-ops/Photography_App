@@ -434,10 +434,12 @@
     <div id="settingsMenu" class="settings-menu">
      <button id="manageBtn">Manage custom gear</button>
         <button id="saveAppBtn">Save updated app (embed custom gear)</button>
-        <button id="refreshBtn">Refresh recommendations</button>
         <button id="themeBtn">Theme: Auto</button>
         <div class="divider"></div>
-        <button id="aboutBtn">About</button>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button id="aboutBtn">About</button>
+          <button id="menuRefreshBtn">Refresh</button>
+        </div>
             </div>
   </div>
 </header>
@@ -469,10 +471,7 @@
 <div id="aboutModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" style="display:none;">
   <div class="modal-content">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div id="aboutTitle" style="font-weight:600">About This App</div>
-        <button id="aboutRefreshBtn" class="icon-btn" style="width:auto" aria-label="Refresh app page">Refresh</button>
-      </div>
+      <div id="aboutTitle" style="font-weight:600">About This App</div>
       <button id="aboutClose" class="icon-btn" style="width:auto" aria-label="Close About">✕</button>
     </div>
     <div style="font-size:15px;line-height:1.6">
@@ -807,12 +806,6 @@ document.getElementById('aboutModal')?.addEventListener('click',function(e){
     btn.textContent=next?'×':'i';
   });
 })();
-var aboutRefresh=document.getElementById('aboutRefreshBtn');
-if(aboutRefresh){
-  aboutRefresh.addEventListener('click',function(){
-    try{ window.location.reload(); }catch(e){ console.warn('About reload failed', e); }
-  });
-}
 (function(){
   try{
     var creativeToggle = document.getElementById('creativeToggle');
@@ -2371,11 +2364,11 @@ function openCustom(type){
       applyTheme(next);
     });
   }
-  var refresh=document.getElementById('refreshBtn');
-  if(refresh){
-    refresh.addEventListener('click',function(){
+  var menuRefresh=document.getElementById('menuRefreshBtn');
+  if(menuRefresh){
+    menuRefresh.addEventListener('click',function(){
       menu.style.display='none';
-      try{ recalc(); }catch(e){ console.warn('Refresh failed', e); }
+      try{ window.location.reload(); }catch(e){ console.warn('Menu reload failed', e); }
     });
   }
   document.addEventListener('click', function(e){
