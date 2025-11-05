@@ -469,7 +469,10 @@
 <div id="aboutModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" style="display:none;">
   <div class="modal-content">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
-      <div id="aboutTitle" style="font-weight:600">About This App</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div id="aboutTitle" style="font-weight:600">About This App</div>
+        <button id="aboutRefreshBtn" class="icon-btn" style="width:auto" aria-label="Refresh app page">Refresh</button>
+      </div>
       <button id="aboutClose" class="icon-btn" style="width:auto" aria-label="Close About">✕</button>
     </div>
     <div style="font-size:15px;line-height:1.6">
@@ -486,7 +489,6 @@
           <li>Added quick refresh and inline changelog access from the settings and About panels.</li>
         </ul>
       </div>
-      <button id="aboutRefreshBtn" style="margin:8px 0;">Refresh app page</button><br>
       This tool helps photographers quickly determine optimal camera settings for any scene, balancing light, creative intent, and film/camera gear. All calculations run locally in your browser. No data is sent or stored externally.<br><br>
       <b>Author:</b> Andrew H.<br>
       <b>Contact:</b> <a href="mailto:ajlh.photography@gmail.com">ajlh.photography@gmail.com</a><br>
