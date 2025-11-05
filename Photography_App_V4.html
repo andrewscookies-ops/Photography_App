@@ -434,11 +434,11 @@
     <div id="settingsMenu" class="settings-menu">
      <button id="manageBtn">Manage custom gear</button>
         <button id="saveAppBtn">Save updated app (embed custom gear)</button>
+        <button id="refreshBtn">Refresh recommendations</button>
         <button id="themeBtn">Theme: Auto</button>
         <div class="divider"></div>
         <button id="aboutBtn">About</button>
-        <button id="closeSettings">Close</button>
-    </div>
+            </div>
   </div>
 </header>
 
@@ -474,7 +474,18 @@
     </div>
     <div style="font-size:15px;line-height:1.6">
       <b>Photography Exposure App</b><br>
-      Version 4.0.7 — October 2025<br><br>
+      <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
+        <span>Version 4.0.7 — October 2025</span>
+        <button id="aboutChangesBtn" class="info-btn" aria-expanded="false" aria-label="Show recent changes" title="Show version changes">i</button>
+      </div>
+      <div id="aboutChanges" data-open="0" style="display:none;margin:6px 0 10px;font-size:13px;color:var(--muted);">
+        <b>4.0.7 highlights</b>
+        <ul style="margin:6px 0 0 18px;padding:0;">
+          <li>Freeze-priority locking keeps motion intent fast while flagging needed ISO or push development.</li>
+          <li>Reciprocity corrections surface alongside recommendations whenever long exposures require them.</li>
+          <li>Added quick refresh and inline changelog access from the settings and About panels.</li>
+        </ul>
+      </div>
       This tool helps photographers quickly determine optimal camera settings for any scene, balancing light, creative intent, and film/camera gear. All calculations run locally in your browser. No data is sent or stored externally.<br><br>
       <b>Author:</b> Andrew H.<br>
       <b>Contact:</b> <a href="mailto:ajlh.photography@gmail.com">ajlh.photography@gmail.com</a><br>
@@ -753,11 +764,46 @@
 <!-- BEGIN compat shim: insert BEFORE your main <script> -->
 <script>
 // About modal logic
-document.getElementById('aboutBtn')?.addEventListener('click',function(){ openModal('aboutModal'); });
-document.getElementById('aboutClose')?.addEventListener('click',function(){ closeModal('aboutModal'); });
-document.getElementById('aboutModal')?.addEventListener('click',function(e){
-  if(e.target===this){ closeModal('aboutModal'); }
+function resetAboutChangelog(){
+  var panel=document.getElementById('aboutChanges');
+  var btn=document.getElementById('aboutChangesBtn');
+  if(panel){
+    panel.style.display='none';
+    panel.setAttribute('data-open','0');
+  }
+  if(btn){
+    btn.setAttribute('aria-expanded','false');
+    btn.textContent='i';
+  }
+}
+document.getElementById('aboutBtn')?.addEventListener('click',function(){
+  resetAboutChangelog();
+  openModal('aboutModal');
 });
+document.getElementById('aboutClose')?.addEventListener('click',function(){
+  closeModal('aboutModal');
+  resetAboutChangelog();
+});
+document.getElementById('aboutModal')?.addEventListener('click',function(e){
+  if(e.target===this){
+    closeModal('aboutModal');
+    resetAboutChangelog();
+  }
+});
+(function(){
+  var btn=document.getElementById('aboutChangesBtn');
+  if(!btn) return;
+  btn.addEventListener('click',function(){
+    var panel=document.getElementById('aboutChanges');
+    if(!panel) return;
+    var openState=panel.getAttribute('data-open')==='1';
+    var next=!openState;
+    panel.style.display=next?'block':'none';
+    panel.setAttribute('data-open', next?'1':'0');
+    btn.setAttribute('aria-expanded', next?'true':'false');
+    btn.textContent=next?'×':'i';
+  });
+})();
 (function(){
   try{
     var creativeToggle = document.getElementById('creativeToggle');
@@ -1119,6 +1165,8 @@ var EV_MAX = 16;
 var ambientEvStored = 13;
 var incidentEvStored = null;
 var headerRecommendationObserver = null;
+var lastRecommendation = null;
+var lastRecommendationFilm = '';
 function storeAmbientEV(ev){
   ambientEvStored = Math.max(EV_MIN, Math.min(EV_MAX, parseFloat(ev)||ambientEvStored));
 }
@@ -1622,129 +1670,334 @@ function getSelectedISO(){
   if(isoNum) isoNum.addEventListener('input', function(){ try{ recalc(); }catch(e){} });
   setMode();
 })();
+var ISO_SERIES=[6,8,10,12,16,20,25,32,40,50,64,80,100,125,160,200,250,320,400,500,640,800,1000,1250,1600,2000,2500,3200,4000,5000,6400,8000,10000,12800,16000,25600];
+function nearestISOValue(value,direction){
+  var arr=ISO_SERIES;
+  var target=Math.max(1, isFinite(value)?value:1);
+  if(direction==='up'){
+    for(var i=0;i<arr.length;i++){ if(arr[i]>=target) return arr[i]; }
+    return arr[arr.length-1];
+  }
+  if(direction==='down'){
+    for(var j=arr.length-1;j>=0;j--){ if(arr[j]<=target) return arr[j]; }
+    return arr[0];
+  }
+  var best=arr[0],diff=Math.abs(arr[0]-target);
+  for(var k=1;k<arr.length;k++){
+    var d=Math.abs(arr[k]-target);
+    if(d<diff){diff=d;best=arr[k];}
+  }
+  return best;
+}
+var PUSH_PULL_STEP=1/3;
+function roundStopsUp(stops){
+  var s=Math.max(0, isFinite(stops)?stops:0);
+  return Math.ceil((s+1e-9)/PUSH_PULL_STEP)*PUSH_PULL_STEP;
+}
+function formatStopValue(stops){
+  if(!isFinite(stops)) return '—';
+  var sign=stops<0?'-':'';
+  var abs=Math.abs(stops);
+  if(abs<1e-3) return '0';
+  if(Math.abs(abs-Math.round(abs))<1e-4){ return sign+Math.round(abs); }
+  if(Math.abs(abs-Math.round(abs*10)/10)<1e-4){ return sign+(Math.round(abs*10)/10).toFixed(1).replace(/\.0$/,''); }
+  return sign+abs.toFixed(2).replace(/0+$/,'').replace(/\.$/,'');
+}
+function combinePushPull(advice){
+  if(!Array.isArray(advice)) return [];
+  var arr=advice.slice();
+  arr.sort(function(a,b){
+    var sa=a&&a.source||'';
+    var sb=b&&b.source||'';
+    if(sa==='goal' || sa==='freezePriority'){
+      if(sb==='goal' || sb==='freezePriority'){
+        return (b.stops||0)-(a.stops||0);
+      }
+      return -1;
+    }
+    if(sb==='goal' || sb==='freezePriority'){
+      return 1;
+    }
+    if(sa===sb) return (b.stops||0)-(a.stops||0);
+    return (b.stops||0)-(a.stops||0);
+  });
+  return arr;
+}
 function recommend(ev,film,lens,focal,camera){
   ev = ev + (parseFloat(document.getElementById('evBias')?.value)||0);
   var ci=getCI();
   var mode=currentCaptureMode();
-  var selectedISO = getSelectedISO();
-  var iso = selectedISO || (film?.box_iso) || 400;
-  var isoLock=true; // ISO is controlled by user via dropdown; do not auto-adjust in algorithm
+  var selectedISO=getSelectedISO();
+  var iso=selectedISO || (film?.box_iso) || 400;
+  var filmBaseISO=film && film.box_iso ? film.box_iso : iso;
+  var warnings=[];
+  var pushPullAdvice=[];
+  var isoOffsetStops=(film && filmBaseISO>0 && iso>0)?Math.log2(iso/filmBaseISO):0;
+  var freezePriority = ci.freeze>=0.75;
+  var freezeUnderStops = 0;
   var ap=lensApertureAtFocal(lens,focal);
-  // DOF bias: interpolate between ~f/11 and the lens' max aperture (wider)
   var deepTarget=Math.min(Math.max(11,ap.minA),ap.maxA);
   var shallowTarget=ap.minA;
-  if(ci.panning){ deepTarget = Math.min(ap.maxA, deepTarget*Math.pow(Math.SQRT2,0.5)); }
-  var grainBiasStops = (ci.grain-0.5)*0.6; // positive -> prefers gritty, negative -> prefers clean
-  var N_target= Math.max(ap.minA, Math.min(ap.maxA, deepTarget + (shallowTarget-deepTarget)*ci.blur));
+  if(ci.panning){ deepTarget=Math.min(ap.maxA, deepTarget*Math.pow(Math.SQRT2,0.5)); }
+  var grainBiasStops=(ci.grain-0.5)*0.6;
+  var N_target=Math.max(ap.minA, Math.min(ap.maxA, deepTarget + (shallowTarget-deepTarget)*ci.blur));
   if(Math.abs(grainBiasStops)>0.05){
-    var grainAdjust = Math.pow(Math.SQRT2, -grainBiasStops); // gritty -> open wider, clean -> stop down
-    N_target = Math.max(ap.minA, Math.min(ap.maxA, N_target * grainAdjust));
+    var grainAdjust=Math.pow(Math.SQRT2, -grainBiasStops);
+    N_target=Math.max(ap.minA, Math.min(ap.maxA, N_target*grainAdjust));
   }
-  // Adjust target based on focal length: longer focal lengths require smaller apertures to achieve similar depth
   if(focal && isFinite(focal)){
-    var focalRatio = Math.max(20, Math.min(200, focal)) / 50; // normalize around 50mm
-    var focalStops = Math.log2(focalRatio);
-    var adjustStops = focalStops * 0.5; // moderate influence
-    var adjustMultiplier = Math.pow(Math.SQRT2, adjustStops);
-    N_target = Math.max(ap.minA, Math.min(ap.maxA, N_target * adjustMultiplier));
+    var focalRatio=Math.max(20, Math.min(200, focal))/50;
+    var focalStops=Math.log2(focalRatio);
+    var adjustMultiplier=Math.pow(Math.SQRT2, focalStops*0.5);
+    N_target=Math.max(ap.minA, Math.min(ap.maxA, N_target*adjustMultiplier));
   }
   var N=N_target;
-  // DOF priority window: limit how far aperture may deviate from target
-  var allowedOpenStops = 0.5 + 1.5*ci.blur + (ci.panning?0.3:0);   // allow slightly more opening
-  var allowedStopStops = 2.0 - 1.5*ci.blur + (ci.panning?0.5:0);   // allow stopping down more for panning
-  allowedOpenStops += grainBiasStops>0 ? Math.min(0.5, grainBiasStops) : 0;
-  allowedStopStops += grainBiasStops<0 ? Math.min(0.5, -grainBiasStops) : 0;
-  var N_open_min = Math.max(ap.minA, N_target/Math.pow(Math.SQRT2, allowedOpenStops));
-  var N_stop_max = Math.min(ap.maxA, N_target*Math.pow(Math.SQRT2, allowedStopStops));
-  if(ci.aperturePickN){ N = Math.max(ap.minA, Math.min(ap.maxA, ci.aperturePickN)); }
-  // Grain preference -> advisory only (no ISO auto-change)
-  var isoFloor=100, isoCeil=3200;
-  // ISO remains as selected.
-  // Motion preference -> target threshold
+  var allowedOpenStops=0.5+1.5*ci.blur+(ci.panning?0.3:0);
+  var allowedStopStops=2.0-1.5*ci.blur+(ci.panning?0.5:0);
+  allowedOpenStops+=grainBiasStops>0?Math.min(0.5,grainBiasStops):0;
+  allowedStopStops+=grainBiasStops<0?Math.min(0.5,-grainBiasStops):0;
+  var N_open_min=Math.max(ap.minA, N_target/Math.pow(Math.SQRT2, allowedOpenStops));
+  var N_stop_max=Math.min(ap.maxA, N_target*Math.pow(Math.SQRT2, allowedStopStops));
+  if(ci.aperturePickN){
+    N=Math.max(ap.minA, Math.min(ap.maxA, ci.aperturePickN));
+    N_open_min=Math.max(ap.minA, Math.min(N_open_min, N));
+    N_stop_max=Math.min(ap.maxA, Math.max(N_stop_max, N));
+  }
   var targets=[1/8,1/30,1/60,1/250,1/500,1/1000];
   var idx=Math.round(ci.freeze*5);
   var tGoal=targets[Math.max(0,Math.min(5,idx))];
-  if(ci.panning) tGoal*=3; // allow ~1.5 stops slower for panning
-  if(ci.shutterPickT){ tGoal = ci.shutterPickT; }
+  if(ci.panning) tGoal*=3;
+  if(ci.shutterPickT){ tGoal=ci.shutterPickT; }
   var t=requiredShutter(ev,iso,N);
-  // If too slow for freeze, first open aperture, then raise ISO up to ceil
-  if(t>tGoal){
-    // open toward allowed limit
-    while(t>tGoal && N>N_open_min){ N=Math.max(N_open_min, N/Math.SQRT2); t=requiredShutter(ev,iso,N); }
-    // Do not change ISO automatically; user controls ISO.
+  var guard=0;
+  while(t>tGoal && N>N_open_min && guard<24){
+    N=Math.max(N_open_min, N/Math.SQRT2);
+    t=requiredShutter(ev,iso,N);
+    guard++;
+    if(Math.abs(N-N_open_min)<1e-6) break;
   }
-  // If faster than desired and user prefers blur/neutral, slow toward tGoal by stopping down then lowering ISO
-  if(t<tGoal && ci.freeze<=0.6){
-    while(t<tGoal && N<N_stop_max){ N=Math.min(N_stop_max, N*Math.SQRT2); t=requiredShutter(ev,iso,N);} 
-    // Do not change ISO automatically; user controls ISO.
+  guard=0;
+  while(t<tGoal && ci.freeze<=0.6 && N<N_stop_max && guard<24){
+    N=Math.min(N_stop_max, N*Math.SQRT2);
+    t=requiredShutter(ev,iso,N);
+    guard++;
+    if(Math.abs(N-N_stop_max)<1e-6) break;
   }
-  var tMin=1/camera.max_shutter_den,warning="",ndAdvice="";
+  var tPreClamp=t;
+  var tMin=1/camera.max_shutter_den;
   if(t<tMin){
-    var stops=Math.ceil(Math.log2(tMin/t));
-    var nd=Math.pow(2,stops);
-    warning="Current data exceeds camera capability.";
-    ndAdvice="Use ND"+nd+" ("+stops+" stops) or lower ISO / stop down.";
+    var stopsNeeded=Math.ceil(Math.log2(tMin/t));
+    var nd=Math.pow(2,stopsNeeded);
+    warnings.push('Current data exceeds camera capability.');
+    warnings.push('Use ND'+nd+' ('+stopsNeeded+' stops) or lower ISO / stop down.');
     t=tMin;
   }
-  var hh=handholdLimit(focal),hhWarn=(t>hh && !ci.tripod)?("Handheld risk. Use ≥ "+fmtSh(hh)+" or a tripod."):"";
-  if(ci.panning){ hhWarn=''; }
-  var apLimitWarn=(Math.abs(N-ap.minA)<1e-6)?"Aperture limit: lens cannot open wider." : ((Math.abs(N-ap.maxA)<1e-6)?"Aperture limit: lens cannot stop down further.":"");
-  var pp="";
-  if(film){
-    try{
-      var filmBox = film.box_iso || 100;
-      var pushStops=Math.log2(iso/filmBox);
-      if(Math.abs(pushStops)>=0.25){
-        var dir=pushStops>0?"push":"pull";
-        var limit=pushStops>0?(film.push_limit||0):(film.pull_limit||0);
-        var abs=Math.abs(pushStops).toFixed(1);
-        var over=Math.abs(pushStops)>(limit||0)?" (beyond lab limit)":"";
-        var def=pushStops>0?"Underexpose in camera, develop longer.":"Overexpose in camera, develop shorter.";
-        pp=dir+" ~"+abs+" stops"+over+" — "+def;
-      }
-    }catch(e){ pp=""; }
+  var hh=handholdLimit(focal);
+  if(t>hh && !ci.tripod && !ci.panning){
+    warnings.push('Handheld risk. Use ≥ '+fmtSh(hh)+' or a tripod.');
   }
-  var panAdvice="";
+  if(Math.abs(N-ap.minA)<1e-6){
+    warnings.push('Aperture limit: lens cannot open wider.');
+  }else if(Math.abs(N-ap.maxA)<1e-6){
+    warnings.push('Aperture limit: lens cannot stop down further.');
+  }
   if(ci.panning){
     var desired=tGoal;
     if(desired>0 && t<desired){
       var deficit=Math.log2(desired/t);
       if(deficit>0.1){
         if(mode==='digital'){
-          var suggestedISO=Math.max(25, Math.round((selectedISO/Math.pow(2, Math.ceil(deficit)))/10)*10);
-          if(suggestedISO<selectedISO){
-            panAdvice='Panning tip: lower ISO to about '+suggestedISO+' or use ND to reach ≈ '+fmtSh(desired);
-          }else{
-            panAdvice='Panning tip: add ND or stop down further to reach ≈ '+fmtSh(desired);
-          }
+          var suggestedISO=Math.max(25, nearestISOValue(iso/Math.pow(2, roundStopsUp(deficit)),'down'));
+          warnings.push('Panning tip: lower ISO toward '+suggestedISO+' or use ND to reach ≈ '+fmtSh(desired)+'.');
         }else if(film){
-          var suggestedFilmISO=Math.max(25, Math.round((film.box_iso/Math.pow(2, Math.ceil(deficit)))/10)*10);
-          panAdvice='Panning tip: consider slower film (ISO ≲ '+suggestedFilmISO+') or use ND to reach ≈ '+fmtSh(desired);
+          var suggestedFilmISO=Math.max(25, nearestISOValue(filmBaseISO/Math.pow(2, roundStopsUp(deficit)),'down'));
+          warnings.push('Panning tip: consider slower film (ISO ≲ '+suggestedFilmISO+') or use ND to reach ≈ '+fmtSh(desired)+'.');
         }else{
-          panAdvice='Panning tip: add ND or lower ISO to reach ≈ '+fmtSh(desired);
+          warnings.push('Panning tip: add ND or lower ISO to reach ≈ '+fmtSh(desired)+'.');
+        }
+      }
+    }
+    if(ci.freeze>0.34){
+      warnings.push('Panning tip: set Motion intent to Slight blur or Blurred for smoother streaks.');
+    }
+  }
+  if(film && filmBaseISO>0 && Math.abs(isoOffsetStops)>=0.25){
+    var userDir=isoOffsetStops>0?'push':'pull';
+    var userLimit=userDir==='push'?(film.push_limit||0):(film.pull_limit||0);
+    var userOver=Math.abs(isoOffsetStops)>(userLimit||0);
+    var userMsg='Current rating: ISO '+Math.round(iso)+' vs box '+filmBaseISO+' ('+(userDir==='push'?'+':'-')+formatStopValue(Math.abs(isoOffsetStops))+' stops)';
+    if(userOver){ userMsg+=' (beyond lab limit '+formatStopValue(userLimit||0)+' stops)'; }
+    userMsg+=' — '+(userDir==='push'?'Underexpose in camera, develop longer.':'Overexpose in camera, develop shorter.');
+    warnings.push(userMsg);
+    pushPullAdvice.push({
+      direction:userDir,
+      rawStops:Math.abs(isoOffsetStops),
+      stops:parseFloat(Math.abs(isoOffsetStops).toFixed(2)),
+      isoSuggested:iso,
+      limit:userLimit,
+      reason:'You set ISO '+Math.round(iso)+' against box '+filmBaseISO+'.',
+      source:'userSelection',
+      beyondLimit:userOver
+    });
+  }
+  if(t>tGoal && tGoal>0 && (ci.freeze>=0.7 || mode==='digital')){
+    var deficitStops=Math.log2(t/tGoal);
+    if(deficitStops>0.15){
+      var roundedStops=roundStopsUp(deficitStops);
+      if(mode==='digital' && !film){
+        var isoTargetDigital=nearestISOValue(iso*Math.pow(2,roundedStops),'up');
+        warnings.push('Freeze intent: raise ISO toward '+isoTargetDigital+' or add light to reach '+fmtSh(tGoal)+'.');
+      }else if(film){
+        var isoTarget=nearestISOValue(iso*Math.pow(2,roundedStops),'up');
+        var limitPush=film.push_limit||0;
+        var beyondPush=roundedStops>(limitPush||0);
+        pushPullAdvice.push({
+          direction:'push',
+          rawStops:deficitStops,
+          stops:parseFloat(roundedStops.toFixed(2)),
+          isoSuggested:isoTarget,
+          limit:limitPush,
+          reason:'Freeze intent needs '+fmtSh(tGoal)+'; current meter gives '+fmtSh(tPreClamp)+'.',
+          source:'goal',
+          beyondLimit:beyondPush
+        });
+        var msg='Freeze intent: rate around ISO '+isoTarget+' (push +'+formatStopValue(roundedStops)+' stops) to reach '+fmtSh(tGoal)+'.';
+        if(beyondPush){ msg+=' (beyond lab limit '+formatStopValue(limitPush||0)+' stops)'; }
+        warnings.push(msg);
+      }
+    }else if(ci.freeze>=0.85){
+      warnings.push('Freeze intent nearly met; add light or stabilize to reach '+fmtSh(tGoal)+'.');
+    }
+  }else if(t<tGoal && ci.freeze<=0.4){
+    var slack=Math.log2(tGoal/t);
+    if(slack>0.15){
+      var roundedPull=roundStopsUp(slack);
+      if(mode==='digital' && !film){
+        var isoDown=nearestISOValue(iso/Math.pow(2,roundedPull),'down');
+        warnings.push('Motion blur intent: lower ISO toward '+isoDown+' or add ND to reach '+fmtSh(tGoal)+'.');
+      }else if(film){
+        var limitPull=film.pull_limit||0;
+        var isoTargetDown=nearestISOValue(iso/Math.pow(2,roundedPull),'down');
+        var beyondPull=roundedPull>(limitPull||0);
+        pushPullAdvice.push({
+          direction:'pull',
+          rawStops:slack,
+          stops:parseFloat(roundedPull.toFixed(2)),
+          isoSuggested:isoTargetDown,
+          limit:limitPull,
+          reason:'Motion blur intent prefers '+fmtSh(tGoal)+' instead of '+fmtSh(tPreClamp)+'.',
+          source:'goal',
+          beyondLimit:beyondPull
+        });
+        var msgPull='Motion blur intent: rate around ISO '+isoTargetDown+' (pull '+formatStopValue(roundedPull)+' stops) to reach '+fmtSh(tGoal)+'.';
+        if(beyondPull){ msgPull+=' (beyond lab limit '+formatStopValue(limitPull||0)+' stops)'; }
+        warnings.push(msgPull);
+      }
+    }
+  }
+  if(freezePriority && tGoal>0){
+    var enforceShutter=Math.max(tGoal, tMin);
+    if(t>enforceShutter*(1+1e-3)){
+      freezeUnderStops=Math.log2(t/enforceShutter);
+      var freezeRoundedStops=roundStopsUp(freezeUnderStops);
+      var freezeStopsDisplay=formatStopValue(freezeUnderStops);
+      var isoRaiseTarget=freezeRoundedStops>0?nearestISOValue(iso*Math.pow(2,freezeRoundedStops),'up'):iso;
+      t=enforceShutter;
+      if(freezeUnderStops>0.02){
+        if(mode==='digital' && !film){
+          var isoRaiseText=freezeRoundedStops>0?('raise ISO toward '+isoRaiseTarget+' or add light'):'raise ISO or add light';
+          warnings.push('Freeze priority locked shutter to '+fmtSh(t)+' • Expect ~'+freezeStopsDisplay+' stops underexposure; '+isoRaiseText+'.');
+        }else if(film){
+          var rateText=freezeRoundedStops>0?('rate around ISO '+isoRaiseTarget+' or push development'):'consider a mild push or add light';
+          warnings.push('Freeze priority locked shutter to '+fmtSh(t)+' • Expect ~'+freezeStopsDisplay+' stops underexposure; '+rateText+'.');
+          var freezeStopsCompare=parseFloat(freezeRoundedStops.toFixed(2));
+          var hasSimilarPush=pushPullAdvice.some(function(a){
+            return a && a.direction==='push' && Math.abs((a.stops||0)-freezeStopsCompare)<0.15;
+          });
+          if(freezeRoundedStops>0.05 && !hasSimilarPush){
+            var limitFreeze=film.push_limit||0;
+            var beyondFreeze=freezeRoundedStops>(limitFreeze||0);
+            pushPullAdvice.push({
+              direction:'push',
+              rawStops:freezeUnderStops,
+              stops:freezeStopsCompare,
+              isoSuggested:isoRaiseTarget,
+              limit:limitFreeze,
+              reason:'Freeze priority locked shutter to '+fmtSh(t)+'.',
+              source:'freezePriority',
+              beyondLimit:beyondFreeze
+            });
+          }
+        }else{
+          warnings.push('Freeze priority locked shutter to '+fmtSh(t)+' • Expect ~'+freezeStopsDisplay+' stops underexposure; raise ISO or add light.');
         }
       }
     }
   }
-  var grainAdvice="";
   if(ci.grain<0.3){
     if(mode==='digital' && selectedISO>200){
-      grainAdvice='Noise tip: drop ISO closer to 200 or add light for a cleaner file.';
-    }else if(film && film.box_iso>200){
-      grainAdvice='Grain tip: consider a slower film stock (ISO ≲ 200) for finer grain.';
+      warnings.push('Noise tip: drop ISO closer to 200 or add light for a cleaner file.');
+    }else if(film && filmBaseISO>200){
+      warnings.push('Grain tip: consider a slower film stock (ISO ≲ 200) for finer grain.');
     }
   }else if(ci.grain>0.7){
     if(mode==='digital' && selectedISO<800){
-      grainAdvice='Noise tip: raise ISO toward 800+ or underexpose slightly for more texture.';
-    }else if(film && film.box_iso<800){
-      grainAdvice='Grain tip: try a faster film (ISO 800+) or push processing for extra grit.';
+      warnings.push('Noise tip: raise ISO toward 800+ or underexpose slightly for more texture.');
+    }else if(film && filmBaseISO<800){
+      warnings.push('Grain tip: try a faster film (ISO 800+) or push processing for extra grit.');
     }
   }
-  // Snap to camera-supported aperture steps for display
-  var displayN = nearestAperture(N, lens, camera);
-  return{iso:Math.round(iso),N:displayN,t:nearestShutterForCamera(camera,t),warns:[warning,ndAdvice,hhWarn,apLimitWarn,pp,panAdvice,grainAdvice].filter(Boolean).join(" • ")}
+  var hasPush=pushPullAdvice.some(function(a){return a.direction==='push';});
+  var hasPull=pushPullAdvice.some(function(a){return a.direction==='pull';});
+  if(hasPush && hasPull){
+    warnings.push('ISO choices conflict: cannot push and pull the same roll. Pick one approach.');
+  }
+  var tBeforeQuant=t;
+  var displayN=nearestAperture(N,lens,camera);
+  var shutterQuant=nearestShutterForCamera(camera,tBeforeQuant);
+  var reciprocitySuggestion=null;
+  if(film){
+    var profile=reciprocityProfileFor(film);
+    if(profile){
+      var threshold=(profile.threshold && profile.threshold>0)?profile.threshold:1;
+      var baseTime=tBeforeQuant;
+      if(baseTime>threshold+1e-6){
+        var corrected=reciprocityAdjustedTime(profile, baseTime);
+        if(isFinite(corrected) && corrected>0){
+          var recStops=Math.log2(corrected/baseTime);
+          if(recStops>0.05){
+            reciprocitySuggestion={
+              base:baseTime,
+              corrected:corrected,
+              stops:recStops,
+              note:profile.note||'',
+              threshold:threshold
+            };
+            warnings.push('Reciprocity: meter '+fmtSh(baseTime)+' → expose '+fmtSh(corrected)+' (+'+formatStopValue(recStops)+' stops).');
+          }
+        }
+      }
+    }
+  }
+  var result={
+    iso:Math.round(iso),
+    N:displayN,
+    t:shutterQuant,
+    warns:warnings.filter(Boolean).join(' • ')
+  };
+  result.warnings=warnings.filter(Boolean);
+  result.preQuantizedShutter=tBeforeQuant;
+  result.actualShutter=shutterQuant;
+  result.preClampShutter=tPreClamp;
+  result.targetShutter=tGoal;
+  result.apertureTarget=N_target;
+  result.apertureFinal=N;
+  result.apertureLimits={open:N_open_min,stop:N_stop_max};
+  result.pushPullOptions=combinePushPull(pushPullAdvice);
+  result.pushPull=result.pushPullOptions[0]||null;
+  result.reciprocity=reciprocitySuggestion;
+  return result;
 }
-
 // ===== Alternatives =====
 function buildCompactAlternatives(ev,film,lens,focal,camera,main){
   var ap=lensApertureAtFocal(lens,focal),
@@ -1989,7 +2242,9 @@ function openCustom(type){
       +'<label>Stock name (unique)</label><input id="f_name" placeholder="e.g., YourBrand 400">'
       +'<label>ISO (box speed)</label><input id="f_iso" type="number" value="400">'
       +'<label>Push limit (stops)</label><input id="f_push" type="number" value="2">'
-      +'<label>Pull limit (stops)</label><input id="f_pull" type="number" value="1">';
+      +'<label>Pull limit (stops)</label><input id="f_pull" type="number" value="1">'
+      +'<label>Reciprocity exponent (optional)</label><input id="f_recip_exp" type="number" step="0.01" placeholder="e.g., 1.26">'
+      +'<label>Reciprocity threshold (seconds, optional)</label><input id="f_recip_thresh" type="number" step="0.1" placeholder="default 1">';
   }
     var manage=document.getElementById('manageModal');
   var wasManageOpen = manage && manage.style.display!=='none';
@@ -2041,6 +2296,20 @@ function openCustom(type){
                  box_iso:parseInt(document.getElementById('f_iso').value,10)||400,
                  push_limit:parseFloat(document.getElementById('f_push').value)||0,
                  pull_limit:parseFloat(document.getElementById('f_pull').value)||0};
+        var recExpNode=document.getElementById('f_recip_exp');
+        var recThrNode=document.getElementById('f_recip_thresh');
+        var recExpStr=recExpNode?recExpNode.value.trim():'';
+        var recThrStr=recThrNode?recThrNode.value.trim():'';
+        if(recExpStr){
+          var recExp=parseFloat(recExpStr);
+          if(!isFinite(recExp)){ alert('Reciprocity exponent must be a number'); return }
+          var recThr=isFinite(parseFloat(recThrStr)) && parseFloat(recThrStr)>0 ? parseFloat(recThrStr) : 1;
+          obj.reciprocity={type:'power',exponent:recExp,threshold:recThr};
+        }else if(recThrStr){
+          var recThrOnly=parseFloat(recThrStr);
+          if(!(isFinite(recThrOnly) && recThrOnly>0)){ alert('Reciprocity threshold must be a positive number'); return }
+          obj.reciprocity={type:'power',exponent:1,threshold:recThrOnly};
+        }
         if(!obj.name||!obj.brand){alert('Brand and stock required');return}
         addToStore('films',obj);
         refreshFilms();
@@ -2063,8 +2332,10 @@ function openCustom(type){
   var btn=document.getElementById('settingsBtn');
   var menu=document.getElementById('settingsMenu');
   btn.addEventListener('click',function(){menu.style.display=menu.style.display==='block'?'none':'block'});
-  document.getElementById('closeSettings').addEventListener('click',function(){menu.style.display='none'});
-  document.getElementById('aboutBtn').addEventListener('click',function(){menu.style.display='none';alert('© 2025 Andrew Harris. Created with AI assistance.')});
+  document.getElementById('aboutBtn').addEventListener('click',function(){
+    menu.style.display='none';
+    openModal('aboutModal');
+  });
   var saveBtn=document.getElementById('saveAppBtn');
   if(saveBtn){ saveBtn.addEventListener('click',function(){ menu.style.display='none'; downloadUpdatedHTML(); }); }
   // Theme toggle
@@ -2091,6 +2362,19 @@ function openCustom(type){
       applyTheme(next);
     });
   }
+  var refresh=document.getElementById('refreshBtn');
+  if(refresh){
+    refresh.addEventListener('click',function(){
+      menu.style.display='none';
+      try{ recalc(); }catch(e){ console.warn('Refresh failed', e); }
+    });
+  }
+  document.addEventListener('click', function(e){
+    if(!menu) return;
+    var isToggle = e.target===btn;
+    var insideMenu = menu.contains(e.target);
+    if(!insideMenu && !isToggle){ menu.style.display='none'; }
+  });
   var manage=document.getElementById('manageBtn');
   if(manage){
     manage.addEventListener('click',function(){
@@ -2182,19 +2466,107 @@ function updateBracket(){
 }
 
 // ===== Advanced: Reciprocity =====
-var RECIP_TABLE={
-  "Kodak Tri-X 400":t=>t<1?t:Math.pow(t,1.26),
-  "Ilford HP5+ 400":t=>t<1?t:Math.pow(t,1.3),
-  "Kodak Portra 400":t=>t<1?t:Math.pow(t,1.2),
-  "Kodak Portra 160":t=>t<1?t:Math.pow(t,1.2),
-  "Kodak Portra 800":t=>t<1?t:Math.pow(t,1.2),
-  "Cinestill 800T":t=>t<1?t:Math.pow(t,1.15),
-  "Cinestill 50D":t=>t<1?t:Math.pow(t,1.12),
-  "Fujifilm Superia 200":t=>t<1?t:Math.pow(t,1.25),
-  "Fujifilm Superia 400":t=>t<1?t:Math.pow(t,1.25),
-  "Kodak Ektar 100":t=>t<1?t:Math.pow(t,1.2),
-  "Kodak Gold 200":t=>t<1?t:Math.pow(t,1.25)
+var RECIP_PROFILES={
+  "Kodak Portra 160":{type:'power',exponent:1.12,threshold:1},
+  "Kodak Portra 400":{type:'power',exponent:1.12,threshold:1},
+  "Kodak Portra 800":{type:'power',exponent:1.18,threshold:1},
+  "Kodak Ektar 100":{type:'power',exponent:1.18,threshold:1},
+  "Kodak Gold 200":{type:'power',exponent:1.24,threshold:1},
+  "Kodak Ultramax 400":{type:'power',exponent:1.27,threshold:1},
+  "Kodak Tri-X 400":{type:'power',exponent:1.33,threshold:1},
+  "Kodak T-Max 100":{type:'power',exponent:1.18,threshold:1},
+  "Kodak T-Max 400":{type:'power',exponent:1.2,threshold:1},
+  "Fujifilm Pro 400H":{type:'power',exponent:1.15,threshold:1},
+  "Fujifilm Superia 200":{type:'power',exponent:1.24,threshold:1},
+  "Fujifilm Superia 400":{type:'power',exponent:1.27,threshold:1},
+  "Fujifilm Superia 800":{type:'power',exponent:1.31,threshold:1},
+  "Fujifilm Acros 100":{type:'power',exponent:1.05,threshold:120},
+  "Ilford HP5+ 400":{type:'power',exponent:1.33,threshold:1},
+  "Ilford FP4+ 125":{type:'power',exponent:1.32,threshold:1},
+  "Ilford Delta 100":{type:'power',exponent:1.22,threshold:1},
+  "Ilford Delta 400":{type:'power',exponent:1.27,threshold:1},
+  "Ilford Delta 3200":{type:'power',exponent:1.4,threshold:0.5},
+  "Ilford Pan F 50":{type:'power',exponent:1.38,threshold:1},
+  "Cinestill 50D":{type:'power',exponent:1.14,threshold:1},
+  "Cinestill 800T":{type:'power',exponent:1.26,threshold:1}
 };
+function reciprocityProfileFor(film){
+  if(!film) return null;
+  var raw=film.reciprocity;
+  if(typeof raw==='number'){ return {type:'power',exponent:raw,threshold:1}; }
+  if(raw && typeof raw==='object'){
+    if(raw.type==='table' && Array.isArray(raw.entries)){
+      var entries=raw.entries.map(function(e){
+        if(Array.isArray(e)){ return {meter:parseFloat(e[0]),actual:parseFloat(e[1])}; }
+        return {meter:parseFloat(e && e.meter),actual:parseFloat(e && e.actual)};
+      }).filter(function(e){ return e && isFinite(e.meter) && e.meter>0 && isFinite(e.actual) && e.actual>0; }).sort(function(a,b){ return a.meter-b.meter; });
+      if(entries.length){
+        return {type:'table',entries:entries,threshold:isFinite(raw.threshold)&&raw.threshold>0?parseFloat(raw.threshold):entries[0].meter,note:raw.note||''};
+      }
+    }
+    var expo=parseFloat(raw.exponent);
+    if(!isFinite(expo) && isFinite(raw.value)){ expo=parseFloat(raw.value); }
+    var threshold=parseFloat(raw.threshold);
+    var profile={type:'power',exponent:isFinite(expo)?expo:1,threshold:isFinite(threshold)&&threshold>0?threshold:1};
+    if(isFinite(raw.factor)){ profile.factor=parseFloat(raw.factor); }
+    if(raw.note){ profile.note=raw.note; }
+    return profile;
+  }
+  if(typeof film.reciprocity_exponent==='number'){
+    var th=film.reciprocity_threshold;
+    return {type:'power',exponent:film.reciprocity_exponent,threshold:isFinite(th)&&th>0?th:1};
+  }
+  if(typeof film.reciprocityExponent==='number'){
+    var th2=film.reciprocityThreshold;
+    return {type:'power',exponent:film.reciprocityExponent,threshold:isFinite(th2)&&th2>0?th2:1};
+  }
+  var def=RECIP_PROFILES[film.name];
+  if(def){
+    var copy={};
+    for(var k in def){ if(Object.prototype.hasOwnProperty.call(def,k)){
+      if(k==='entries' && Array.isArray(def[k])){
+        copy.entries=def[k].map(function(e){ return {meter:e.meter,actual:e.actual}; });
+      }else{
+        copy[k]=def[k];
+      }
+    }}
+    return copy;
+  }
+  return null;
+}
+function reciprocityAdjustedTime(profile, seconds){
+  if(!profile || !(seconds>0)) return seconds;
+  if(profile.type==='table'){
+    var entries=(profile.entries||[]).filter(function(e){ return e && e.meter>0 && e.actual>0; }).sort(function(a,b){ return a.meter-b.meter; });
+    if(!entries.length) return seconds;
+    if(seconds<=entries[0].meter){
+      return seconds*(entries[0].actual/entries[0].meter);
+    }
+    for(var i=0;i<entries.length-1;i++){
+      var a=entries[i],b=entries[i+1];
+      if(seconds<=b.meter){
+        var denom=Math.log(b.meter/a.meter);
+        if(Math.abs(denom)<1e-6){ return b.actual; }
+        var ratio=Math.log(seconds/a.meter)/denom;
+        var actual=a.actual+ratio*(b.actual-a.actual);
+        return actual;
+      }
+    }
+    var prev=entries[entries.length-2];
+    var last=entries[entries.length-1];
+    var denomLast=Math.log(last.meter/prev.meter);
+    if(Math.abs(denomLast)<1e-6){ return last.actual; }
+    var extra=Math.log(seconds/prev.meter)/denomLast;
+    return prev.actual+extra*(last.actual-prev.actual);
+  }
+  var exponent=profile.exponent||1;
+  var threshold=(profile.threshold && profile.threshold>0)?profile.threshold:1;
+  if(seconds<=threshold) return seconds;
+  var ratio=seconds/threshold;
+  var corrected=seconds*Math.pow(Math.max(ratio,1e-6), (exponent-1));
+  if(profile.factor){ corrected*=profile.factor; }
+  return corrected;
+}
 function currentFilm(){
   var mode=document.getElementById('captureMode')?.value||'film';
   if(mode==='digital') return null;
@@ -2206,20 +2578,48 @@ function currentFilm(){
   return byIso||films[0];
 }
 function updateReciprocity(){
+  var out=document.getElementById('recipOut');
+  if(!out) return;
   var film=currentFilm();
-  if(!film){document.getElementById('recipOut').textContent='—';return}
-  var camName=document.getElementById('cameraSelect').value,lensName=document.getElementById('lensSelect').value;
-  var camera=findCameraByName(camName);
-  var lens=findLensByName(lensName);
-  if(!camera||!lens){document.getElementById('recipOut').textContent='—';return}
-  var focal=parseFloat(document.getElementById('focalInput').value)||50;
-  var evEff=effectiveEV();
-  var base=recommend(evEff,film,lens,focal,camera),t=base.t,fn=RECIP_TABLE[film.name];
-  if(t<1){document.getElementById('recipOut').textContent='Not needed below 1s.';return}
-  var corr=fn?fn(t):t;
-  document.getElementById('recipOut').textContent='Metered '+fmtSh(t)+' → Reciprocity corrected ≈ '+fmtSh(corr);
+  if(!film){ out.textContent='—'; return; }
+  var rec=lastRecommendation;
+  if(!rec || lastRecommendationFilm!==film.name){
+    out.textContent='—';
+    return;
+  }
+  if(rec.reciprocity){
+    var info=rec.reciprocity;
+    var base=info.base || rec.preQuantizedShutter || rec.t;
+    var corrected=info.corrected;
+    if(!(base>0) || !(corrected>0)){ out.textContent='—'; return; }
+    var stops=info.stops!=null?info.stops:Math.log2(corrected/base);
+    var stopsText=(stops>0.05)?' (~+'+formatStopValue(stops)+' stops)':'';
+    var note=info.note?' • '+info.note:'';
+    out.textContent='Metered '+fmtSh(base)+' → Reciprocity corrected ≈ '+fmtSh(corrected)+stopsText+note;
+    return;
+  }
+  var profile=reciprocityProfileFor(film);
+  if(!profile){
+    out.textContent='No reciprocity data for '+film.name+'.';
+    return;
+  }
+  var t=rec.actualShutter || rec.t;
+  if(!(t>0)){ out.textContent='—'; return; }
+  var threshold=(profile.threshold && profile.threshold>0)?profile.threshold:1;
+  if(t<=threshold){
+    out.textContent='Not needed below '+fmtSh(threshold)+' for '+film.name+'.';
+    return;
+  }
+  var corrected=reciprocityAdjustedTime(profile,t);
+  if(!isFinite(corrected) || corrected<=0){
+    out.textContent='Reciprocity data inconclusive for '+film.name+'.';
+    return;
+  }
+  var stops=Math.log2(corrected/t);
+  var stopsText=stops>0.05?' (~+'+formatStopValue(stops)+' stops)':'';
+  var note=profile.note?' • '+profile.note:'';
+  out.textContent='Metered '+fmtSh(t)+' → Correct '+fmtSh(corrected)+stopsText+note;
 }
-
 function setupHeaderRecommendation(){
   var headerEl=document.getElementById('headerRecommendation');
   var card=document.getElementById('recommendedCard');
@@ -2238,16 +2638,48 @@ function setupHeaderRecommendation(){
 // ===== Advanced: Push/Pull =====
 
 function updatePushPull(){
+  var out=document.getElementById('ppOut');
+  if(!out) return;
   var film=currentFilm();
-  if(!film){document.getElementById('ppOut').textContent='—';return}
-  var stops=parseFloat(document.getElementById('ppStops')?.value)||0;
-  var action=stops>0?('Push +'+stops+' stops'):(stops<0?('Pull '+stops+' stops'):'No change');
-  var def=stops>0?'Underexpose in camera, develop longer.':(stops<0?'Overexpose in camera, develop shorter.':'');
-  var limit=(stops>0?film.push_limit:film.pull_limit)||0;
-  var over=Math.abs(stops)>(limit)?' (beyond lab limit)':'';
-  document.getElementById('ppOut').textContent=action+over+' — '+def;
+  if(!film){
+    out.textContent='Push/pull not applicable in digital mode.';
+    return;
+  }
+  var rec=lastRecommendation;
+  if(!rec || lastRecommendationFilm!==film.name){
+    out.textContent='—';
+    return;
+  }
+  var advs=Array.isArray(rec.pushPullOptions)?rec.pushPullOptions:[];
+  if(!advs.length){
+    var baseISO=film.box_iso?('ISO '+film.box_iso):'box speed';
+    out.textContent='No push or pull needed. Shoot at '+baseISO+'.';
+    return;
+  }
+  var parts=[];
+  var primary=advs[0];
+  var isoSuggested=primary && isFinite(primary.isoSuggested)?Math.round(primary.isoSuggested):null;
+  var dirLabel=primary.direction==='push'?'Push +':'Pull ';
+  var primaryLimit=(primary.limit||primary.limit===0)?primary.limit:null;
+  var limitNote=primaryLimit!==null && primary.stops>(primaryLimit||0)?' (beyond lab limit '+formatStopValue(primaryLimit||0)+' stops)':'';
+  var isoPart=isoSuggested?' → rate ≈ ISO '+isoSuggested:'';
+  parts.push(dirLabel+formatStopValue(primary.stops)+' stops'+isoPart+limitNote+' — '+(primary.reason||'Adjust development accordingly.'));
+  for(var i=1;i<advs.length;i++){
+    var adv=advs[i];
+    var isoSecondary=isFinite(adv.isoSuggested)?Math.round(adv.isoSuggested):null;
+    var prefix=adv.source==='userSelection'?'Current rating: ':'Additional: ';
+    var detail=prefix+(adv.direction==='push'?'push +':'pull ')+formatStopValue(adv.stops)+' stops';
+    if(isoSecondary){
+      if(adv.source==='userSelection'){ detail+=' (ISO '+isoSecondary+')'; }
+      else { detail+=' → ISO '+isoSecondary; }
+    }
+    if((adv.limit||adv.limit===0) && adv.stops>(adv.limit||0)){
+      detail+=' (beyond limit '+formatStopValue(adv.limit||0)+')';
+    }
+    parts.push(detail);
+  }
+  out.textContent=parts.join(' • ');
 }
-
 
 /* ----- New EV Control ----- */
 (function(){
@@ -2489,7 +2921,17 @@ function recalc(){
     }
   }catch(e){}
   var rec=recommend(evEff,film,lens,focal,camera);
+  lastRecommendation = rec;
+  lastRecommendationFilm = film ? film.name : '';
   var newText = 'ISO '+rec.iso+' • f/'+rec.N.toFixed(1)+' • '+fmtSh(rec.t);
+  if(rec.reciprocity){
+    var recStops = rec.reciprocity.stops || 0;
+    var recLabel = 'Reciprocity ≈ '+fmtSh(rec.reciprocity.corrected);
+    if(recStops>0.05){
+      recLabel+=' (+'+formatStopValue(recStops)+' stops)';
+    }
+    newText+=' • '+recLabel;
+  }
   if (output.textContent !== newText) {
     output.textContent = newText;
     output.classList.remove('flash-animate');
