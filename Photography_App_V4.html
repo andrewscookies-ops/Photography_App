@@ -486,6 +486,7 @@
           <li>Added quick refresh and inline changelog access from the settings and About panels.</li>
         </ul>
       </div>
+      <button id="aboutRefreshBtn" style="margin:8px 0;">Refresh app page</button><br>
       This tool helps photographers quickly determine optimal camera settings for any scene, balancing light, creative intent, and film/camera gear. All calculations run locally in your browser. No data is sent or stored externally.<br><br>
       <b>Author:</b> Andrew H.<br>
       <b>Contact:</b> <a href="mailto:ajlh.photography@gmail.com">ajlh.photography@gmail.com</a><br>
@@ -804,6 +805,12 @@ document.getElementById('aboutModal')?.addEventListener('click',function(e){
     btn.textContent=next?'×':'i';
   });
 })();
+var aboutRefresh=document.getElementById('aboutRefreshBtn');
+if(aboutRefresh){
+  aboutRefresh.addEventListener('click',function(){
+    try{ window.location.reload(); }catch(e){ console.warn('About reload failed', e); }
+  });
+}
 (function(){
   try{
     var creativeToggle = document.getElementById('creativeToggle');
