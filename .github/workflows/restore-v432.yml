@@ -1,0 +1,25 @@
+name: Restore Photography App v4.3.2
+on:
+  push:
+    paths:
+      - '.github/workflows/restore-v432.yml'
+permissions:
+  contents: write
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Restore last known-good monolithic app
+        run: |
+          git show 475bc92978c63922ff5dc12db726dc893011c227:index.html > index.html
+      - name: Commit restore
+        run: |
+          git config user.name "Photography App Maintainer"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+          git rm .github/workflows/restore-v432.yml
+          git commit -m "Restore Photography App v4.3.2 stable build"
+          git push
