@@ -1,0 +1,257 @@
+name: Apply Photography App v4.2.3 UI fixes
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-v423-ui-fixes.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fix typing and interaction glitches
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+
+          def rep(old,new,label,count=None):
+              global s
+              n=s.count(old)
+              if count is not None and n != count:
+                  raise SystemExit(f'{label}: expected {count} matches, found {n}')
+              if n == 0:
+                  raise SystemExit(f'{label}: text not found')
+              s=s.replace(old,new)
+
+          rep('Version 4.2.2 — September 2026','Version 4.2.3 — September 2026','version',1)
+          rep('<input type="number" id="focalInput" value="50">','<input type="number" id="focalInput" value="50" inputmode="decimal" autocomplete="off">','focal html',1)
+
+          old='''// Helper: enforce focal input constraints based on lens
+function updateFocalConstraint(lens){
+  var fi=document.getElementById('focalInput'); if(!fi||!lens) return;
+  if(lens.type==='prime'){
+    fi.readOnly=true; fi.min=lens.focal_mm; fi.max=lens.focal_mm; fi.step=1; fi.value=String(lens.focal_mm);
+  }else{
+    fi.readOnly=false; fi.min=lens.focal_min_mm; fi.max=lens.focal_max_mm; fi.step=1;
+    var v=parseFloat(fi.value)||lens.focal_min_mm;
+    v=Math.max(lens.focal_min_mm, Math.min(lens.focal_max_mm, v));
+    fi.value=String(Math.round(v));
+  }
+}'''
+          new='''// Helper: enforce focal constraints without fighting the user while they type.
+function updateFocalConstraint(lens, normalizeValue){
+  var fi=document.getElementById('focalInput'); if(!fi||!lens) return;
+  var normalize = normalizeValue !== false;
+  if(lens.type==='prime'){
+    fi.readOnly=true; fi.min=lens.focal_mm; fi.max=lens.focal_mm; fi.step=1;
+    fi.value=String(lens.focal_mm);
+    fi.dataset.lastValidFocal=String(lens.focal_mm);
+  }else{
+    fi.readOnly=false; fi.min=lens.focal_min_mm; fi.max=lens.focal_max_mm; fi.step=1;
+    var v=parseFloat(fi.value);
+    var valid=isFinite(v) && v>=lens.focal_min_mm && v<=lens.focal_max_mm;
+    if(valid){ fi.dataset.lastValidFocal=String(v); }
+    if(normalize){
+      if(!valid){
+        var last=parseFloat(fi.dataset.lastValidFocal);
+        if(!(isFinite(last) && last>=lens.focal_min_mm && last<=lens.focal_max_mm)){
+          last=(lens.focal_min_mm+lens.focal_max_mm)/2;
+        }
+        v=last;
+      }
+      v=Math.max(lens.focal_min_mm, Math.min(lens.focal_max_mm, v));
+      fi.value=String(Math.round(v));
+      fi.dataset.lastValidFocal=fi.value;
+    }
+  }
+}
+function focalValueForLens(lens){
+  var fi=document.getElementById('focalInput');
+  if(!lens) return 50;
+  if(lens.type==='prime') return lens.focal_mm;
+  var min=lens.focal_min_mm, max=lens.focal_max_mm;
+  var v=fi ? parseFloat(fi.value) : NaN;
+  if(isFinite(v) && v>=min && v<=max){
+    if(fi) fi.dataset.lastValidFocal=String(v);
+    return v;
+  }
+  var last=fi ? parseFloat(fi.dataset.lastValidFocal) : NaN;
+  if(isFinite(last) && last>=min && last<=max) return last;
+  return (min+max)/2;
+}'''
+          rep(old,new,'focal helper',1)
+
+          rep("var ap = lensApertureAtFocal(lens, parseFloat(document.getElementById('focalInput')?.value||'50'));","var ap = lensApertureAtFocal(lens, focalValueForLens(lens));",'aperture focal',1)
+          rep("var focal=(lens.type==='prime')?lens.focal_mm:(parseFloat(document.getElementById('focalInput').value)||50);","var focal=focalValueForLens(lens);",'dof focal',1)
+          rep("var focal=parseFloat(document.getElementById('focalInput').value)||50;","var focal=focalValueForLens(lens);",'other focal reads',3)
+
+          old='''  // Clamp focal to lens capability
+  try{
+    var fi=document.getElementById('focalInput');
+    var lensNow=lens;
+    if(lensNow && fi){
+      if(lensNow.type==='prime'){
+        fi.readOnly=true; fi.min=lensNow.focal_mm; fi.max=lensNow.focal_mm; fi.step=1; fi.value=String(lensNow.focal_mm);
+        focal=lensNow.focal_mm;
+      } else {
+        fi.readOnly=false; fi.min=lensNow.focal_min_mm; fi.max=lensNow.focal_max_mm; fi.step=1;
+        var fv=Math.max(lensNow.focal_min_mm, Math.min(lensNow.focal_max_mm, focal));
+        if(fv!==focal){ focal=fv; fi.value=String(Math.round(fv)); }
+      }
+    }
+  }catch(e){}'''
+          new='''  // Keep constraints current, but never rewrite a zoom value mid-keystroke.
+  try{ updateFocalConstraint(lens,false); }catch(e){}'''
+          rep(old,new,'recalc focal clamp',1)
+
+          old='''  document.getElementById('focalInput').addEventListener('input',function(){
+    try{
+      var lensName=document.getElementById('lensSelect').value;
+      var lens=(loadUserStore().lenses||[]).concat(lensesBuiltin).find(l=>l.name===lensName);
+      if(lens){ updateFocalConstraint(lens); }
+    }catch(e){}
+    recalc();
+  });'''
+          new='''  (function(){
+    var fi=document.getElementById('focalInput');
+    if(!fi) return;
+    function selectedLens(){ return findLensByName(document.getElementById('lensSelect')?.value); }
+    fi.addEventListener('input',function(){
+      try{ var lens=selectedLens(); if(lens){ updateFocalConstraint(lens,false); } }catch(e){}
+      recalc();
+    });
+    fi.addEventListener('blur',function(){
+      try{ var lens=selectedLens(); if(lens){ updateFocalConstraint(lens,true); } }catch(e){}
+      recalc();
+    });
+    fi.addEventListener('keydown',function(e){ if(e.key==='Enter'){ this.blur(); } });
+  })();'''
+          rep(old,new,'focal listener',1)
+
+          old='''      if(evIn){
+        evIn.addEventListener('input', function(){
+          var ev = clamp(parseFloat(this.value)||0);
+          this.value = ev.toFixed(1);
+          setEV(ev, 'input');
+          recalc();
+        });
+      }
+      if(lxIn){
+        lxIn.addEventListener('input', function(){
+          var lx = Math.max(0, parseFloat(this.value)||0);
+          var ev = clamp(Math.log2(Math.max(1e-6,lx)/2.5));
+          setEV(ev, 'input');
+          recalc();
+        });
+      }'''
+          new='''      if(evIn){
+        evIn.addEventListener('input', function(){
+          var raw=String(this.value).trim();
+          if(raw==='' || raw==='-' || raw==='.' || raw==='-.') return;
+          var parsed=parseFloat(raw); if(!isFinite(parsed)) return;
+          var ev=clamp(parsed);
+          setEV(ev, 'input');
+          recalc();
+        });
+        evIn.addEventListener('blur', function(){
+          var parsed=parseFloat(this.value);
+          var fallback=parseFloat(hidden?.value);
+          var ev=clamp(isFinite(parsed)?parsed:(isFinite(fallback)?fallback:13));
+          this.value=ev.toFixed(1);
+          setEV(ev,'input'); recalc();
+        });
+      }
+      if(lxIn){
+        lxIn.addEventListener('input', function(){
+          var raw=String(this.value).trim(); if(raw==='') return;
+          var lx=parseFloat(raw); if(!isFinite(lx) || lx<0) return;
+          var ev=clamp(Math.log2(Math.max(1e-6,lx)/2.5));
+          setEV(ev, 'input');
+          recalc();
+        });
+        lxIn.addEventListener('blur', function(){
+          var lx=parseFloat(this.value);
+          if(!isFinite(lx) || lx<0){ lx=fmtLux(parseFloat(hidden?.value)||13); }
+          this.value=String(Math.round(lx));
+          var ev=clamp(Math.log2(Math.max(1e-6,lx)/2.5));
+          setEV(ev,'input'); recalc();
+        });
+      }'''
+          rep(old,new,'ev numeric typing',1)
+
+          rep("  try{ document.getElementById('evSlider').focus(); }catch(e){}\n",'', 'hidden slider autofocus',1)
+
+          old='''  function startDrag(clientX){
+    dragging=true;
+    ctrl.classList.add('ev-dragging');
+    setEV(tToEv(pxToT(clientX)), 'drag');
+    if(tip){ tip.removeAttribute('aria-hidden'); }
+  }'''
+          new='''  function startDrag(clientX){
+    dragging=true;
+    window.__evDragging=true;
+    ctrl.classList.add('ev-dragging');
+    document.getElementById('output')?.classList.remove('flash-animate');
+    setEV(tToEv(pxToT(clientX)), 'drag');
+    if(tip){ tip.removeAttribute('aria-hidden'); }
+  }'''
+          rep(old,new,'drag start',1)
+
+          old='''  function endDrag(){
+    if(!dragging) return;
+    dragging=false;
+    ctrl.classList.remove('ev-dragging');
+    if(tip){ tip.setAttribute('aria-hidden','true'); }
+    try{ recalc(); }catch(_e){}
+  }'''
+          new='''  function endDrag(){
+    if(!dragging) return;
+    dragging=false;
+    window.__evDragging=false;
+    ctrl.classList.remove('ev-dragging');
+    if(tip){ tip.setAttribute('aria-hidden','true'); }
+    try{ recalc(); }catch(_e){}
+  }'''
+          rep(old,new,'drag end',1)
+
+          old='''  if (output.textContent !== newText) {
+    output.textContent = newText;
+    output.classList.remove('flash-animate');
+    void output.offsetWidth; // force reflow
+    output.classList.add('flash-animate');
+  } else {
+    output.textContent = newText;
+  }'''
+          new='''  if (output.textContent !== newText) {
+    output.textContent = newText;
+    if(!window.__evDragging){
+      output.classList.remove('flash-animate');
+      void output.offsetWidth; // force reflow only for settled changes
+      output.classList.add('flash-animate');
+    }
+  } else {
+    output.textContent = newText;
+  }'''
+          rep(old,new,'output drag animation',1)
+
+          p.write_text(s)
+          print('UI fixes applied successfully')
+          PY
+          git diff --check
+          grep -q 'Version 4.2.3' index.html
+          grep -q 'focalValueForLens' index.html
+      - name: Commit v4.2.3
+        shell: bash
+        run: |
+          git config user.name 'Photography App Maintainer'
+          git config user.email 'actions@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Photography App v4.2.3 fix numeric input UI glitches'
+          git push
