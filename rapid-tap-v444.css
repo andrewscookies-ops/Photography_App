@@ -1,0 +1,9 @@
+/* v4.4.4 — Prevent accidental double-tap zoom on rapidly pressed controls.
+   Pinch-to-zoom remains available for accessibility. */
+button,
+[role="button"] {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
