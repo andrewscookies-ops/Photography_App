@@ -482,7 +482,7 @@
     </div>
     <div style="font-size:15px;line-height:1.6">
       <b>Photography Exposure App</b><br>
-      Version 4.2.0 — September 2026<br><br>
+      Version 4.2.1 — September 2026<br><br>
       This tool helps photographers quickly determine optimal camera settings for any scene, balancing light, creative intent, and film/camera gear. All calculations run locally in your browser. No data is sent or stored externally.<br><br>
       <b>Author:</b> Andrew H.<br>
       <b>Contact:</b> <a href="mailto:ajlh.photography@gmail.com">ajlh.photography@gmail.com</a><br>
@@ -604,13 +604,13 @@
         </div>
 
         <div class="incident-entry">
-          <label>Incident EV
+          <label>Incident EV (EV100)
             <input id="incidentExactInput" type="number" min="-4" max="20" step="0.1" inputmode="decimal" placeholder="e.g. 12.3">
           </label>
           <button type="button" id="incidentUseExact">Use EV</button>
         </div>
 
-        <div class="sub">Or enter the exposure combination shown by your meter:</div>
+        <div class="sub">If your meter does not report EV100, enter the exposure combination it shows instead:</div>
         <div class="meter-exposure-entry">
           <label>Meter ISO<input id="incidentMeterISO" type="number" min="1" step="1" value="100"></label>
           <label>Aperture<input id="incidentMeterN" type="number" min="0.7" max="128" step="0.1" value="4"></label>
@@ -1677,51 +1677,51 @@ function nearestAperture(N, lens, camera){
 
 // ===== EV descriptors =====
 var EV_DESC = {
-  "-4":"Very dark night / faint starlight",
+  "-4":"Starlight / very dark night",
   "-3":"Dark night outdoors",
-  "-2":"Moonlit night",
+  "-2":"Moonlit landscape",
   "-1":"Very dim candlelit scene",
-  "0":"Candlelight / very dim room",
-  "1":"Dim night street",
-  "2":"Dim indoor lighting",
-  "3":"Typical home at night",
-  "4":"Bright home interior",
-  "5":"Very bright interior",
-  "6":"Bright indoor / stage lighting",
-  "7":"Bright window-lit room",
-  "8":"Dusk / deep outdoor shade",
-  "9":"Just after sunset / heavy overcast",
-  "10":"Overcast daylight",
-  "11":"Open shade / bright overcast",
-  "12":"Bright open shade",
-  "13":"Cloudy-bright / soft daylight",
+  "0":"Candlelight / very dark room",
+  "1":"Dark night street / very low light",
+  "2":"Very dim interior",
+  "3":"Dim interior",
+  "4":"Dim home interior",
+  "5":"Typical home interior",
+  "6":"Bright home interior",
+  "7":"Office / bright indoor light",
+  "8":"Very bright indoor / stage light",
+  "9":"Dusk / just after sunset",
+  "10":"Heavy overcast / deep outdoor shade",
+  "11":"Overcast daylight / shade",
+  "12":"Open shade / bright overcast",
+  "13":"Cloudy-bright daylight",
   "14":"Hazy or weak direct sun",
   "15":"Bright direct sun",
   "16":"Bright sun on snow or sand"
 };
 
 var INCIDENT_DESC = {
-  "-4":"Extremely low subject illumination",
-  "-3":"Very dark subject illumination",
+  "-4":"Starlight-level illumination on subject",
+  "-3":"Very dark night illumination on subject",
   "-2":"Moonlight on subject",
   "-1":"Very dim candlelight on subject",
   "0":"Candlelight on subject",
-  "1":"Very dim indoor light on subject",
-  "2":"Dim indoor light on subject",
-  "3":"Home interior light on subject",
-  "4":"Bright home light on subject",
-  "5":"Strong indoor light on subject",
-  "6":"Bright interior / stage light on subject",
-  "7":"Window light on subject",
-  "8":"Dusk or deep shade on subject",
-  "9":"Heavy overcast light on subject",
-  "10":"Overcast daylight on subject",
-  "11":"Open-shade light on subject",
-  "12":"Bright shade on subject",
-  "13":"Soft daylight on subject",
+  "1":"Very low light on subject",
+  "2":"Very dim indoor light on subject",
+  "3":"Dim indoor light on subject",
+  "4":"Dim home light on subject",
+  "5":"Typical home light on subject",
+  "6":"Bright home light on subject",
+  "7":"Office / bright indoor light on subject",
+  "8":"Very bright indoor / stage light on subject",
+  "9":"Dusk-level light on subject",
+  "10":"Heavy overcast / deep shade on subject",
+  "11":"Overcast / shade light on subject",
+  "12":"Open-shade light on subject",
+  "13":"Cloudy-bright daylight on subject",
   "14":"Hazy direct sun on subject",
   "15":"Bright direct sun on subject",
-  "16":"Very bright sun / snow-sand light"
+  "16":"Very bright sun / snow-sand illumination"
 };
 
 // ...
@@ -1797,6 +1797,7 @@ function getCI(){
           var ev = evFromExposure(N,t,ISO);
           if(!isFinite(ev)){ alert('Could not compute EV'); return; }
           ev = Math.max(-4, Math.min(16, ev));
+          exposureMeterSource='scene'; updateMeterSourceUI();
           if(typeof window.setEvControlValue==='function'){
             window.setEvControlValue(ev, 'cal');
           }else{
@@ -1815,6 +1816,7 @@ function getCI(){
       reset.addEventListener('click',function(){
         try{
           var ev=13; // default EV
+          exposureMeterSource='scene'; updateMeterSourceUI();
           if(typeof window.setEvControlValue==='function'){
             window.setEvControlValue(ev, 'cal');
           }else{
