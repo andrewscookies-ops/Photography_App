@@ -1,0 +1,38 @@
+name: Apply Photography App v4.4.2
+
+on:
+  push:
+    paths:
+      - ".github/workflows/apply-v442.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply v4.4.2
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          replacements=[
+            ('Version 4.4.1 — September 2026','Version 4.4.2 — September 2026'),
+            ('<script src="auto-iso-v440.js?v=440"></script>','<script src="auto-iso-v442.js?v=442"></script>'),
+            ('<script src="exposure-priority-v441.js?v=441"></script>','<script src="exposure-priority-v442.js?v=442"></script>'),
+          ]
+          for old,new in replacements:
+            if old not in s:
+              raise SystemExit(f'Missing expected marker: {old}')
+            s=s.replace(old,new,1)
+          p.write_text(s,encoding='utf-8')
+      - name: Commit v4.4.2
+        run: |
+          git config user.name "Photography App Maintainer"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+          git commit -m "Photography App v4.4.2 sharp exposure balance"
+          git push
