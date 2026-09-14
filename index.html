@@ -482,7 +482,7 @@
     </div>
     <div style="font-size:15px;line-height:1.6">
       <b>Photography Exposure App</b><br>
-      Version 4.2.1 — September 2026<br><br>
+      Version 4.2.2 — September 2026<br><br>
       This tool helps photographers quickly determine optimal camera settings for any scene, balancing light, creative intent, and film/camera gear. All calculations run locally in your browser. No data is sent or stored externally.<br><br>
       <b>Author:</b> Andrew H.<br>
       <b>Contact:</b> <a href="mailto:ajlh.photography@gmail.com">ajlh.photography@gmail.com</a><br>
@@ -2516,7 +2516,7 @@ function updatePushPull(){
       dragRecalcTimer=null;
       try{ recalc(); }catch(_e){}
       if(dragging){ scheduleDragRecalc(); }
-    }, 80);
+    }, 40);
   }
 
   function setEV(ev, source){
@@ -2543,7 +2543,8 @@ function updatePushPull(){
     updateEvDescriptor(ev);
     updateIncidentNote();
     if(source==='drag'){
-      // Drag stays visually immediate; full exposure recalculation happens on release.
+      // Keep the thumb/description immediate, while recommendations refresh during the drag.
+      scheduleDragRecalc();
     }else if(source==='kb'){
       try{ recalc(); }catch(_e){}
     }else if(source!=='input' && hidden){
