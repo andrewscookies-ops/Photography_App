@@ -1,4 +1,4 @@
-name: Apply Photography App v4.3.1 general mode
+name: Apply Photography App v4.3.2 sharing UI
 'on':
   push:
     paths:
@@ -12,132 +12,109 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Apply v4.3.1 general exposure fix
+      - name: Apply v4.3.2 app sharing UI
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import re
+
           p=Path('index.html')
           s=p.read_text()
-          s=s.replace('Version 4.3.0 — September 2026','Version 4.3.1 — September 2026')
-          old="""  var tGoal=targets[Math.max(0,Math.min(5,idx))];
-            if(ci.panning) tGoal*=3; // allow ~1.5 stops slower for panning"""
-          new="""  var tGoal=targets[Math.max(0,Math.min(5,idx))];
-            if(focal && isFinite(focal)) tGoal*=Math.max(0.25,Math.min(4,50/focal));
-            if(ci.panning) tGoal*=3; // allow slower shutter while following subject"""
-          if old in s:
+          s=s.replace('Version 4.3.1 — September 2026','Version 4.3.2 — September 2026')
+
+          if 'id="shareAppBtn"' not in s:
+              old='''    <button id="helpBtn" class="icon-btn" title="Quick Start & Help" aria-label="Quick Start and Help" style="font-size:18px;width:auto;">❓</button>\n    <button id="settingsBtn" class="icon-btn" title="Settings">⋮</button>'''
+              new='''    <button id="helpBtn" class="icon-btn" title="Quick Start & Help" aria-label="Quick Start and Help" style="font-size:18px;width:auto;">❓</button>\n    <button id="shareAppBtn" class="icon-btn" title="Share Photography App" aria-label="Share Photography App" style="width:auto;display:inline-flex;align-items:center;justify-content:center;">\n      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="m7 8 5-5 5 5"></path><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path></svg>\n    </button>\n    <button id="settingsBtn" class="icon-btn" title="Settings">⋮</button>'''
+              if old not in s:
+                  raise SystemExit('header share insertion point not found')
               s=s.replace(old,new,1)
-          s=re.sub(r'<script id="v431GeneralExposureFix">.*?</script>\s*','',s,flags=re.S)
-          js=r'''<script id="v431GeneralExposureFix">
-          (function(){
-            function snapGeneralAperture(N,camera){
-              var step=(camera&&camera.aperture_step)||'third';
-              var q=step==='full'?0.5:(1/6);
-              return parseFloat(Math.pow(2,Math.round(Math.log2(Math.max(0.7,N))/q)*q).toFixed(1));
-            }
-            function interp(vals,x){
-              x=Math.max(0,Math.min(1,x))*(vals.length-1);
-              var i=Math.floor(x),j=Math.min(vals.length-1,i+1),f=x-i;
-              return vals[i]+(vals[j]-vals[i])*f;
-            }
-            function generalRecommend(ev,camera,focal,film){
-              ev=ev+(parseFloat(document.getElementById('evBias')?.value)||0);
-              var ci=getCI(),iso=getSelectedISO()||400;
-              var N=interp([16,11,8,4,2],ci.blur);
-              var target=interp([1/15,1/30,1/125,1/500,1/1000],ci.freeze);
-              if(focal&&isFinite(focal)) target*=Math.max(0.25,Math.min(4,50/focal));
-              if(ci.panning) target*=3;
-              var t=requiredShutter(ev,iso,N),notes=[];
-              if(t>target&&ci.freeze>0.55){
-                while(t>target&&N>1){N=Math.max(1,N/Math.SQRT2);t=requiredShutter(ev,iso,N)}
-                if(t>target) notes.push('More light or a higher ISO may be needed to freeze motion.');
-              }else if(t<target&&ci.freeze<0.45){
-                while(t<target&&N<32){N=Math.min(32,N*Math.SQRT2);t=requiredShutter(ev,iso,N)}
-                if(t<target) notes.push('A lower ISO or ND filter may be needed for more motion blur.');
-              }
-              if(camera&&camera.max_shutter_den){
-                var fastest=1/camera.max_shutter_den;
-                if(t<fastest){notes.push(camera.name+' tops out at '+fmtSh(fastest)+'. Adjust ISO/aperture or use ND if needed.');t=fastest;}
-              }
-              if(focal&&isFinite(focal)&&!ci.tripod&&!ci.panning){
-                var hh=handholdLimit(focal);
-                if(t>hh) notes.push('At '+Math.round(focal)+'mm, handheld camera shake is more likely below about '+fmtSh(hh)+'.');
-              }
-              if(film){
-                var ps=Math.log2(iso/(film.box_iso||iso));
-                if(Math.abs(ps)>=0.25) notes.push((ps>0?'Push ':'Pull ')+Math.abs(ps).toFixed(1)+' stops relative to '+film.name+' box speed.');
-              }
-              if(ci.grain<0.3&&iso>200) notes.push('For a cleaner look, a lower ISO would reduce grain/noise if the light allows.');
-              if(ci.grain>0.7&&iso<800) notes.push('For more visible texture, a higher ISO can increase grain/noise if desired.');
-              return {iso:Math.round(iso),N:snapGeneralAperture(N,camera),t:camera?nearestShutterForCamera(camera,t):nearestShutterThird(t),warns:notes.join(' • ')};
-            }
-            function generalAlternatives(ev,rec,camera){
-              var iso=rec.iso,vals=[rec.N/2,rec.N/Math.SQRT2,rec.N,rec.N*Math.SQRT2,rec.N*2],out=[],seen={};
-              vals.forEach(function(n){
-                n=Math.max(1,Math.min(32,snapGeneralAperture(n,camera)));
-                var t=requiredShutter(ev,iso,n);
-                if(camera&&camera.max_shutter_den&&t<1/camera.max_shutter_den)return;
-                t=camera?nearestShutterForCamera(camera,t):nearestShutterThird(t);
-                var k=n+'-'+t;if(!seen[k]){seen[k]=1;out.push({iso:iso,N:n,t:t});}
-              });
-              return out;
-            }
-            function renderWhy(rec,ev,cam,lens,film,focal,isGeneral){
-              var h=document.getElementById('whyDetails');if(!h)return;
-              var ci=getCI(),a=[],d=EV_DESC[String(Math.round(ev))]||('EV '+ev.toFixed(1));
-              a.push(d+' (EV '+ev.toFixed(1)+') sets the available light.');
-              a.push('ISO '+rec.iso+' sets the working sensitivity.');
-              if(focal&&isFinite(focal)){
-                a.push(Math.round(focal)+'mm changes both depth-of-field behavior and motion/camera-shake sensitivity; longer focal lengths push motion guidance toward faster shutter speeds.');
-              }
-              if(lens){
-                var ap=lensApertureAtFocal(lens,focal||focalValueForLens(lens));
-                a.push(lens.name+' constrains the recommendation to about f/'+ap.minA.toFixed(1)+' through f/'+ap.maxA.toFixed(1)+'.');
-              }
-              if(cam)a.push(cam.name+' supplies the camera-specific shutter limit and exposure-step increments.');
-              if(film)a.push(film.name+' contributes its box speed (ISO '+film.box_iso+') and push/pull guidance.');
-              if(ci.blur>0.55)a.push('Your shallow-depth choice pushes toward a wider aperture.');
-              else if(ci.blur<0.45)a.push('Your deep-depth choice pushes toward a smaller aperture.');
-              if(ci.freeze>0.55)a.push('Your motion choice pushes toward a faster shutter.');
-              else if(ci.freeze<0.45)a.push('Your motion-blur choice pushes toward a slower shutter.');
-              if(isGeneral)a.push('No lens is selected, so the aperture is a photographic target rather than a hidden default-lens assumption. Verify that your lens can reach it.');
-              if(!cam)a.push('No camera is selected, so no camera-specific shutter-speed limit is being imposed.');
-              h.innerHTML='<ul>'+a.map(function(x){return'<li>'+x+'</li>';}).join('')+'</ul>';
-            }
-            recalc=function(){
-              var out=document.getElementById('output'),warn=document.getElementById('warning');if(!out||!warn)return;
-              var cn=document.getElementById('cameraSelect')?.value||'',ln=document.getElementById('lensSelect')?.value||'';
-              if(cn==='__custom__'||ln==='__custom__')return;
-              var cam=findCameraByName(cn)||null,lens=findLensByName(ln)||null,film=currentFilm(),focal=(lens?focalValueForLens(lens):parseFloat(document.getElementById('focalInput')?.value)),ev=effectiveEV();
-              if(!(isFinite(focal)&&focal>0))focal=null;
-              var rec=lens?recommend(ev,film,lens,focal,cam):generalRecommend(ev,cam,focal,film);
-              var txt='ISO '+rec.iso+' • f/'+rec.N.toFixed(1)+' • '+fmtSh(rec.t);
-              if(out.textContent!==txt){out.textContent=txt;if(!window.__evDragging){out.classList.remove('flash-animate');void out.offsetWidth;out.classList.add('flash-animate');}}
-              var hr=document.getElementById('headerRecommendation');if(hr)hr.textContent=txt;warn.textContent=rec.warns||'';
-              var sc=document.getElementById('recommendationScope');if(sc){var a=[];if(cam)a.push(cam.name);if(lens)a.push(lens.name);if(film)a.push(film.name);sc.textContent=a.length?'Refined for: '+a.join(' • '):'General recommendation — no specific camera, lens, or film limits applied.';}
-              renderWhy(rec,ev,cam,lens,film,focal,!lens);
-              try{
-                var rows=lens?buildCompactAlternatives(ev,film,lens,focal,cam,rec):generalAlternatives(ev,rec,cam),tb=document.querySelector('#altTable tbody');
-                if(tb){tb.innerHTML='';rows.forEach(function(r){var tr=document.createElement('tr');tr.innerHTML='<td>'+r.iso+'</td><td>f/'+r.N.toFixed(1)+'</td><td>'+fmtSh(r.t)+'</td>';tb.appendChild(tr);});}
-                var tbf=document.querySelector('#altTableFull tbody');if(tbf){tbf.innerHTML=tb?tb.innerHTML:'';}
-              }catch(e){}
-              updateDOF();updateMotion();updateBracket();updateReciprocity();updatePushPull();
-            };
-            document.addEventListener('DOMContentLoaded',function(){
-              var qi=document.getElementById('quickISO');
-              if(qi&&!qi.dataset.v431){qi.dataset.v431='1';qi.addEventListener('input',function(){
-                var n=document.getElementById('isoNumeric');if(n)n.value=this.value;
-                var s=document.getElementById('isoSelect');if(s&&s.options.length){var v=parseInt(this.value,10)||400,best=s.options[0];Array.from(s.options).forEach(function(o){if(Math.abs((parseInt(o.value,10)||0)-v)<Math.abs((parseInt(best.value,10)||0)-v))best=o;});s.value=best.value;}
-                recalc();
-              });}
-              getSelectedISO=function(){var q=document.getElementById('quickISO');if(q&&parseInt(q.value,10)>0)return parseInt(q.value,10);var m=currentCaptureMode();return m==='film'?(parseInt(document.getElementById('isoSelect')?.value,10)||400):(parseInt(document.getElementById('isoNumeric')?.value,10)||400);};
-              var fs=document.getElementById('filmSelect');if(fs&&!fs.dataset.v431){fs.dataset.v431='1';fs.addEventListener('change',function(){setTimeout(function(){var f=currentFilm(),q=document.getElementById('quickISO');if(f&&q){q.value=String(f.box_iso);var n=document.getElementById('isoNumeric');if(n)n.value=q.value;}recalc();},0);});}
-              recalc();
-            });
-          })();
-          </script>'''
-          s=s.replace('</body>',js+'\n</body>')
+
+          if 'id="shareAppMenuBtn"' not in s:
+              old='''        <button id="themeBtn">Theme: Auto</button>\n        <div class="divider"></div>'''
+              new='''        <button id="themeBtn">Theme: Auto</button>\n        <button id="shareAppMenuBtn">Share app</button>\n        <div class="divider"></div>'''
+              if old not in s:
+                  raise SystemExit('settings share insertion point not found')
+              s=s.replace(old,new,1)
+
+          if 'id="shareAppModal"' not in s:
+              modal='''<!-- Share App Modal -->\n<div id="shareAppModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="shareAppTitle" style="display:none;">\n  <div class="modal-content" style="max-width:430px;text-align:center;">\n    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;text-align:left">\n      <div id="shareAppTitle" style="font-weight:650">Share Photography App</div>\n      <button id="shareAppClose" class="icon-btn" style="width:auto" aria-label="Close Share App">✕</button>\n    </div>\n    <div class="sub" style="font-size:13px;line-height:1.45;margin:0 0 12px">Scan the QR code or send the link to open the web app.</div>\n    <div id="shareAppQRWrap" style="display:flex;justify-content:center;margin:8px auto 14px;">\n      <div id="shareAppQR" style="display:inline-flex;align-items:center;justify-content:center;min-width:236px;min-height:236px;padding:8px;background:#fff;border-radius:12px;border:1px solid var(--border);"></div>\n    </div>\n    <label for="shareAppUrl" style="text-align:left">Web app link</label>\n    <input id="shareAppUrl" type="text" readonly value="https://andrewscookies-ops.github.io/Photography_App/" style="font-size:13px">\n    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">\n      <button id="copyAppLinkBtn" style="flex:1 1 140px">Copy Link</button>\n      <button id="nativeShareAppBtn" style="flex:1 1 140px">Share…</button>\n    </div>\n  </div>\n</div>\n'''
+              marker='<!-- About Modal -->'
+              if marker not in s:
+                  raise SystemExit('share modal insertion point not found')
+              s=s.replace(marker,modal+marker,1)
+
+          s=s.replace('<button id="shareBtn" style="width:auto">Share</button>','<button id="shareBtn" style="width:auto">Share Settings</button>')
+
+          s=re.sub(r'<script id="shareAppFeature">.*?</script>\s*','',s,flags=re.S)
+          s=re.sub(r'<script id="shareAppQrLibrary"[^>]*></script>\s*','',s,flags=re.S)
+
+          feature=r'''<script id="shareAppQrLibrary" src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script id="shareAppFeature">
+(function(){
+  var SHARE_APP_URL='https://andrewscookies-ops.github.io/Photography_App/';
+  var qrRendered=false;
+
+  function modal(){ return document.getElementById('shareAppModal'); }
+  function renderQR(){
+    var host=document.getElementById('shareAppQR');
+    if(!host || qrRendered) return;
+    host.innerHTML='';
+    if(typeof QRCode==='function'){
+      try{
+        new QRCode(host,{text:SHARE_APP_URL,width:220,height:220,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+        qrRendered=true;
+        return;
+      }catch(e){}
+    }
+    host.innerHTML='<div style="max-width:210px;color:#333;font-size:13px;line-height:1.4">QR code could not load. Use Copy Link below.</div>';
+  }
+  function openShareApp(){
+    var m=modal(); if(!m) return;
+    var input=document.getElementById('shareAppUrl'); if(input) input.value=SHARE_APP_URL;
+    var menu=document.getElementById('settingsMenu'); if(menu) menu.style.display='none';
+    m.style.display='flex';
+    renderQR();
+  }
+  function closeShareApp(){ var m=modal(); if(m) m.style.display='none'; }
+  function copiedState(btn){
+    if(!btn) return;
+    var old=btn.textContent;
+    btn.textContent='Copied!';
+    setTimeout(function(){btn.textContent=old;},1200);
+  }
+  function copyLink(){
+    var btn=document.getElementById('copyAppLinkBtn');
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(SHARE_APP_URL).then(function(){copiedState(btn);},fallbackCopy);
+    }else fallbackCopy();
+    function fallbackCopy(){
+      var input=document.getElementById('shareAppUrl');
+      if(!input) return;
+      input.focus(); input.select(); input.setSelectionRange(0,input.value.length);
+      try{ document.execCommand('copy'); copiedState(btn); }catch(e){}
+    }
+  }
+  function nativeShare(){
+    if(navigator.share){
+      navigator.share({title:'Photography App',text:'Photography App',url:SHARE_APP_URL}).catch(function(){});
+    }else{
+      copyLink();
+    }
+  }
+  function bind(){
+    document.getElementById('shareAppBtn')?.addEventListener('click',openShareApp);
+    document.getElementById('shareAppMenuBtn')?.addEventListener('click',openShareApp);
+    document.getElementById('shareAppClose')?.addEventListener('click',closeShareApp);
+    document.getElementById('copyAppLinkBtn')?.addEventListener('click',copyLink);
+    document.getElementById('nativeShareAppBtn')?.addEventListener('click',nativeShare);
+    modal()?.addEventListener('click',function(e){if(e.target===this)closeShareApp();});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape' && modal()?.style.display==='flex')closeShareApp();});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind); else bind();
+})();
+</script>'''
+          s=s.replace('</body>',feature+'\n</body>')
           p.write_text(s)
           PY
       - name: Commit app update
@@ -146,5 +123,5 @@ jobs:
           git config user.name "Photography App Maintainer"
           git config user.email "actions@users.noreply.github.com"
           git add index.html
-          git commit -m "Photography App v4.3.1 true general exposure mode" || exit 0
+          git commit -m "Photography App v4.3.2 add app sharing QR and link" || exit 0
           git push
