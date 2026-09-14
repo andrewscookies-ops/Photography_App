@@ -17,103 +17,30 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
-
+          import base64,re
           p=Path('index.html')
           s=p.read_text()
+          dec=lambda x: base64.b64decode(x).decode('utf-8')
+          header_old=dec('ICAgIDxidXR0b24gaWQ9ImhlbHBCdG4iIGNsYXNzPSJpY29uLWJ0biIgdGl0bGU9IlF1aWNrIFN0YXJ0ICYgSGVscCIgYXJpYS1sYWJlbD0iUXVpY2sgU3RhcnQgYW5kIEhlbHAiIHN0eWxlPSJmb250LXNpemU6MThweDt3aWR0aDphdXRvOyI+4p2TPC9idXR0b24+CiAgICA8YnV0dG9uIGlkPSJzZXR0aW5nc0J0biIgY2xhc3M9Imljb24tYnRuIiB0aXRsZT0iU2V0dGluZ3MiPuKLrjwvYnV0dG9uPg==')
+          header_new=dec('ICAgIDxidXR0b24gaWQ9ImhlbHBCdG4iIGNsYXNzPSJpY29uLWJ0biIgdGl0bGU9IlF1aWNrIFN0YXJ0ICYgSGVscCIgYXJpYS1sYWJlbD0iUXVpY2sgU3RhcnQgYW5kIEhlbHAiIHN0eWxlPSJmb250LXNpemU6MThweDt3aWR0aDphdXRvOyI+4p2TPC9idXR0b24+CiAgICA8YnV0dG9uIGlkPSJzaGFyZUFwcEJ0biIgY2xhc3M9Imljb24tYnRuIiB0aXRsZT0iU2hhcmUgUGhvdG9ncmFwaHkgQXBwIiBhcmlhLWxhYmVsPSJTaGFyZSBQaG90b2dyYXBoeSBBcHAiIHN0eWxlPSJ3aWR0aDphdXRvO2Rpc3BsYXk6aW5saW5lLWZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpjZW50ZXI7Ij4KICAgICAgPHN2ZyBhcmlhLWhpZGRlbj0idHJ1ZSIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTEyIDN2MTIiPjwvcGF0aD48cGF0aCBkPSJtNyA4IDUtNSA1IDUiPjwvcGF0aD48cGF0aCBkPSJNNSAxM3Y2YTIgMiAwIDAgMCAyIDJoMTBhMiAyIDAgMCAwIDItMnYtNiI+PC9wYXRoPjwvc3ZnPgogICAgPC9idXR0b24+CiAgICA8YnV0dG9uIGlkPSJzZXR0aW5nc0J0biIgY2xhc3M9Imljb24tYnRuIiB0aXRsZT0iU2V0dGluZ3MiPuKLrjwvYnV0dG9uPg==')
+          settings_old=dec('ICAgICAgICA8YnV0dG9uIGlkPSJ0aGVtZUJ0biI+VGhlbWU6IEF1dG88L2J1dHRvbj4KICAgICAgICA8ZGl2IGNsYXNzPSJkaXZpZGVyIj48L2Rpdj4=')
+          settings_new=dec('ICAgICAgICA8YnV0dG9uIGlkPSJ0aGVtZUJ0biI+VGhlbWU6IEF1dG88L2J1dHRvbj4KICAgICAgICA8YnV0dG9uIGlkPSJzaGFyZUFwcE1lbnVCdG4iPlNoYXJlIGFwcDwvYnV0dG9uPgogICAgICAgIDxkaXYgY2xhc3M9ImRpdmlkZXIiPjwvZGl2Pg==')
+          modal=dec('PCEtLSBTaGFyZSBBcHAgTW9kYWwgLS0+CjxkaXYgaWQ9InNoYXJlQXBwTW9kYWwiIGNsYXNzPSJtb2RhbCIgcm9sZT0iZGlhbG9nIiBhcmlhLW1vZGFsPSJ0cnVlIiBhcmlhLWxhYmVsbGVkYnk9InNoYXJlQXBwVGl0bGUiIHN0eWxlPSJkaXNwbGF5Om5vbmU7Ij4KICA8ZGl2IGNsYXNzPSJtb2RhbC1jb250ZW50IiBzdHlsZT0ibWF4LXdpZHRoOjQzMHB4O3RleHQtYWxpZ246Y2VudGVyOyI+CiAgICA8ZGl2IHN0eWxlPSJkaXNwbGF5OmZsZXg7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW47YWxpZ24taXRlbXM6Y2VudGVyO2dhcDoxMnB4O21hcmdpbi1ib3R0b206MTJweDt0ZXh0LWFsaWduOmxlZnQiPgogICAgICA8ZGl2IGlkPSJzaGFyZUFwcFRpdGxlIiBzdHlsZT0iZm9udC13ZWlnaHQ6NjUwIj5TaGFyZSBQaG90b2dyYXBoeSBBcHA8L2Rpdj4KICAgICAgPGJ1dHRvbiBpZD0ic2hhcmVBcHBDbG9zZSIgY2xhc3M9Imljb24tYnRuIiBzdHlsZT0id2lkdGg6YXV0byIgYXJpYS1sYWJlbD0iQ2xvc2UgU2hhcmUgQXBwIj7inJU8L2J1dHRvbj4KICAgIDwvZGl2PgogICAgPGRpdiBjbGFzcz0ic3ViIiBzdHlsZT0iZm9udC1zaXplOjEzcHg7bGluZS1oZWlnaHQ6MS40NTttYXJnaW46MCAwIDEycHgiPlNjYW4gdGhlIFFSIGNvZGUgb3Igc2VuZCB0aGUgbGluayB0byBvcGVuIHRoZSB3ZWIgYXBwLjwvZGl2PgogICAgPGRpdiBpZD0ic2hhcmVBcHBRUldyYXAiIHN0eWxlPSJkaXNwbGF5OmZsZXg7anVzdGlmeS1jb250ZW50OmNlbnRlcjttYXJnaW46OHB4IGF1dG8gMTRweDsiPgogICAgICA8ZGl2IGlkPSJzaGFyZUFwcFFSIiBzdHlsZT0iZGlzcGxheTppbmxpbmUtZmxleDthbGlnbi1pdGVtczpjZW50ZXI7anVzdGlmeS1jb250ZW50OmNlbnRlcjttaW4td2lkdGg6MjM2cHg7bWluLWhlaWdodDoyMzZweDtwYWRkaW5nOjhweDtiYWNrZ3JvdW5kOiNmZmY7Ym9yZGVyLXJhZGl1czoxMnB4O2JvcmRlcjoxcHggc29saWQgdmFyKC0tYm9yZGVyKTsiPjwvZGl2PgogICAgPC9kaXY+CiAgICA8bGFiZWwgZm9yPSJzaGFyZUFwcFVybCIgc3R5bGU9InRleHQtYWxpZ246bGVmdCI+V2ViIGFwcCBsaW5rPC9sYWJlbD4KICAgIDxpbnB1dCBpZD0ic2hhcmVBcHBVcmwiIHR5cGU9InRleHQiIHJlYWRvbmx5IHZhbHVlPSJodHRwczovL2FuZHJld3Njb29raWVzLW9wcy5naXRodWIuaW8vUGhvdG9ncmFwaHlfQXBwLyIgc3R5bGU9ImZvbnQtc2l6ZToxM3B4Ij4KICAgIDxkaXYgc3R5bGU9ImRpc3BsYXk6ZmxleDtnYXA6OHB4O21hcmdpbi10b3A6MTJweDtmbGV4LXdyYXA6d3JhcCI+CiAgICAgIDxidXR0b24gaWQ9ImNvcHlBcHBMaW5rQnRuIiBzdHlsZT0iZmxleDoxIDEgMTQwcHgiPkNvcHkgTGluazwvYnV0dG9uPgogICAgICA8YnV0dG9uIGlkPSJuYXRpdmVTaGFyZUFwcEJ0biIgc3R5bGU9ImZsZXg6MSAxIDE0MHB4Ij5TaGFyZeKApjwvYnV0dG9uPgogICAgPC9kaXY+CiAgPC9kaXY+CjwvZGl2Pgo=')
+          feature=dec('PHNjcmlwdCBpZD0ic2hhcmVBcHBRckxpYnJhcnkiIHNyYz0iaHR0cHM6Ly9jZG4uanNkZWxpdnIubmV0L25wbS9xcmNvZGVqc0AxLjAuMC9xcmNvZGUubWluLmpzIj48L3NjcmlwdD4KPHNjcmlwdCBpZD0ic2hhcmVBcHBGZWF0dXJlIj4KKGZ1bmN0aW9uKCl7CiAgdmFyIFNIQVJFX0FQUF9VUkw9J2h0dHBzOi8vYW5kcmV3c2Nvb2tpZXMtb3BzLmdpdGh1Yi5pby9QaG90b2dyYXBoeV9BcHAvJzsKICB2YXIgcXJSZW5kZXJlZD1mYWxzZTsKICBmdW5jdGlvbiBtb2RhbCgpeyByZXR1cm4gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3NoYXJlQXBwTW9kYWwnKTsgfQogIGZ1bmN0aW9uIHJlbmRlclFSKCl7CiAgICB2YXIgaG9zdD1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnc2hhcmVBcHBRUicpOwogICAgaWYoIWhvc3QgfHwgcXJSZW5kZXJlZCkgcmV0dXJuOwogICAgaG9zdC5pbm5lckhUTUw9Jyc7CiAgICBpZih0eXBlb2YgUVJDb2RlPT09J2Z1bmN0aW9uJyl7CiAgICAgIHRyeXsKICAgICAgICBuZXcgUVJDb2RlKGhvc3Qse3RleHQ6U0hBUkVfQVBQX1VSTCx3aWR0aDoyMjAsaGVpZ2h0OjIyMCxjb2xvckRhcms6JyMwMDAwMDAnLGNvbG9yTGlnaHQ6JyNmZmZmZmYnLGNvcnJlY3RMZXZlbDpRUkNvZGUuQ29ycmVjdExldmVsLk19KTsKICAgICAgICBxclJlbmRlcmVkPXRydWU7CiAgICAgICAgcmV0dXJuOwogICAgICB9Y2F0Y2goZSl7fQogICAgfQogICAgaG9zdC5pbm5lckhUTUw9JzxkaXYgc3R5bGU9Im1heC13aWR0aDoyMTBweDtjb2xvcjojMzMzO2ZvbnQtc2l6ZToxM3B4O2xpbmUtaGVpZ2h0OjEuNCI+UVIgY29kZSBjb3VsZCBub3QgbG9hZC4gVXNlIENvcHkgTGluayBiZWxvdy48L2Rpdj4nOwogIH0KICBmdW5jdGlvbiBvcGVuU2hhcmVBcHAoKXsKICAgIHZhciBtPW1vZGFsKCk7IGlmKCFtKSByZXR1cm47CiAgICB2YXIgaW5wdXQ9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3NoYXJlQXBwVXJsJyk7IGlmKGlucHV0KSBpbnB1dC52YWx1ZT1TSEFSRV9BUFBfVVJMOwogICAgdmFyIG1lbnU9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3NldHRpbmdzTWVudScpOyBpZihtZW51KSBtZW51LnN0eWxlLmRpc3BsYXk9J25vbmUnOwogICAgbS5zdHlsZS5kaXNwbGF5PSdmbGV4JzsKICAgIHJlbmRlclFSKCk7CiAgfQogIGZ1bmN0aW9uIGNsb3NlU2hhcmVBcHAoKXsgdmFyIG09bW9kYWwoKTsgaWYobSkgbS5zdHlsZS5kaXNwbGF5PSdub25lJzsgfQogIGZ1bmN0aW9uIGNvcGllZFN0YXRlKGJ0bil7CiAgICBpZighYnRuKSByZXR1cm47CiAgICB2YXIgb2xkPWJ0bi50ZXh0Q29udGVudDsKICAgIGJ0bi50ZXh0Q29udGVudD0nQ29waWVkISc7CiAgICBzZXRUaW1lb3V0KGZ1bmN0aW9uKCl7YnRuLnRleHRDb250ZW50PW9sZDt9LDEyMDApOwogIH0KICBmdW5jdGlvbiBjb3B5TGluaygpewogICAgdmFyIGJ0bj1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnY29weUFwcExpbmtCdG4nKTsKICAgIGlmKG5hdmlnYXRvci5jbGlwYm9hcmQgJiYgd2luZG93LmlzU2VjdXJlQ29udGV4dCl7CiAgICAgIG5hdmlnYXRvci5jbGlwYm9hcmQud3JpdGVUZXh0KFNIQVJFX0FQUF9VUkwpLnRoZW4oZnVuY3Rpb24oKXtjb3BpZWRTdGF0ZShidG4pO30sZmFsbGJhY2tDb3B5KTsKICAgIH1lbHNlIGZhbGxiYWNrQ29weSgpOwogICAgZnVuY3Rpb24gZmFsbGJhY2tDb3B5KCl7CiAgICAgIHZhciBpbnB1dD1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnc2hhcmVBcHBVcmwnKTsKICAgICAgaWYoIWlucHV0KSByZXR1cm47CiAgICAgIGlucHV0LmZvY3VzKCk7IGlucHV0LnNlbGVjdCgpOyBpbnB1dC5zZXRTZWxlY3Rpb25SYW5nZSgwLGlucHV0LnZhbHVlLmxlbmd0aCk7CiAgICAgIHRyeXsgZG9jdW1lbnQuZXhlY0NvbW1hbmQoJ2NvcHknKTsgY29waWVkU3RhdGUoYnRuKTsgfWNhdGNoKGUpe30KICAgIH0KICB9CiAgZnVuY3Rpb24gbmF0aXZlU2hhcmUoKXsKICAgIGlmKG5hdmlnYXRvci5zaGFyZSl7CiAgICAgIG5hdmlnYXRvci5zaGFyZSh7dGl0bGU6J1Bob3RvZ3JhcGh5IEFwcCcsdGV4dDonUGhvdG9ncmFwaHkgQXBwJyx1cmw6U0hBUkVfQVBQX1VSTH0pLmNhdGNoKGZ1bmN0aW9uKCl7fSk7CiAgICB9ZWxzZXsKICAgICAgY29weUxpbmsoKTsKICAgIH0KICB9CiAgZnVuY3Rpb24gYmluZCgpewogICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3NoYXJlQXBwQnRuJyk/LmFkZEV2ZW50TGlzdGVuZXIoJ2NsaWNrJyxvcGVuU2hhcmVBcHApOwogICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3NoYXJlQXBwTWVudUJ0bicpPy5hZGRFdmVudExpc3RlbmVyKCdjbGljaycsb3BlblNoYXJlQXBwKTsKICAgIGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdzaGFyZUFwcENsb3NlJyk/LmFkZEV2ZW50TGlzdGVuZXIoJ2NsaWNrJyxjbG9zZVNoYXJlQXBwKTsKICAgIGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdjb3B5QXBwTGlua0J0bicpPy5hZGRFdmVudExpc3RlbmVyKCdjbGljaycsY29weUxpbmspOwogICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ25hdGl2ZVNoYXJlQXBwQnRuJyk/LmFkZEV2ZW50TGlzdGVuZXIoJ2NsaWNrJyxuYXRpdmVTaGFyZSk7CiAgICBtb2RhbCgpPy5hZGRFdmVudExpc3RlbmVyKCdjbGljaycsZnVuY3Rpb24oZSl7aWYoZS50YXJnZXQ9PT10aGlzKWNsb3NlU2hhcmVBcHAoKTt9KTsKICAgIGRvY3VtZW50LmFkZEV2ZW50TGlzdGVuZXIoJ2tleWRvd24nLGZ1bmN0aW9uKGUpe2lmKGUua2V5PT09J0VzY2FwZScgJiYgbW9kYWwoKT8uc3R5bGUuZGlzcGxheT09PSdmbGV4JyljbG9zZVNoYXJlQXBwKCk7fSk7CiAgfQogIGlmKGRvY3VtZW50LnJlYWR5U3RhdGU9PT0nbG9hZGluZycpIGRvY3VtZW50LmFkZEV2ZW50TGlzdGVuZXIoJ0RPTUNvbnRlbnRMb2FkZWQnLGJpbmQpOyBlbHNlIGJpbmQoKTsKfSkoKTsKPC9zY3JpcHQ+')
           s=s.replace('Version 4.3.1 — September 2026','Version 4.3.2 — September 2026')
-
           if 'id="shareAppBtn"' not in s:
-              old='''    <button id="helpBtn" class="icon-btn" title="Quick Start & Help" aria-label="Quick Start and Help" style="font-size:18px;width:auto;">❓</button>\n    <button id="settingsBtn" class="icon-btn" title="Settings">⋮</button>'''
-              new='''    <button id="helpBtn" class="icon-btn" title="Quick Start & Help" aria-label="Quick Start and Help" style="font-size:18px;width:auto;">❓</button>\n    <button id="shareAppBtn" class="icon-btn" title="Share Photography App" aria-label="Share Photography App" style="width:auto;display:inline-flex;align-items:center;justify-content:center;">\n      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="m7 8 5-5 5 5"></path><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path></svg>\n    </button>\n    <button id="settingsBtn" class="icon-btn" title="Settings">⋮</button>'''
-              if old not in s:
-                  raise SystemExit('header share insertion point not found')
-              s=s.replace(old,new,1)
-
+              if header_old not in s: raise SystemExit('header insertion point not found')
+              s=s.replace(header_old,header_new,1)
           if 'id="shareAppMenuBtn"' not in s:
-              old='''        <button id="themeBtn">Theme: Auto</button>\n        <div class="divider"></div>'''
-              new='''        <button id="themeBtn">Theme: Auto</button>\n        <button id="shareAppMenuBtn">Share app</button>\n        <div class="divider"></div>'''
-              if old not in s:
-                  raise SystemExit('settings share insertion point not found')
-              s=s.replace(old,new,1)
-
+              if settings_old not in s: raise SystemExit('settings insertion point not found')
+              s=s.replace(settings_old,settings_new,1)
           if 'id="shareAppModal"' not in s:
-              modal='''<!-- Share App Modal -->\n<div id="shareAppModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="shareAppTitle" style="display:none;">\n  <div class="modal-content" style="max-width:430px;text-align:center;">\n    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;text-align:left">\n      <div id="shareAppTitle" style="font-weight:650">Share Photography App</div>\n      <button id="shareAppClose" class="icon-btn" style="width:auto" aria-label="Close Share App">✕</button>\n    </div>\n    <div class="sub" style="font-size:13px;line-height:1.45;margin:0 0 12px">Scan the QR code or send the link to open the web app.</div>\n    <div id="shareAppQRWrap" style="display:flex;justify-content:center;margin:8px auto 14px;">\n      <div id="shareAppQR" style="display:inline-flex;align-items:center;justify-content:center;min-width:236px;min-height:236px;padding:8px;background:#fff;border-radius:12px;border:1px solid var(--border);"></div>\n    </div>\n    <label for="shareAppUrl" style="text-align:left">Web app link</label>\n    <input id="shareAppUrl" type="text" readonly value="https://andrewscookies-ops.github.io/Photography_App/" style="font-size:13px">\n    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">\n      <button id="copyAppLinkBtn" style="flex:1 1 140px">Copy Link</button>\n      <button id="nativeShareAppBtn" style="flex:1 1 140px">Share…</button>\n    </div>\n  </div>\n</div>\n'''
               marker='<!-- About Modal -->'
-              if marker not in s:
-                  raise SystemExit('share modal insertion point not found')
+              if marker not in s: raise SystemExit('modal insertion point not found')
               s=s.replace(marker,modal+marker,1)
-
           s=s.replace('<button id="shareBtn" style="width:auto">Share</button>','<button id="shareBtn" style="width:auto">Share Settings</button>')
-
           s=re.sub(r'<script id="shareAppFeature">.*?</script>\s*','',s,flags=re.S)
           s=re.sub(r'<script id="shareAppQrLibrary"[^>]*></script>\s*','',s,flags=re.S)
-
-          feature=r'''<script id="shareAppQrLibrary" src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<script id="shareAppFeature">
-(function(){
-  var SHARE_APP_URL='https://andrewscookies-ops.github.io/Photography_App/';
-  var qrRendered=false;
-
-  function modal(){ return document.getElementById('shareAppModal'); }
-  function renderQR(){
-    var host=document.getElementById('shareAppQR');
-    if(!host || qrRendered) return;
-    host.innerHTML='';
-    if(typeof QRCode==='function'){
-      try{
-        new QRCode(host,{text:SHARE_APP_URL,width:220,height:220,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
-        qrRendered=true;
-        return;
-      }catch(e){}
-    }
-    host.innerHTML='<div style="max-width:210px;color:#333;font-size:13px;line-height:1.4">QR code could not load. Use Copy Link below.</div>';
-  }
-  function openShareApp(){
-    var m=modal(); if(!m) return;
-    var input=document.getElementById('shareAppUrl'); if(input) input.value=SHARE_APP_URL;
-    var menu=document.getElementById('settingsMenu'); if(menu) menu.style.display='none';
-    m.style.display='flex';
-    renderQR();
-  }
-  function closeShareApp(){ var m=modal(); if(m) m.style.display='none'; }
-  function copiedState(btn){
-    if(!btn) return;
-    var old=btn.textContent;
-    btn.textContent='Copied!';
-    setTimeout(function(){btn.textContent=old;},1200);
-  }
-  function copyLink(){
-    var btn=document.getElementById('copyAppLinkBtn');
-    if(navigator.clipboard && window.isSecureContext){
-      navigator.clipboard.writeText(SHARE_APP_URL).then(function(){copiedState(btn);},fallbackCopy);
-    }else fallbackCopy();
-    function fallbackCopy(){
-      var input=document.getElementById('shareAppUrl');
-      if(!input) return;
-      input.focus(); input.select(); input.setSelectionRange(0,input.value.length);
-      try{ document.execCommand('copy'); copiedState(btn); }catch(e){}
-    }
-  }
-  function nativeShare(){
-    if(navigator.share){
-      navigator.share({title:'Photography App',text:'Photography App',url:SHARE_APP_URL}).catch(function(){});
-    }else{
-      copyLink();
-    }
-  }
-  function bind(){
-    document.getElementById('shareAppBtn')?.addEventListener('click',openShareApp);
-    document.getElementById('shareAppMenuBtn')?.addEventListener('click',openShareApp);
-    document.getElementById('shareAppClose')?.addEventListener('click',closeShareApp);
-    document.getElementById('copyAppLinkBtn')?.addEventListener('click',copyLink);
-    document.getElementById('nativeShareAppBtn')?.addEventListener('click',nativeShare);
-    modal()?.addEventListener('click',function(e){if(e.target===this)closeShareApp();});
-    document.addEventListener('keydown',function(e){if(e.key==='Escape' && modal()?.style.display==='flex')closeShareApp();});
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind); else bind();
-})();
-</script>'''
           s=s.replace('</body>',feature+'\n</body>')
           p.write_text(s)
           PY
