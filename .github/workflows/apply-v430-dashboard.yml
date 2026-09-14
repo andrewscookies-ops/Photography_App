@@ -1,0 +1,150 @@
+name: Apply Photography App v4.3.1 general mode
+'on':
+  push:
+    paths:
+      - '.github/workflows/apply-v430-dashboard.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply v4.3.1 general exposure fix
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text()
+          s=s.replace('Version 4.3.0 — September 2026','Version 4.3.1 — September 2026')
+          old="""  var tGoal=targets[Math.max(0,Math.min(5,idx))];
+            if(ci.panning) tGoal*=3; // allow ~1.5 stops slower for panning"""
+          new="""  var tGoal=targets[Math.max(0,Math.min(5,idx))];
+            if(focal && isFinite(focal)) tGoal*=Math.max(0.25,Math.min(4,50/focal));
+            if(ci.panning) tGoal*=3; // allow slower shutter while following subject"""
+          if old in s:
+              s=s.replace(old,new,1)
+          s=re.sub(r'<script id="v431GeneralExposureFix">.*?</script>\s*','',s,flags=re.S)
+          js=r'''<script id="v431GeneralExposureFix">
+          (function(){
+            function snapGeneralAperture(N,camera){
+              var step=(camera&&camera.aperture_step)||'third';
+              var q=step==='full'?0.5:(1/6);
+              return parseFloat(Math.pow(2,Math.round(Math.log2(Math.max(0.7,N))/q)*q).toFixed(1));
+            }
+            function interp(vals,x){
+              x=Math.max(0,Math.min(1,x))*(vals.length-1);
+              var i=Math.floor(x),j=Math.min(vals.length-1,i+1),f=x-i;
+              return vals[i]+(vals[j]-vals[i])*f;
+            }
+            function generalRecommend(ev,camera,focal,film){
+              ev=ev+(parseFloat(document.getElementById('evBias')?.value)||0);
+              var ci=getCI(),iso=getSelectedISO()||400;
+              var N=interp([16,11,8,4,2],ci.blur);
+              var target=interp([1/15,1/30,1/125,1/500,1/1000],ci.freeze);
+              if(focal&&isFinite(focal)) target*=Math.max(0.25,Math.min(4,50/focal));
+              if(ci.panning) target*=3;
+              var t=requiredShutter(ev,iso,N),notes=[];
+              if(t>target&&ci.freeze>0.55){
+                while(t>target&&N>1){N=Math.max(1,N/Math.SQRT2);t=requiredShutter(ev,iso,N)}
+                if(t>target) notes.push('More light or a higher ISO may be needed to freeze motion.');
+              }else if(t<target&&ci.freeze<0.45){
+                while(t<target&&N<32){N=Math.min(32,N*Math.SQRT2);t=requiredShutter(ev,iso,N)}
+                if(t<target) notes.push('A lower ISO or ND filter may be needed for more motion blur.');
+              }
+              if(camera&&camera.max_shutter_den){
+                var fastest=1/camera.max_shutter_den;
+                if(t<fastest){notes.push(camera.name+' tops out at '+fmtSh(fastest)+'. Adjust ISO/aperture or use ND if needed.');t=fastest;}
+              }
+              if(focal&&isFinite(focal)&&!ci.tripod&&!ci.panning){
+                var hh=handholdLimit(focal);
+                if(t>hh) notes.push('At '+Math.round(focal)+'mm, handheld camera shake is more likely below about '+fmtSh(hh)+'.');
+              }
+              if(film){
+                var ps=Math.log2(iso/(film.box_iso||iso));
+                if(Math.abs(ps)>=0.25) notes.push((ps>0?'Push ':'Pull ')+Math.abs(ps).toFixed(1)+' stops relative to '+film.name+' box speed.');
+              }
+              if(ci.grain<0.3&&iso>200) notes.push('For a cleaner look, a lower ISO would reduce grain/noise if the light allows.');
+              if(ci.grain>0.7&&iso<800) notes.push('For more visible texture, a higher ISO can increase grain/noise if desired.');
+              return {iso:Math.round(iso),N:snapGeneralAperture(N,camera),t:camera?nearestShutterForCamera(camera,t):nearestShutterThird(t),warns:notes.join(' • ')};
+            }
+            function generalAlternatives(ev,rec,camera){
+              var iso=rec.iso,vals=[rec.N/2,rec.N/Math.SQRT2,rec.N,rec.N*Math.SQRT2,rec.N*2],out=[],seen={};
+              vals.forEach(function(n){
+                n=Math.max(1,Math.min(32,snapGeneralAperture(n,camera)));
+                var t=requiredShutter(ev,iso,n);
+                if(camera&&camera.max_shutter_den&&t<1/camera.max_shutter_den)return;
+                t=camera?nearestShutterForCamera(camera,t):nearestShutterThird(t);
+                var k=n+'-'+t;if(!seen[k]){seen[k]=1;out.push({iso:iso,N:n,t:t});}
+              });
+              return out;
+            }
+            function renderWhy(rec,ev,cam,lens,film,focal,isGeneral){
+              var h=document.getElementById('whyDetails');if(!h)return;
+              var ci=getCI(),a=[],d=EV_DESC[String(Math.round(ev))]||('EV '+ev.toFixed(1));
+              a.push(d+' (EV '+ev.toFixed(1)+') sets the available light.');
+              a.push('ISO '+rec.iso+' sets the working sensitivity.');
+              if(focal&&isFinite(focal)){
+                a.push(Math.round(focal)+'mm changes both depth-of-field behavior and motion/camera-shake sensitivity; longer focal lengths push motion guidance toward faster shutter speeds.');
+              }
+              if(lens){
+                var ap=lensApertureAtFocal(lens,focal||focalValueForLens(lens));
+                a.push(lens.name+' constrains the recommendation to about f/'+ap.minA.toFixed(1)+' through f/'+ap.maxA.toFixed(1)+'.');
+              }
+              if(cam)a.push(cam.name+' supplies the camera-specific shutter limit and exposure-step increments.');
+              if(film)a.push(film.name+' contributes its box speed (ISO '+film.box_iso+') and push/pull guidance.');
+              if(ci.blur>0.55)a.push('Your shallow-depth choice pushes toward a wider aperture.');
+              else if(ci.blur<0.45)a.push('Your deep-depth choice pushes toward a smaller aperture.');
+              if(ci.freeze>0.55)a.push('Your motion choice pushes toward a faster shutter.');
+              else if(ci.freeze<0.45)a.push('Your motion-blur choice pushes toward a slower shutter.');
+              if(isGeneral)a.push('No lens is selected, so the aperture is a photographic target rather than a hidden default-lens assumption. Verify that your lens can reach it.');
+              if(!cam)a.push('No camera is selected, so no camera-specific shutter-speed limit is being imposed.');
+              h.innerHTML='<ul>'+a.map(function(x){return'<li>'+x+'</li>';}).join('')+'</ul>';
+            }
+            recalc=function(){
+              var out=document.getElementById('output'),warn=document.getElementById('warning');if(!out||!warn)return;
+              var cn=document.getElementById('cameraSelect')?.value||'',ln=document.getElementById('lensSelect')?.value||'';
+              if(cn==='__custom__'||ln==='__custom__')return;
+              var cam=findCameraByName(cn)||null,lens=findLensByName(ln)||null,film=currentFilm(),focal=(lens?focalValueForLens(lens):parseFloat(document.getElementById('focalInput')?.value)),ev=effectiveEV();
+              if(!(isFinite(focal)&&focal>0))focal=null;
+              var rec=lens?recommend(ev,film,lens,focal,cam):generalRecommend(ev,cam,focal,film);
+              var txt='ISO '+rec.iso+' • f/'+rec.N.toFixed(1)+' • '+fmtSh(rec.t);
+              if(out.textContent!==txt){out.textContent=txt;if(!window.__evDragging){out.classList.remove('flash-animate');void out.offsetWidth;out.classList.add('flash-animate');}}
+              var hr=document.getElementById('headerRecommendation');if(hr)hr.textContent=txt;warn.textContent=rec.warns||'';
+              var sc=document.getElementById('recommendationScope');if(sc){var a=[];if(cam)a.push(cam.name);if(lens)a.push(lens.name);if(film)a.push(film.name);sc.textContent=a.length?'Refined for: '+a.join(' • '):'General recommendation — no specific camera, lens, or film limits applied.';}
+              renderWhy(rec,ev,cam,lens,film,focal,!lens);
+              try{
+                var rows=lens?buildCompactAlternatives(ev,film,lens,focal,cam,rec):generalAlternatives(ev,rec,cam),tb=document.querySelector('#altTable tbody');
+                if(tb){tb.innerHTML='';rows.forEach(function(r){var tr=document.createElement('tr');tr.innerHTML='<td>'+r.iso+'</td><td>f/'+r.N.toFixed(1)+'</td><td>'+fmtSh(r.t)+'</td>';tb.appendChild(tr);});}
+                var tbf=document.querySelector('#altTableFull tbody');if(tbf){tbf.innerHTML=tb?tb.innerHTML:'';}
+              }catch(e){}
+              updateDOF();updateMotion();updateBracket();updateReciprocity();updatePushPull();
+            };
+            document.addEventListener('DOMContentLoaded',function(){
+              var qi=document.getElementById('quickISO');
+              if(qi&&!qi.dataset.v431){qi.dataset.v431='1';qi.addEventListener('input',function(){
+                var n=document.getElementById('isoNumeric');if(n)n.value=this.value;
+                var s=document.getElementById('isoSelect');if(s&&s.options.length){var v=parseInt(this.value,10)||400,best=s.options[0];Array.from(s.options).forEach(function(o){if(Math.abs((parseInt(o.value,10)||0)-v)<Math.abs((parseInt(best.value,10)||0)-v))best=o;});s.value=best.value;}
+                recalc();
+              });}
+              getSelectedISO=function(){var q=document.getElementById('quickISO');if(q&&parseInt(q.value,10)>0)return parseInt(q.value,10);var m=currentCaptureMode();return m==='film'?(parseInt(document.getElementById('isoSelect')?.value,10)||400):(parseInt(document.getElementById('isoNumeric')?.value,10)||400);};
+              var fs=document.getElementById('filmSelect');if(fs&&!fs.dataset.v431){fs.dataset.v431='1';fs.addEventListener('change',function(){setTimeout(function(){var f=currentFilm(),q=document.getElementById('quickISO');if(f&&q){q.value=String(f.box_iso);var n=document.getElementById('isoNumeric');if(n)n.value=q.value;}recalc();},0);});}
+              recalc();
+            });
+          })();
+          </script>'''
+          s=s.replace('</body>',js+'\n</body>')
+          p.write_text(s)
+          PY
+      - name: Commit app update
+        shell: bash
+        run: |
+          git config user.name "Photography App Maintainer"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+          git commit -m "Photography App v4.3.1 true general exposure mode" || exit 0
+          git push
