@@ -1,0 +1,25 @@
+name: Apply Photography App v4.4.1
+
+on:
+  push:
+    paths:
+      - ".github/workflows/apply-v441.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply v4.4.1
+        run: python patch-v441.py
+      - name: Commit v4.4.1
+        run: |
+          git config user.name "Photography App Maintainer"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Photography App v4.4.1 exposure priority"
+          git push
