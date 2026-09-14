@@ -1,0 +1,214 @@
+name: Apply Auto ISO and ISO stepper
+'on':
+  push:
+    paths:
+      - '.github/workflows/apply-auto-iso.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply Auto ISO behavior
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          p=Path('index.html')
+          s=p.read_text()
+          feature=r'''<script id="v440AutoISO">
+(function(){
+  var AUTO_KEY='photoAppAutoISO_v1';
+  var ISO_STEPS=[25,32,40,50,64,80,100,125,160,200,250,320,400,500,640,800,1000,1250,1600,2000,2500,3200,4000,5000,6400,8000,10000,12800,16000,20000,25600,32000,40000,51200];
+
+  function loadAuto(){
+    try{return localStorage.getItem(AUTO_KEY)!=='manual';}catch(e){return true;}
+  }
+  window.__photoAutoISO=loadAuto();
+  function isAutoISO(){ return currentCaptureMode()!=='film' && window.__photoAutoISO!==false; }
+  function saveMode(){ try{localStorage.setItem(AUTO_KEY,window.__photoAutoISO?'auto':'manual');}catch(e){} }
+  function setAutoISO(on){
+    window.__photoAutoISO=!!on;
+    saveMode();
+    updateISOControl();
+  }
+  function nearestISO(v){
+    v=Math.max(ISO_STEPS[0],Math.min(ISO_STEPS[ISO_STEPS.length-1],Number(v)||400));
+    var best=ISO_STEPS[0];
+    for(var i=1;i<ISO_STEPS.length;i++) if(Math.abs(ISO_STEPS[i]-v)<Math.abs(best-v)) best=ISO_STEPS[i];
+    return best;
+  }
+  function stepISO(v,dir){
+    v=Number(v)||400;
+    var idx=0,best=Infinity;
+    for(var i=0;i<ISO_STEPS.length;i++){
+      var d=Math.abs(ISO_STEPS[i]-v);
+      if(d<best){best=d;idx=i;}
+    }
+    idx=Math.max(0,Math.min(ISO_STEPS.length-1,idx+dir));
+    return ISO_STEPS[idx];
+  }
+  function apertureTarget(lens,focal){
+    var ci=getCI();
+    var ap=lensApertureAtFocal(lens,focal);
+    var deepTarget=Math.min(Math.max(11,ap.minA),ap.maxA);
+    var shallowTarget=ap.minA;
+    if(ci.panning) deepTarget=Math.min(ap.maxA,deepTarget*Math.pow(Math.SQRT2,0.5));
+    var grainBiasStops=(ci.grain-0.5)*0.6;
+    var N=deepTarget+(shallowTarget-deepTarget)*ci.blur;
+    N=Math.max(ap.minA,Math.min(ap.maxA,N));
+    if(Math.abs(grainBiasStops)>0.05){
+      N*=Math.pow(Math.SQRT2,-grainBiasStops);
+      N=Math.max(ap.minA,Math.min(ap.maxA,N));
+    }
+    if(focal&&isFinite(focal)){
+      var focalRatio=Math.max(20,Math.min(200,focal))/50;
+      var adjustStops=Math.log2(focalRatio)*0.5;
+      N*=Math.pow(Math.SQRT2,adjustStops);
+      N=Math.max(ap.minA,Math.min(ap.maxA,N));
+    }
+    if(ci.aperturePickN) N=Math.max(ap.minA,Math.min(ap.maxA,ci.aperturePickN));
+    return N;
+  }
+  function shutterTarget(focal){
+    var ci=getCI();
+    var targets=[1/8,1/30,1/60,1/250,1/500,1/1000];
+    var idx=Math.max(0,Math.min(5,Math.round(ci.freeze*5)));
+    var t=targets[idx];
+    if(focal&&isFinite(focal)) t*=Math.max(0.25,Math.min(4,50/focal));
+    if(ci.panning) t*=3;
+    if(ci.shutterPickT) t=ci.shutterPickT;
+    return t;
+  }
+  function autoISOFor(ev,lens,focal,camera){
+    var N=apertureTarget(lens,focal);
+    var t=shutterTarget(focal);
+    var e=ev+(parseFloat(document.getElementById('evBias')?.value)||0);
+    var raw=100*N*N/(Math.pow(2,e)*Math.max(t,1/8000));
+    var lo=(camera&&camera.iso_min)||50;
+    var hi=(camera&&camera.iso_max)||12800;
+    raw=Math.max(lo,Math.min(hi,raw));
+    return nearestISO(raw);
+  }
+
+  var baseRecommend=window.recommend;
+  if(typeof baseRecommend==='function'){
+    window.recommend=function(ev,film,lens,focal,camera){
+      if(currentCaptureMode()!=='film' && isAutoISO()){
+        var a=autoISOFor(ev,lens,focal,camera);
+        var q=document.getElementById('quickISO');
+        var n=document.getElementById('isoNumeric');
+        if(q) q.value=String(a);
+        if(n) n.value=String(a);
+      }
+      var r=baseRecommend(ev,film,lens,focal,camera);
+      if(currentCaptureMode()!=='film' && isAutoISO()){
+        var q2=document.getElementById('quickISO');
+        if(q2) q2.value=String(r.iso);
+      }
+      updateISOControl();
+      return r;
+    };
+    recommend=window.recommend;
+  }
+
+  function updateISOControl(){
+    var q=document.getElementById('quickISO');
+    var auto=document.getElementById('isoAutoBtn');
+    if(q){
+      q.readOnly=isAutoISO();
+      q.setAttribute('aria-label',isAutoISO()?'ISO, automatically selected':'ISO, manual');
+      q.title=isAutoISO()?'Auto ISO is choosing this value. Use − or + to switch to manual.':'Manual ISO';
+    }
+    if(auto){
+      auto.classList.toggle('active',isAutoISO());
+      auto.setAttribute('aria-pressed',String(isAutoISO()));
+      auto.textContent=isAutoISO()?'AUTO':'Auto';
+    }
+  }
+  function buildISOControl(){
+    var g=document.getElementById('quickISOGroup');
+    var q=document.getElementById('quickISO');
+    if(!g||!q||document.getElementById('isoMinusBtn')){updateISOControl();return;}
+    q.remove();
+    g.innerHTML='';
+    g.classList.add('iso-control-group');
+    var label=document.createElement('label');
+    label.className='iso-control-label';
+    label.textContent='ISO';
+    var row=document.createElement('div');
+    row.className='iso-stepper';
+    var minus=document.createElement('button');
+    minus.type='button';minus.id='isoMinusBtn';minus.className='iso-step-btn';minus.textContent='−';minus.setAttribute('aria-label','Decrease ISO');
+    var plus=document.createElement('button');
+    plus.type='button';plus.id='isoPlusBtn';plus.className='iso-step-btn';plus.textContent='+';plus.setAttribute('aria-label','Increase ISO');
+    var auto=document.createElement('button');
+    auto.type='button';auto.id='isoAutoBtn';auto.className='iso-auto-btn';auto.textContent='AUTO';auto.setAttribute('aria-label','Toggle Auto ISO');
+    q.classList.add('iso-step-value');
+    q.inputMode='numeric';
+    row.appendChild(minus);row.appendChild(q);row.appendChild(plus);row.appendChild(auto);
+    g.appendChild(label);g.appendChild(row);
+
+    minus.addEventListener('click',function(){
+      setAutoISO(false);
+      q.value=String(stepISO(q.value,-1));
+      var n=document.getElementById('isoNumeric');if(n)n.value=q.value;
+      recalc();
+    });
+    plus.addEventListener('click',function(){
+      setAutoISO(false);
+      q.value=String(stepISO(q.value,1));
+      var n=document.getElementById('isoNumeric');if(n)n.value=q.value;
+      recalc();
+    });
+    auto.addEventListener('click',function(){setAutoISO(!isAutoISO());recalc();});
+    q.addEventListener('input',function(){
+      if(document.activeElement===q){setAutoISO(false);}
+    });
+    updateISOControl();
+  }
+  function addStyle(){
+    if(document.getElementById('autoISOStyle'))return;
+    var st=document.createElement('style');
+    st.id='autoISOStyle';
+    st.textContent='.iso-control-group{display:block!important;margin-bottom:10px}.iso-control-label{display:block!important;max-width:none!important;margin:0 0 5px!important;font-size:12px;color:var(--muted)}.iso-stepper{display:grid;grid-template-columns:44px minmax(82px,120px) 44px minmax(62px,auto);gap:6px;align-items:center}.iso-step-btn,.iso-auto-btn{width:100%;min-height:42px;padding:8px!important;font-size:18px;font-weight:700}.iso-auto-btn{font-size:12px;letter-spacing:.4px}.iso-auto-btn.active{background:var(--accent);color:var(--accent-contrast);border-color:var(--accent)}.iso-step-value{width:100%!important;text-align:center;font-variant-numeric:tabular-nums;font-weight:650}.iso-step-value[readonly]{background:var(--chipBg)}@media(max-width:420px){.iso-stepper{grid-template-columns:42px minmax(74px,1fr) 42px 62px}}';
+    document.head.appendChild(st);
+  }
+
+  document.addEventListener('DOMContentLoaded',function(){
+    addStyle();
+    buildISOControl();
+    var mode=document.getElementById('captureMode');
+    if(mode) mode.addEventListener('change',function(){setTimeout(function(){buildISOControl();updateISOControl();recalc();},0);});
+    updateISOControl();
+    recalc();
+  });
+})();
+</script>'''
+
+          pat=re.compile(r'<script id="v440AutoISO">.*?</script>',re.S)
+          if pat.search(s):
+              s=pat.sub(feature,s)
+          elif '</body>' in s:
+              s=s.replace('</body>',feature+'\n</body>',1)
+          else:
+              s += '\n'+feature+'\n'
+          p.write_text(s)
+          PY
+      - name: Commit app update
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No changes needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Enable Auto ISO with step buttons"
+          git push
