@@ -1,0 +1,62 @@
+name: Apply Photography App v4.4.0
+
+on:
+  push:
+    paths:
+      - ".github/workflows/apply-v440.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apply v4.4.0
+        shell: bash
+        run: |
+          printf '%s' 'ZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCgpwYXRoPVBhdGgoImluZGV4Lmh0bWwiKQpzPXBhdGgucmVhZF90ZXh0KGVuY29kaW5nPSJ1dGYtOCIpCgppZiAnaWQ9InY0NDBBdXRvSVNPIicgaW4gczoKICAgIHByaW50KCJ2NC40LjAgYWxyZWFkeSBhcHBsaWVkIikKICAgIHJhaXNlIFN5c3RlbUV4aXQoMCkKCm9sZD0nVmVyc2lvbiA0LjMuMiDigJQgU2VwdGVtYmVyIDIwMjYnCm5ldz0nVmVyc2lvbiA0LjQuMCDigJQgU2VwdGVtYmVyIDIwMjYnCmlmIG9sZCBub3QgaW4gczoKICAgIHJhaXNlIFN5c3RlbUV4aXQoIkV4cGVjdGVkIHY0LjMuMiBtYXJrZXIgbm90IGZvdW5kIikKcz1zLnJlcGxhY2Uob2xkLG5ldyw xKQoKb2xkX2dlbmVyYWw9IiIiICAgIHZhciBjaT1nZXRDSSgpLGlzbz1nZXRTZWxlY3RlZElTTygpfHw0MDA7CiAgICB2YXIgTj1pbnRlcnAoWzE2LDExLDgsNCwyXSxjaS5ibHVyKTsKICAgIHZhciB0YXJnZXQ9aW50ZXJwKFsxLzE1LDEvMzAsMS8xMjUsMS81MDAsMS8xMDAwXSxjaS5mcmVlemUpOyIiIgpuZXdfZ2VuZXJhbD0iIiIgICAgdmFyIGNpPWdldENJKCksaXNvPWdldFNlbGVjdGVkSVNPKCl8fDQwMDsKICAgIHZhciBOPWludGVycChbMTYsMTEsOCw0LDJdLGNpLmJsdXIpOwogICAgaWYoZm9jYWwmJmlzRmluaXRlKGZvY2FsKSl7CiAgICAgIHZhciBmb2NhbFJhdGlvPU1hdGgubWF4KDIwLE1hdGgubWluKDIwMCxmb2NhbCkpLzUwOwogICAgICBOKj1NYXRoLnBvdyhNYXRoLlNRUlQyLE1hdGgubG9nMihmb2NhbFJhdGlvKSowLjUpOwogICAgICBOPU1hdGgubWF4KDEsTWF0aC5taW4oMzIsTikpOwogICAgfQogICAgdmFyIHRhcmdldD1pbnRlcnAoWzEvMTUsMS8zMCwxLzEyNSwxLzUwMCwxLzEwMDBdLGNpLmZyZWV6ZSk7IiIiCmlmIG9sZF9nZW5lcmFsIG5vdCBpbiBzOgogICAgcmFpc2UgU3lzdGVtRXhpdCgiR2VuZXJhbCBmb2NhbC1sZW5ndGggaW5zZXJ0aW9uIHBvaW50IG5vdCBmb3VuZCIpCnM9cy5yZXBsYWNlKG9sZF9nZW5lcmFsLG5ld19nZW5lcmFsLDEpCgpoZWxwX2FuY2hvcj0nICAgICAgICA8bGk+VXNlIDxiPkNvcHk8L2I+IHRvIHNhdmUgb3Igc2VuZCB5b3VyIHNldHRpbmdzLjwvbGk+JwpoZWxwX2xpbmU9JyAgICAgICAgPGxpPkluIEdlbmVyYWwgb3IgRGlnaXRhbCBtb2RlLCA8Yj5BdXRvIElTTzwvYj4gY2hhbmdlcyB3aXRoIHRoZSBsaWdodCBhbmQgeW91ciBhY3RpdmUgY2hvaWNlcy4gRmlsbSBtb2RlIGtlZXBzIElTTyBmaXhlZCB0byB0aGUgc2VsZWN0ZWQgZmlsbSBzcGVlZC48L2xpPicKaWYgaGVscF9hbmNob3IgaW4gcyBhbmQgaGVscF9saW5lIG5vdCBpbiBzOgogICAgcz1zLnJlcGxhY2UoaGVscF9hbmNob3IsaGVscF9saW5lKyJcbiIraGVscF9hbmNob3IsMSkKCm1hcmtlcj0nPHNjcmlwdCBpZD0ic2hhcmVBcHBRckxpYnJhcnkiIHNyYz0iaHR0cHM6Ly9jZG4uanNkZWxpdnIubmV0L25wbS9xcmNvZGVqczAxLjAuMC9xcmNvZGUubWluLmpzIj48L3NjcmlwdD4nCmlmIG1hcmtlciBub3QgaW4gczoKICAgIHJhaXNlIFN5c3RlbUV4aXQoIlNoYXJlIHNjcmlwdCBtYXJrZXIgbm90IGZvdW5kIikKCkFVVE9fSFRNTCA9ICc8c2NyaXB0IGlkPSJ2NDQwQXV0b0lTTyI+XG4oaW5jbHVkZWRfYXV0b19pc28pPC9zY3JpcHQ+Jw==' | base64 -d > /tmp/apply_v440.py
+          python /tmp/apply_v440.py
+
+      - name: Validate
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path("index.html").read_text(encoding="utf-8")
+          needed=[
+              'Version 4.4.0 — September 2026',
+              'id="v440AutoISO"',
+              'id="v430DashboardPatch"',
+              'id="v431GeneralExposureFix"',
+              'id="shareAppFeature"',
+              'Auto ISO changes with light'
+          ]
+          missing=[x for x in needed if x not in s]
+          if missing:
+              raise SystemExit("Missing markers: "+repr(missing))
+          if "fetch('app-core.html" in s:
+              raise SystemExit("Loader architecture found in index.html")
+          m=re.search(r'<script id="v440AutoISO">(.*?)</script>',s,re.S)
+          if not m:
+              raise SystemExit("v440 Auto ISO script not found")
+          Path("/tmp/v440.js").write_text(m.group(1),encoding="utf-8")
+          print("v4.4.0 markers validated")
+          PY
+          node --check /tmp/v440.js
+
+      - name: Commit
+        shell: bash
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "No index changes"
+            exit 0
+          fi
+          git config user.name "Photography App Maintainer"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+          git commit -m "Photography App v4.4.0 clean Auto ISO rebuild"
+          git push
