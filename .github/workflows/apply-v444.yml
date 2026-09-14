@@ -1,0 +1,37 @@
+name: Apply Photography App v4.4.4
+
+on:
+  push:
+    paths:
+      - ".github/workflows/apply-v444.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply v4.4.4
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          replacements=[
+            ('Version 4.4.3 — September 2026','Version 4.4.4 — September 2026'),
+            ('<title>Photography App — FULL</title>','<title>Photography App — FULL</title>\n<link rel="stylesheet" href="rapid-tap-v444.css?v=444">'),
+          ]
+          for old,new in replacements:
+            if old not in s:
+              raise SystemExit(f'Missing expected marker: {old}')
+            s=s.replace(old,new,1)
+          p.write_text(s,encoding='utf-8')
+      - name: Commit v4.4.4
+        run: |
+          git config user.name "Photography App Maintainer"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+          git commit -m "Photography App v4.4.4 prevent rapid-tap zoom"
+          git push
