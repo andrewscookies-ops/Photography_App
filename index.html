@@ -504,7 +504,7 @@
     </div>
     <div style="font-size:15px;line-height:1.6">
       <b>Photography Exposure App</b><br>
-      Version 4.3.2 — September 2026<br><br>
+      Version 4.4.0 — September 2026<br><br>
       This tool helps photographers quickly determine optimal camera settings for any scene, balancing light, creative intent, and film/camera gear. All calculations run locally in your browser. No data is sent or stored externally.<br><br>
       <b>Author:</b> Andrew H.<br>
       <b>Contact:</b> <a href="mailto:ajlh.photography@gmail.com">ajlh.photography@gmail.com</a><br>
@@ -3065,6 +3065,11 @@ document.addEventListener('DOMContentLoaded',function(){try{initApp()}catch(e){a
     ev=ev+(parseFloat(document.getElementById('evBias')?.value)||0);
     var ci=getCI(),iso=getSelectedISO()||400;
     var N=interp([16,11,8,4,2],ci.blur);
+    if(focal&&isFinite(focal)){
+      var focalRatio=Math.max(20,Math.min(200,focal))/50;
+      N*=Math.pow(Math.SQRT2,Math.log2(focalRatio)*0.5);
+      N=Math.max(1,Math.min(32,N));
+    }
     var target=interp([1/15,1/30,1/125,1/500,1/1000],ci.freeze);
     if(focal&&isFinite(focal)) target*=Math.max(0.25,Math.min(4,50/focal));
     if(ci.panning) target*=3;
@@ -3157,6 +3162,7 @@ document.addEventListener('DOMContentLoaded',function(){try{initApp()}catch(e){a
   });
 })();
 </script>
+<script src="auto-iso-v440.js?v=440"></script>
 <script id="shareAppQrLibrary" src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script id="shareAppFeature">
 (function(){
