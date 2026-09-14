@@ -1,4 +1,4 @@
-name: Apply Photography App v4.2.3 UI fixes
+name: Apply Photography App v4.2.4 creative intent redesign
 
 on:
   push:
@@ -13,19 +13,142 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Apply UI fixes
+      - name: Redesign Creative Intent
         shell: bash
         run: |
-          echo 'ZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCnA9UGF0aCgiaW5kZXguaHRtbCIpCnM9cC5yZWFkX3RleHQoKQoKZGVmIHJlcChvbGQsbmV3LGxhYmVsLGNvdW50PU5vbmUpOgogICAgZ2xvYmFsIHMKICAgIG49cy5jb3VudChvbGQpCiAgICBpZiBjb3VudCBpcyBub3QgTm9uZSBhbmQgbiAhPSBjb3VudDoKICAgICAgICByYWlzZSBTeXN0ZW1FeGl0KGYie2xhYmVsfTogZXhwZWN0ZWQge2NvdW50fSBtYXRjaGVzLCBmb3VuZCB7bn0iKQogICAgaWYgbiA9PSAwOgogICAgICAgIHJhaXNlIFN5c3RlbUV4aXQoZiJ7bGFiZWx9OiB0ZXh0IG5vdCBmb3VuZCIpCiAgICBzPXMucmVwbGFjZShvbGQsbmV3KQoKcmVwKCJWZXJzaW9uIDQuMi4yIOKAlCBTZXB0ZW1iZXIgMjAyNiIsIlZlcnNpb24gNC4yLjMg4oCUIFNlcHRlbWJlciAyMDI2IiwidmVyc2lvbiIsMSkKcmVwKCc8aW5wdXQgdHlwZT0ibnVtYmVyIiBpZD0iZm9jYWxJbnB1dCIgdmFsdWU9IjUwIj4nLCc8aW5wdXQgdHlwZT0ibnVtYmVyIiBpZD0iZm9jYWxJbnB1dCIgdmFsdWU9IjUwIiBpbnB1dG1vZGU9ImRlY2ltYWwiIGF1dG9jb21wbGV0ZT0ib2ZmIj4nLCJmb2NhbCBodG1sIiwxKQoKb2xkPSIiIi8vIEhlbHBlcjogZW5mb3JjZSBmb2NhbCBpbnB1dCBjb25zdHJhaW50cyBiYXNlZCBvbiBsZW5zCmZ1bmN0aW9uIHVwZGF0ZUZvY2FsQ29uc3RyYWludChsZW5zKXsKICB2YXIgZmk9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2ZvY2FsSW5wdXQnKTsgaWYoIWZpfHwhbGVucykgcmV0dXJuOwogIGlmKGxlbnMudHlwZT09PSdwcmltZScpewogICAgZmkucmVhZE9ubHk9dHJ1ZTsgZmkubWluPWxlbnMuZm9jYWxfbW07IGZpLm1heD1sZW5zLmZvY2FsX21tOyBmaS5zdGVwPTE7IGZpLnZhbHVlPVN0cmluZyhsZW5zLmZvY2FsX21tKTsKICB9ZWxzZXsKICAgIGZpLnJlYWRPbmx5PWZhbHNlOyBmaS5taW49bGVucy5mb2NhbF9taW5fbW07IGZpLm1heD1sZW5zLmZvY2FsX21heF9tbTsgZmkuc3RlcD0xOwogICAgdmFyIHY9cGFyc2VGbG9hdChmaS52YWx1ZSl8fGxlbnMuZm9jYWxfbWluX21tOwogICAgdj1NYXRoLm1heChsZW5zLmZvY2FsX21pbl9tbSwgTWF0aC5taW4obGVucy5mb2NhbF9tYXhfbW0sIHYpKTsKICAgIGZpLnZhbHVlPVN0cmluZyhNYXRoLnJvdW5kKHYpKTsKICB9Cn0iIiIKbmV3PSIiIi8vIEhlbHBlcjogZW5mb3JjZSBmb2NhbCBjb25zdHJhaW50cyB3aXRob3V0IGZpZ2h0aW5nIHRoZSB1c2VyIHdoaWxlIHRoZXkgdHlwZS4KZnVuY3Rpb24gdXBkYXRlRm9jYWxDb25zdHJhaW50KGxlbnMsIG5vcm1hbGl6ZVZhbHVlKXsKICB2YXIgZmk9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2ZvY2FsSW5wdXQnKTsgaWYoIWZpfHwhbGVucykgcmV0dXJuOwogIHZhciBub3JtYWxpemUgPSBub3JtYWxpemVWYWx1ZSAhPT0gZmFsc2U7CiAgaWYobGVucy50eXBlPT09J3ByaW1lJyl7CiAgICBmaS5yZWFkT25seT10cnVlOyBmaS5taW49bGVucy5mb2NhbF9tbTsgZmkubWF4PWxlbnMuZm9jYWxfbW07IGZpLnN0ZXA9MTsKICAgIGZpLnZhbHVlPVN0cmluZyhsZW5zLmZvY2FsX21tKTsKICAgIGZpLmRhdGFzZXQubGFzdFZhbGlkRm9jYWw9U3RyaW5nKGxlbnMuZm9jYWxfbW0pOwogIH1lbHNlewogICAgZmkucmVhZE9ubHk9ZmFsc2U7IGZpLm1pbj1sZW5zLmZvY2FsX21pbl9tbTsgZmkubWF4PWxlbnMuZm9jYWxfbWF4X21tOyBmaS5zdGVwPTE7CiAgICB2YXIgdj1wYXJzZUZsb2F0KGZpLnZhbHVlKTsKICAgIHZhciB2YWxpZD1pc0Zpbml0ZSh2KSAmJiB2Pj1sZW5zLmZvY2FsX21pbl9tbSAmJiB2PD1sZW5zLmZvY2FsX21heF9tbTsKICAgIGlmKHZhbGlkKXsgZmkuZGF0YXNldC5sYXN0VmFsaWRGb2NhbD1TdHJpbmcodik7IH0KICAgIGlmKG5vcm1hbGl6ZSl7CiAgICAgIGlmKCF2YWxpZCl7CiAgICAgICAgdmFyIGxhc3Q9cGFyc2VGbG9hdChmaS5kYXRhc2V0Lmxhc3RWYWxpZEZvY2FsKTsKICAgICAgICBpZighKGlzRmluaXRlKGxhc3QpICYmIGxhc3Q+PWxlbnMuZm9jYWxfbWluX21tICYmIGxhc3Q8PWxlbnMuZm9jYWxfbWF4X21tKSl7CiAgICAgICAgICBsYXN0PShsZW5zLmZvY2FsX21pbl9tbStsZW5zLmZvY2FsX21heF9tbSkvMjsKICAgICAgICB9CiAgICAgICAgdj1sYXN0OwogICAgICB9CiAgICAgIHY9TWF0aC5tYXgobGVucy5mb2NhbF9taW5fbW0sIE1hdGgubWluKGxlbnMuZm9jYWxfbWF4X21tLCB2KSk7CiAgICAgIGZpLnZhbHVlPVN0cmluZyhNYXRoLnJvdW5kKHYpKTsKICAgICAgZmkuZGF0YXNldC5sYXN0VmFsaWRGb2NhbD1maS52YWx1ZTsKICAgIH0KICB9Cn0KZnVuY3Rpb24gZm9jYWxWYWx1ZUZvckxlbnMobGVucyl7CiAgdmFyIGZpPWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdmb2NhbElucHV0Jyk7CiAgaWYoIWxlbnMpIHJldHVybiA1MDsKICBpZihsZW5zLnR5cGU9PT0ncHJpbWUnKSByZXR1cm4gbGVucy5mb2NhbF9tbTsKICB2YXIgbWluPWxlbnMuZm9jYWxfbWluX21tLCBtYXg9bGVucy5mb2NhbF9tYXhfbW07CiAgdmFyIHY9ZmkgPyBwYXJzZUZsb2F0KGZpLnZhbHVlKSA6IE5hTjsKICBpZihpc0Zpbml0ZSh2KSAmJiB2Pj1taW4gJiYgdjw9bWF4KXsKICAgIGlmKGZpKSBmaS5kYXRhc2V0Lmxhc3RWYWxpZEZvY2FsPVN0cmluZyh2KTsKICAgIHJldHVybiB2OwogIH0KICB2YXIgbGFzdD1maSA/IHBhcnNlRmxvYXQoZmkuZGF0YXNldC5sYXN0VmFsaWRGb2NhbCkgOiBOYU47CiAgaWYoaXNGaW5pdGUobGFzdCkgJiYgbGFzdD49bWluICYmIGxhc3Q8PW1heCkgcmV0dXJuIGxhc3Q7CiAgcmV0dXJuIChtaW4rbWF4KS8yOwp9IiIiCnJlcChvbGQsbmV3LCJmb2NhbCBoZWxwZXIiLDEpCgpyZXAoInZhciBhcCA9IGxlbnNBcGVydHVyZUF0Rm9jYWwobGVucywgcGFyc2VGbG9hdChkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnZm9jYWxJbnB1dCcpPy52YWx1ZXx8JzUwJykpOyIsInZhciBhcCA9IGxlbnNBcGVydHVyZUF0Rm9jYWwobGVucywgZm9jYWxWYWx1ZUZvckxlbnMobGVucykpOyIsImFwZXJ0dXJlIGZvY2FsIiwxKQpyZXAoInZhciBmb2NhbD0obGVucy50eXBlPT09J3ByaW1lJyk/bGVucy5mb2NhbF9tbToocGFyc2VGbG9hdChkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnZm9jYWxJbnB1dCcpLnZhbHVlKXx8NTApOyIsInZhciBmb2NhbD1mb2NhbFZhbHVlRm9yTGVucyhsZW5zKTsiLCJkb2YgZm9jYWwiLDEpCnJlcCgidmFyIGZvY2FsPXBhcnNlRmxvYXQoZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2ZvY2FsSW5wdXQnKS52YWx1ZSl8fDUwOyIsInZhciBmb2NhbD1mb2NhbFZhbHVlRm9yTGVucyhsZW5zKTsiLCJvdGhlciBmb2NhbCByZWFkcyIsMykKCm9sZD0iIiIgIC8vIENsYW1wIGZvY2FsIHRvIGxlbnMgY2FwYWJpbGl0eQogIHRyeXsKICAgIHZhciBmaT1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnZm9jYWxJbnB1dCcpOwogICAgdmFyIGxlbnNOb3c9bGVuczsKICAgIGlmKGxlbnNOb3cgJiYgZmkpewogICAgICBpZihsZW5zTm93LnR5cGU9PT0ncHJpbWUnKXsKICAgICAgICBmaS5yZWFkT25seT10cnVlOyBmaS5taW49bGVuc05vdy5mb2NhbF9tbTsgZmkubWF4PWxlbnNOb3cuZm9jYWxfbW07IGZpLnN0ZXA9MTsgZmkudmFsdWU9U3RyaW5nKGxlbnNOb3cuZm9jYWxfbW0pOwogICAgICAgIGZvY2FsPWxlbnNOb3cuZm9jYWxfbW07CiAgICAgIH0gZWxzZSB7CiAgICAgICAgZmkucmVhZE9ubHk9ZmFsc2U7IGZpLm1pbj1sZW5zTm93LmZvY2FsX21pbl9tbTsgZmkubWF4PWxlbnNOb3cuZm9jYWxfbWF4X21tOyBmaS5zdGVwPTE7CiAgICAgICAgdmFyIGZ2PU1hdGgubWF4KGxlbnNOb3cuZm9jYWxfbWluX21tLCBNYXRoLm1pbihsZW5zTm93LmZvY2FsX21heF9tbSwgZm9jYWwpKTsKICAgICAgICBpZihmdiE9PWZvY2FsKXsgZm9jYWw9ZnY7IGZpLnZhbHVlPVN0cmluZyhNYXRoLnJvdW5kKGZ2KSk7IH0KICAgICAgfQogICAgfQogIH1jYXRjaChlKXt9IiIiCm5ldz0iIiIgIC8vIEtlZXAgY29uc3RyYWludHMgY3VycmVudCwgYnV0IG5ldmVyIHJld3JpdGUgYSB6b29tIHZhbHVlIG1pZC1rZXlzdHJva2UuCiAgdHJ5eyB1cGRhdGVGb2NhbENvbnN0cmFpbnQobGVucyxmYWxzZSk7IH1jYXRjaChlKXt9IiIiCnJlcChvbGQsbmV3LCJyZWNhbGMgZm9jYWwgY2xhbXAiLDEpCgpvbGQ9IiIiICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnZm9jYWxJbnB1dCcpLmFkZEV2ZW50TGlzdGVuZXIoJ2lucHV0JyxmdW5jdGlvbigpewogICAgdHJ5ewogICAgICB2YXIgbGVuc05hbWU9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2xlbnNTZWxlY3QnKS52YWx1ZTsKICAgICAgdmFyIGxlbnM9KGxvYWRVc2VyU3RvcmUoKS5sZW5zZXN8fFtdKS5jb25jYXQobGVuc2VzQnVpbHRpbikuZmluZChsPT5sLm5hbWU9PT1sZW5zTmFtZSk7CiAgICAgIGlmKGxlbnMpeyB1cGRhdGVGb2NhbENvbnN0cmFpbnQobGVucyk7IH0KICAgIH1jYXRjaChlKXt9CiAgICByZWNhbGMoKTsKICB9KTsiIiIKbmV3PSIiIiAgKGZ1bmN0aW9uKCl7CiAgICB2YXIgZmk9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2ZvY2FsSW5wdXQnKTsKICAgIGlmKCFmaSkgcmV0dXJuOwogICAgZnVuY3Rpb24gc2VsZWN0ZWRMZW5zKCl7IHJldHVybiBmaW5kTGVuc0J5TmFtZShkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnbGVuc1NlbGVjdCcpPy52YWx1ZSk7IH0KICAgIGZpLmFkZEV2ZW50TGlzdGVuZXIoJ2lucHV0JyxmdW5jdGlvbigpewogICAgICB0cnl7IHZhciBsZW5zPXNlbGVjdGVkTGVucygpOyBpZihsZW5zKXsgdXBkYXRlRm9jYWxDb25zdHJhaW50KGxlbnMsZmFsc2UpOyB9IH1jYXRjaChlKXt9CiAgICAgIHJlY2FsYygpOwogICAgfSk7CiAgICBmaS5hZGRFdmVudExpc3RlbmVyKCdibHVyJyxmdW5jdGlvbigpewogICAgICB0cnl7IHZhciBsZW5zPXNlbGVjdGVkTGVucygpOyBpZihsZW5zKXsgdXBkYXRlRm9jYWxDb25zdHJhaW50KGxlbnMsdHJ1ZSk7IH0gfWNhdGNoKGUpe30KICAgICAgcmVjYWxjKCk7CiAgICB9KTsKICAgIGZpLmFkZEV2ZW50TGlzdGVuZXIoJ2tleWRvd24nLGZ1bmN0aW9uKGUpeyBpZihlLmtleT09PSdFbnRlcicpeyB0aGlzLmJsdXIoKTsgfSB9KTsKICB9KSgpOyIiIgpyZXAob2xkLG5ldywiZm9jYWwgbGlzdGVuZXIiLDEpCgpvbGQ9IiIiICAgICAgaWYoZXZJbil7CiAgICAgICAgZXZJbi5hZGRFdmVudExpc3RlbmVyKCdpbnB1dCcsIGZ1bmN0aW9uKCl7CiAgICAgICAgICB2YXIgZXYgPSBjbGFtcChwYXJzZUZsb2F0KHRoaXMudmFsdWUpfHwwKTsKICAgICAgICAgIHRoaXMudmFsdWUgPSBldi50b0ZpeGVkKDEpOwogICAgICAgICAgc2V0RVYoZXYsICdpbnB1dCcpOwogICAgICAgICAgcmVjYWxjKCk7CiAgICAgICAgfSk7CiAgICAgIH0KICAgICAgaWYobHhJbil7CiAgICAgICAgbHhJbi5hZGRFdmVudExpc3RlbmVyKCdpbnB1dCcsIGZ1bmN0aW9uKCl7CiAgICAgICAgICB2YXIgbHggPSBNYXRoLm1heCgwLCBwYXJzZUZsb2F0KHRoaXMudmFsdWUpfHwwKTsKICAgICAgICAgIHZhciBldiA9IGNsYW1wKE1hdGgubG9nMihNYXRoLm1heCgxZS02LGx4KS8yLjUpKTsKICAgICAgICAgIHNldEVWKGV2LCAnaW5wdXQnKTsKICAgICAgICAgIHJlY2FsYygpOwogICAgICAgIH0pOwogICAgICB9IiIiCm5ldz0iIiIgICAgICBpZihldkluKXsKICAgICAgICBldkluLmFkZEV2ZW50TGlzdGVuZXIoJ2lucHV0JywgZnVuY3Rpb24oKXsKICAgICAgICAgIHZhciByYXc9U3RyaW5nKHRoaXMudmFsdWUpLnRyaW0oKTsKICAgICAgICAgIGlmKHJhdz09PScnIHx8IHJhdz09PSctJyB8fCByYXc9PT0nLicgfHwgcmF3PT09Jy0uJykgcmV0dXJuOwogICAgICAgICAgdmFyIHBhcnNlZD1wYXJzZUZsb2F0KHJhdyk7IGlmKCFpc0Zpbml0ZShwYXJzZWQpKSByZXR1cm47CiAgICAgICAgICB2YXIgZXY9Y2xhbXAocGFyc2VkKTsKICAgICAgICAgIHNldEVWKGV2LCAnaW5wdXQnKTsKICAgICAgICAgIHJlY2FsYygpOwogICAgICAgIH0pOwogICAgICAgIGV2SW4uYWRkRXZlbnRMaXN0ZW5lcignYmx1cicsIGZ1bmN0aW9uKCl7CiAgICAgICAgICB2YXIgcGFyc2VkPXBhcnNlRmxvYXQodGhpcy52YWx1ZSk7CiAgICAgICAgICB2YXIgZmFsbGJhY2s9cGFyc2VGbG9hdChoaWRkZW4/LnZhbHVlKTsKICAgICAgICAgIHZhciBldj1jbGFtcChpc0Zpbml0ZShwYXJzZWQpP3BhcnNlZDooaXNGaW5pdGUoZmFsbGJhY2spP2ZhbGxiYWNrOjEzKSk7CiAgICAgICAgICB0aGlzLnZhbHVlPWV2LnRvRml4ZWQoMSk7CiAgICAgICAgICBzZXRFVihldiwnaW5wdXQnKTsgcmVjYWxjKCk7CiAgICAgICAgfSk7CiAgICAgIH0KICAgICAgaWYobHhJbil7CiAgICAgICAgbHhJbi5hZGRFdmVudExpc3RlbmVyKCdpbnB1dCcsIGZ1bmN0aW9uKCl7CiAgICAgICAgICB2YXIgcmF3PVN0cmluZyh0aGlzLnZhbHVlKS50cmltKCk7IGlmKHJhdz09PScnKSByZXR1cm47CiAgICAgICAgICB2YXIgbHg9cGFyc2VGbG9hdChyYXcpOyBpZighaXNGaW5pdGUobHgpIHx8IGx4PDApIHJldHVybjsKICAgICAgICAgIHZhciBldj1jbGFtcChNYXRoLmxvZzIoTWF0aC5tYXgoMWUtNixseCkvMi41KSk7CiAgICAgICAgICBzZXRFVihldiwgJ2lucHV0Jyk7CiAgICAgICAgICByZWNhbGMoKTsKICAgICAgICB9KTsKICAgICAgICBseEluLmFkZEV2ZW50TGlzdGVuZXIoJ2JsdXInLCBmdW5jdGlvbigpewogICAgICAgICAgdmFyIGx4PXBhcnNlRmxvYXQodGhpcy52YWx1ZSk7CiAgICAgICAgICBpZighaXNGaW5pdGUobHgpIHx8IGx4PDApeyBseD1mbXRMdXgocGFyc2VGbG9hdChoaWRkZW4/LnZhbHVlKXx8MTMpOyB9CiAgICAgICAgICB0aGlzLnZhbHVlPVN0cmluZyhNYXRoLnJvdW5kKGx4KSk7CiAgICAgICAgICB2YXIgZXY9Y2xhbXAoTWF0aC5sb2cyKE1hdGgubWF4KDFlLTYsbHgpLzIuNSkpOwogICAgICAgICAgc2V0RVYoZXYsJ2lucHV0Jyk7IHJlY2FsYygpOwogICAgICAgIH0pOwogICAgICB9IiIiCnJlcChvbGQsbmV3LCJldiBudW1lcmljIHR5cGluZyIsMSkKCnJlcCgiICB0cnl7IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdldlNsaWRlcicpLmZvY3VzKCk7IH1jYXRjaChlKXt9XG4iLCIiLCJoaWRkZW4gc2xpZGVyIGF1dG9mb2N1cyIsMSkKCm9sZD0iIiIgIGZ1bmN0aW9uIHN0YXJ0RHJhZyhjbGllbnRYKXsKICAgIGRyYWdnaW5nPXRydWU7CiAgICBjdHJsLmNsYXNzTGlzdC5hZGQoJ2V2LWRyYWdnaW5nJyk7CiAgICBzZXRFVih0VG9FdihweFRvVChjbGllbnRYKSksICdkcmFnJyk7CiAgICBpZih0aXApeyB0aXAucmVtb3ZlQXR0cmlidXRlKCdhcmlhLWhpZGRlbicpOyB9CiAgfSIiIgpuZXc9IiIiICBmdW5jdGlvbiBzdGFydERyYWcoY2xpZW50WCl7CiAgICBkcmFnZ2luZz10cnVlOwogICAgd2luZG93Ll9fZXZEcmFnZ2luZz10cnVlOwogICAgY3RybC5jbGFzc0xpc3QuYWRkKCdldi1kcmFnZ2luZycpOwogICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ291dHB1dCcpPy5jbGFzc0xpc3QucmVtb3ZlKCdmbGFzaC1hbmltYXRlJyk7CiAgICBzZXRFVih0VG9FdihweFRvVChjbGllbnRYKSksICdkcmFnJyk7CiAgICBpZih0aXApeyB0aXAucmVtb3ZlQXR0cmlidXRlKCdhcmlhLWhpZGRlbicpOyB9CiAgfSIiIgpyZXAob2xkLG5ldywiZHJhZyBzdGFydCIsMSkKCm9sZD0iIiIgIGZ1bmN0aW9uIGVuZERyYWcoKXsKICAgIGlmKCFkcmFnZ2luZykgcmV0dXJuOwogICAgZHJhZ2dpbmc9ZmFsc2U7CiAgICBjdHJsLmNsYXNzTGlzdC5yZW1vdmUoJ2V2LWRyYWdnaW5nJyk7CiAgICBpZih0aXApeyB0aXAuc2V0QXR0cmlidXRlKCdhcmlhLWhpZGRlbicsJ3RydWUnKTsgfQogICAgdHJ5eyByZWNhbGMoKTsgfWNhdGNoKF9lKXt9CiAgfSIiIgpuZXc9IiIiICBmdW5jdGlvbiBlbmREcmFnKCl7CiAgICBpZighZHJhZ2dpbmcpIHJldHVybjsKICAgIGRyYWdnaW5nPWZhbHNlOwogICAgd2luZG93Ll9fZXZEcmFnZ2luZz1mYWxzZTsKICAgIGN0cmwuY2xhc3NMaXN0LnJlbW92ZSgnZXYtZHJhZ2dpbmcnKTsKICAgIGlmKHRpcCl7IHRpcC5zZXRBdHRyaWJ1dGUoJ2FyaWEtaGlkZGVuJywndHJ1ZScpOyB9CiAgICB0cnl7IHJlY2FsYygpOyB9Y2F0Y2goX2Upe30KICB9IiIiCnJlcChvbGQsbmV3LCJkcmFnIGVuZCIsMSkKCm9sZD0iIiIgIGlmIChvdXRwdXQudGV4dENvbnRlbnQgIT09IG5ld1RleHQpIHsKICAgIG91dHB1dC50ZXh0Q29udGVudCA9IG5ld1RleHQ7CiAgICBvdXRwdXQuY2xhc3NMaXN0LnJlbW92ZSgnZmxhc2gtYW5pbWF0ZScpOwogICAgdm9pZCBvdXRwdXQub2Zmc2V0V2lkdGg7IC8vIGZvcmNlIHJlZmxvdwogICAgb3V0cHV0LmNsYXNzTGlzdC5hZGQoJ2ZsYXNoLWFuaW1hdGUnKTsKICB9IGVsc2UgewogICAgb3V0cHV0LnRleHRDb250ZW50ID0gbmV3VGV4dDsKICB9IiIiCm5ldz0iIiIgIGlmIChvdXRwdXQudGV4dENvbnRlbnQgIT09IG5ld1RleHQpIHsKICAgIG91dHB1dC50ZXh0Q29udGVudCA9IG5ld1RleHQ7CiAgICBpZighd2luZG93Ll9fZXZEcmFnZ2luZyl7CiAgICAgIG91dHB1dC5jbGFzc0xpc3QucmVtb3ZlKCdmbGFzaC1hbmltYXRlJyk7CiAgICAgIHZvaWQgb3V0cHV0Lm9mZnNldFdpZHRoOyAvLyBmb3JjZSByZWZsb3cgb25seSBmb3Igc2V0dGxlZCBjaGFuZ2VzCiAgICAgIG91dHB1dC5jbGFzc0xpc3QuYWRkKCdmbGFzaC1hbmltYXRlJyk7CiAgICB9CiAgfSBlbHNlIHsKICAgIG91dHB1dC50ZXh0Q29udGVudCA9IG5ld1RleHQ7CiAgfSIiIgpyZXAob2xkLG5ldywib3V0cHV0IGRyYWcgYW5pbWF0aW9uIiwxKQoKcC53cml0ZV90ZXh0KHMpCnByaW50KCJVSSBmaXhlcyBhcHBsaWVkIHN1Y2Nlc3NmdWxseSIpCg==' | base64 -d > /tmp/patch_v423.py
-          python3 /tmp/patch_v423.py
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text()
+
+          oldver='Version 4.2.3 — September 2026'
+          newver='Version 4.2.4 — September 2026'
+          if s.count(oldver)!=1:
+              raise SystemExit('version anchor mismatch')
+          s=s.replace(oldver,newver,1)
+
+          css='''
+  /* Creative Intent: compact, aligned discrete choices */
+  .intent-stack{display:grid;gap:12px;margin-top:8px}
+  .intent-row{border:1px solid var(--border);border-radius:12px;padding:10px;background:var(--chipBg)}
+  .intent-row-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
+  .intent-title{font-size:13px;font-weight:700;color:var(--text)}
+  .intent-hint{font-size:11px;color:var(--muted);text-align:right}
+  .intent-strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+  #creativeCard .intent-strip .seg-btn{min-width:0;width:100%;padding:9px 4px;font-size:12px;border:1px solid var(--border);border-radius:9px;background:var(--card);color:var(--text);line-height:1.15}
+  #creativeCard .intent-strip .seg-btn:hover{background:var(--rowHover)}
+  #creativeCard .intent-strip .seg-btn.active{background:var(--accent);color:var(--accent-contrast);border-color:var(--accent);box-shadow:none}
+  .creative-toggles{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .creative-toggle-pill{display:flex;align-items:center;justify-content:center;gap:7px;margin:0;padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:var(--card);color:var(--text);font-size:12px;cursor:pointer}
+  .creative-toggle-pill input{width:auto;margin:0;padding:0}
+  #ciSummary{margin-top:9px;padding-top:9px;border-top:1px solid var(--border)}
+  @media(max-width:600px){
+    .intent-row{padding:8px}
+    .intent-row-head{display:block;margin-bottom:7px}
+    .intent-hint{display:block;text-align:left;margin-top:2px}
+    #creativeCard .intent-strip .seg-btn{font-size:11px;padding:9px 2px}
+  }
+'''
+          anchor='  /* Range slider base */'
+          if anchor not in s:
+              raise SystemExit('css anchor missing')
+          s=s.replace(anchor,css+'\n'+anchor,1)
+
+          pattern=re.compile(r'''  <button id="creativeToggle".*?</button>\s*<div class="card" id="creativeCard".*?<div class="sub" id="ciSummary".*?</div>\s*</div>''',re.S)
+          replacement='''  <button id="creativeToggle" aria-expanded="true" style="margin-bottom:8px;">Hide Creative Intent</button>
+  <div class="card" id="creativeCard">
+    <div class="section-header">Creative Intent</div>
+    <div class="sub">Tell the app what you want the photograph to look like.</div>
+
+    <div class="intent-stack">
+      <div class="intent-row">
+        <div class="intent-row-head">
+          <span class="intent-title">Depth of field</span>
+          <span class="intent-hint">More in focus ↔ Softer background</span>
+        </div>
+        <div class="intent-strip" id="ciBlurSeg" role="group" aria-label="Depth of field preference">
+          <button type="button" class="seg-btn" data-val="vdeep">Very deep</button>
+          <button type="button" class="seg-btn" data-val="deep">Deep</button>
+          <button type="button" class="seg-btn active" data-val="balanced">Balanced</button>
+          <button type="button" class="seg-btn" data-val="shallow">Shallow</button>
+          <button type="button" class="seg-btn" data-val="vshallow">Very shallow</button>
+        </div>
+      </div>
+
+      <div class="intent-row">
+        <div class="intent-row-head">
+          <span class="intent-title">Motion</span>
+          <span class="intent-hint">Show movement ↔ Freeze movement</span>
+        </div>
+        <div class="intent-strip" id="ciMoveSeg" role="group" aria-label="Motion preference">
+          <button type="button" class="seg-btn" data-val="blur">Blurred</button>
+          <button type="button" class="seg-btn" data-val="slow">Slight blur</button>
+          <button type="button" class="seg-btn active" data-val="balanced">Natural</button>
+          <button type="button" class="seg-btn" data-val="fast">Sharp</button>
+          <button type="button" class="seg-btn" data-val="freeze">Frozen</button>
+        </div>
+      </div>
+
+      <div class="intent-row">
+        <div class="intent-row-head">
+          <span id="grainLabel" class="intent-title">Grain preference</span>
+          <span class="intent-hint">Cleaner ↔ More texture</span>
+        </div>
+        <div class="intent-strip" id="ciGrainSeg" role="group" aria-label="Grain or noise preference">
+          <button type="button" class="seg-btn" data-val="clean">Clean</button>
+          <button type="button" class="seg-btn" data-val="low">Low</button>
+          <button type="button" class="seg-btn active" data-val="balanced">Balanced</button>
+          <button type="button" class="seg-btn" data-val="high">High</button>
+          <button type="button" class="seg-btn" data-val="gritty">Gritty</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="creative-toggles">
+      <label class="creative-toggle-pill">Tripod <input type="checkbox" id="ciTripod2"></label>
+      <label class="creative-toggle-pill">Panning <input type="checkbox" id="ciPanning2"></label>
+    </div>
+    <div class="sub" id="ciSummary">Balanced DOF • Neutral motion • Balanced grain/noise</div>
+  </div>'''
+          s,n=pattern.subn(replacement,s,count=1)
+          if n!=1:
+              raise SystemExit(f'creative markup matches: {n}')
+
+          old='''    wrap.querySelectorAll('.seg-btn').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        wrap.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));
+        this.classList.add('active');
+        updateCISummary();
+        recalc();
+      });
+    });'''
+          new='''    wrap.querySelectorAll('.seg-btn').forEach(function(btn){
+      btn.setAttribute('aria-pressed',btn.classList.contains('active')?'true':'false');
+      btn.addEventListener('click',function(){
+        wrap.querySelectorAll('.seg-btn').forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
+        this.classList.add('active');
+        this.setAttribute('aria-pressed','true');
+        updateCISummary();
+        recalc();
+      });
+    });'''
+          if s.count(old)!=1:
+              raise SystemExit('bindSeg anchor mismatch')
+          s=s.replace(old,new,1)
+
+          p.write_text(s)
+          print('Creative Intent redesign applied')
+          PY
           git diff --check
-          grep -q 'Version 4.2.3' index.html
-          grep -q 'focalValueForLens' index.html
-      - name: Commit v4.2.3
+          grep -q 'Version 4.2.4' index.html
+          grep -q 'intent-strip' index.html
+          grep -q 'Hide Creative Intent' index.html
+      - name: Commit v4.2.4
         shell: bash
         run: |
           git config user.name 'Photography App Maintainer'
           git config user.email 'actions@users.noreply.github.com'
           git add index.html
-          git commit -m 'Photography App v4.2.3 fix numeric input UI glitches'
+          git commit -m 'Photography App v4.2.4 refine creative intent workflow'
           git push
