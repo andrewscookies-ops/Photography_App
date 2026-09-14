@@ -3,30 +3,3222 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Photography App</title>
+<title>Photography App — FULL</title>
 <style>
-html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f7f7f9;color:#111318}
-#boot{padding:24px;text-align:center;color:#667085}
+  /* Creative Intent toggle button */
+  #creativeToggle {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    width:auto;
+    margin:0 0 8px 0;
+    padding:8px 12px;
+    font-weight:600;
+  }
+  .section-header {
+    font-weight: 650;
+    margin-bottom: 8px;
+    color: var(--text);
+    font-size: 1em;
+    border: none;
+    padding: 0;
+    background: none;
+    letter-spacing: 0;
+  }
+  @media (max-width: 600px) {
+    .wrap { padding: 6px; }
+    .card { padding: 8px; margin-bottom: 10px; }
+    .row { gap: 6px; }
+    .col { min-width: 120px; }
+    .output-main { font-size: 18px; }
+    button, input, select, textarea { font-size: 16px; padding: 12px 10px; }
+    .ev-control { height: 44px; padding: 8px 4px; }
+    .ev-descriptor { flex-direction: column; gap: 4px; padding: 6px 6px; }
+    #exposureTriangle { max-width: 98vw; }
+    .incident-dial { width: 60px; height: 60px; }
+    .incident-center { width: 16px; height: 16px; }
+    .incident-readouts .value { font-size: 12px; }
+    .section-header { font-size: 15px; }
+  }
+  :root{
+    --pad:12px;
+    --bg:#f7f7f9;
+    --card:#ffffff;
+    --text:#111318;
+    --muted:#667085;
+    --border:#e6e8ec;
+    --accent:#0d6efd;
+    --accent-contrast:#ffffff;
+    --ring: rgba(13,110,253,.25);
+    --shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.10);
+    --shadow-lg: 0 10px 30px rgba(16,24,40,.12);
+    --radius:12px;
+    /* UI tokens */
+    --btn-bg:#f4f6f8;
+    --btn-bg-hover:#eef2f6;
+    --tableHead:#f8fafc;
+    --rowHover:#fafbff;
+    --chipBg:#fafafa;
+    --track:#d0d5dd;
+    --border-strong:#dce2e8;
+    --slider-gutter: 9px;
+    --flash-bg-light:#fffbe6;
+    --flash-glow-light:#ffe08a;
+    --flash-glow-outer-light:#ffe08a44;
+    --flash-bg:var(--flash-bg-light);
+    --flash-glow:var(--flash-glow-light);
+    --flash-glow-outer:var(--flash-glow-outer-light);
+    color-scheme: light dark;
+  }
+  *{box-sizing:border-box}
+  body{font-family:ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;margin:0;background:var(--bg);color:var(--text)}
+  header{padding:12px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card);z-index:10;display:flex;justify-content:space-between;align-items:center;backdrop-filter:saturate(180%) blur(6px)}
+  h1{font-size:18px;margin:0;font-weight:650;letter-spacing:.2px}
+  .header-recommendation{flex:1;margin:0 12px;font-size:12px;color:var(--muted);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:none}
+  .wrap{max-width:1100px;margin:0 auto;padding:16px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;padding:14px;box-shadow:var(--shadow);transition:box-shadow .2s ease,border-color .2s ease}
+  .card:hover{box-shadow:var(--shadow-lg)}
+  .section-header{font-weight:650;margin-bottom:8px;color:var(--text)}
+  .row{display:flex;flex-wrap:wrap;gap:12px}
+  .col{flex:1;min-width:180px}
+  label{font-size:12px;display:block;margin-bottom:6px;color:var(--muted);text-transform:none;letter-spacing:.2px}
+  input,select,button:not(.info-btn),textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:14px;background:var(--card);color:var(--text);transition:border-color .15s ease, box-shadow .15s ease}
+  input:focus,select:focus,textarea:focus,button:focus{outline:none;box-shadow:0 0 0 3px var(--ring);border-color:var(--accent)}
+  input[type=range]{
+    display:block;
+    margin-left:auto;
+    margin-right:auto;
+    width:96%;
+    background:transparent
+  }
+  button{cursor:pointer;background:var(--btn-bg);color:var(--text);border:1px solid var(--border);border-radius:10px}
+  button:hover{background:var(--btn-bg-hover)}
+  button:active{transform:translateY(0.5px)}
+  /* Improve hover contrast for toggle buttons */
+  #advancedToggle, #altToggle, #toggleFull{
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+  }
+  #advancedToggle:hover, #altToggle:hover, #toggleFull:hover{
+    background: var(--accent);
+    color: var(--accent-contrast);
+    border-color: var(--accent);
+  }
+  .icon-btn{width:auto;padding:6px 10px;font-size:18px;line-height:1;border-radius:10px;background:var(--card)}
+  .output-main{font-size:22px;font-weight:750;margin:8px 0}
+  .sub{font-size:12px;color:var(--muted);margin-top:4px}
+  .warning{color:#b00020;margin-top:6px;min-height:2.4em;overflow-wrap:anywhere}
+  .alt-grid{overflow-x:auto;margin-top:10px}
+  table{border-collapse:separate;border-spacing:0;font-size:14px;width:100%;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  thead th{background:var(--tableHead);color:var(--text);font-weight:600}
+  th,td{border-bottom:1px solid var(--border);padding:10px 12px;text-align:left;white-space:nowrap}
+  tbody tr:hover{background:var(--rowHover)}
+  tr.recommended{background:#f0f8ff}
+  .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,.5);justify-content:center;align-items:center;padding:16px;z-index:9999;}
+  .modal-content{background:var(--card);border-radius:14px;padding:16px;max-width:560px;width:96%;max-height:90%;overflow:auto;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
+  footer{text-align:center;padding:10px;font-size:12px;border-top:1px solid var(--border)}
+  footer a{color:var(--muted);text-decoration:none}
+  .settings-menu{display:none;position:absolute;right:16px;top:48px;background:var(--card);border:1px solid var(--border);border-radius:12px;min-width:240px;box-shadow:var(--shadow-lg);padding:8px}
+  .settings-menu button{width:100%;margin:4px 0}
+.divider{height:1px;background:var(--border);margin:6px 0}
+  .ev-label-badge{position:absolute;top:14px;transform:translateX(-50%);font-size:10px;color:var(--muted);background:var(--card);padding:0 4px;border-radius:4px;border:1px solid var(--border)}
+  .ev-wrap{ position:relative; padding-top:36px; }
+.ev-descriptor{margin-top:8px;font-size:12px;color:#333;border:1px solid var(--border);border-radius:12px;padding:12px;background:var(--chipBg);display:flex;flex-direction:column;gap:12px}
+  .ev-headline{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .descriptor-tag{font-size:10px;font-weight:650;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:4px 9px;background:var(--card)}
+  #evDescLabel{
+    flex:1 1 100%; font-weight:750; font-size:20px; color:var(--text);
+    display:flex;align-items:center;min-height:54px;padding:8px 12px;
+    border:1px solid var(--border);border-radius:10px;background:var(--card);
+    line-height:1.25;
+  }
+  .meter-source-line{font-size:12px;color:var(--muted);margin-top:-4px}
+  .meter-source-line.incident-active{color:var(--accent);font-weight:650}
+  .incident-explain{font-size:13px;line-height:1.45;color:var(--text);padding:8px 10px;border:1px solid var(--border);border-radius:10px;background:var(--card)}
+  .incident-entry{display:grid;grid-template-columns:minmax(120px,1fr) auto;gap:8px;align-items:end;margin-top:2px}
+  .incident-entry label{margin:0}
+  .incident-entry button{width:auto;white-space:nowrap}
+  .meter-exposure-entry{display:grid;grid-template-columns:repeat(3,minmax(82px,1fr)) auto;gap:8px;align-items:end;margin-top:2px}
+  .meter-exposure-entry label{margin:0}
+  .meter-exposure-entry button{width:auto;white-space:nowrap}
+  @media(max-width:640px){
+    #evDescLabel{font-size:19px}
+    .incident-entry,.meter-exposure-entry{grid-template-columns:1fr}
+    .incident-entry button,.meter-exposure-entry button{width:100%}
+  }
+  .ev-numeric{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .ev-numeric label{display:flex;align-items:center;gap:6px;margin:0;font-size:12px;color:var(--muted)}
+  .ev-descriptor input{width:auto !important;min-width:5ch;max-width:12ch;display:inline-block;padding:6px 8px;font-family: ui-monospace, SFMono-Regular, Menlo, monospace; text-align:right; font-variant-numeric: tabular-nums;border-radius:8px}
+  .ev-descriptor input#evInput{width:9ch !important}
+  .ev-descriptor input#luxInput{width:10ch !important}
+  .seg{display:flex;border:1px solid var(--border);border-radius:12px;overflow:hidden;flex-wrap:wrap;background:var(--chipBg)}
+  .seg-btn{flex:1 1 33%;min-width:100px;padding:10px;background:transparent;border:0;white-space:normal;line-height:1.2;color:var(--text)}
+  .seg-btn+.seg-btn{border-left:1px solid var(--border)}
+  .seg-btn:hover{background:var(--rowHover)}
+  .seg-btn.active{background:var(--accent);color:var(--accent-contrast);box-shadow:0 0 0 1px var(--accent) inset}
+  .seg-btn.active:hover,
+  .seg-btn.active:focus {
+    color: var(--accent-contrast);
+  }
+  .seg-btn.active:hover,.seg-btn.active:focus{filter:brightness(0.96)}
+  @media (max-width: 480px){.seg-btn{flex-basis:50%}}
+  /* Range slider base */
+  input[type=range]{-webkit-appearance:none;height:22px}
+  input[type=range]{appearance:none}
+  input[type=range]::-webkit-slider-runnable-track{height:4px;background:transparent;border-radius:999px}
+  input[type=range]::-moz-range-track{height:4px;background:transparent;border-radius:999px}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--card);border:1px solid var(--border-strong, var(--border));box-shadow:0 1px 2px rgba(16,24,40,.15);margin-top:-7px;transition:border-color .15s ease, box-shadow .15s ease}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--card);border:1px solid var(--border-strong, var(--border));box-shadow:0 1px 2px rgba(16,24,40,.15);transition:border-color .15s ease, box-shadow .15s ease}
+  input[type=range]:hover::-webkit-slider-thumb, input[type=range]:focus::-webkit-slider-thumb{border-color:var(--accent);box-shadow:0 0 3px 8px var(--ring), 0 1px 2px rgba(16,24,40,.15)}
+  input[type=range]:hover::-moz-range-thumb, input[type=range]:focus::-moz-range-thumb{border-color:var(--accent);box-shadow:0 0 3px 8px var(--ring), 0 1px 2px rgba(16,24,40,.15)}
+
+  /* New Scene Input slider (self-contained visuals) */
+  .ev-slider2{ position:relative; padding:16px 0 12px; }
+  .ev-slider2 .ev-track{
+    position:absolute; left:0; right:0; top:50%; transform:translateY(-50%);
+    height:12px; border-radius:999px;
+    background: linear-gradient(90deg,#1b1b2f 0%, #2a3b6a 15%, #3f7ec0 30%, #66c3ff 45%, #bfefff 60%, #fff3b0 75%, #ffe08a 87%, #ffd35e 100%);
+  }
+  .ev-slider2 .ev-ticks{
+    position:absolute; left:0; right:0; top:50%; transform:translateY(-50%);
+    height:34px; pointer-events:none;
+  }
+  .ev-slider2 .ev-ticks .tick{ position:absolute; bottom:0; width:1px; height:10px; background:var(--border-strong); opacity:.9; transform:translateX(-50%); }
+  .ev-slider2 .ev-ticks .tick.major{ width:2px; height:16px; background:var(--muted); opacity:1; }
+  .ev-slider2 input[type=range]{ position:relative; z-index:2; width:100%; display:block; margin:0 auto; background:transparent }
+
+  /* Unified EV slider: gradient track + tick marks overlay */
+.ev-slider{ position:relative; padding:16px 0 12px; }
+  .ev-slider input[type=range]{
+    width:100%;
+    margin:0 auto;
+    display:block;
+    appearance:none;
+    background:transparent;
+    box-sizing:border-box;
+  }
+
+/* Track uses gradient (both engines) */
+/* Unified EV slider: gradient track + tick marks overlay */
+  .ev-slider input[type=range]::-webkit-slider-runnable-track{
+    width:100%;
+    height:20px; border-radius:10px;
+    background: linear-gradient(90deg,#1b1b2f 0%, #2a3b6a 15%, #3f7ec0 30%, #66c3ff 45%, #bfefff 60%, #fff3b0 75%, #ffe08a 87%, #ffd35e 100%);
+    position:relative;
+    z-index:1;
+  }
+  .ev-slider input[type=range]::-moz-range-track{
+    width:100%;
+    height:20px; border-radius:10px;
+    background: linear-gradient(90deg,#1b1b2f 0%, #2a3b6a 15%, #3f7ec0 30%, #66c3ff 45%, #bfefff 60%, #fff3b0 75%, #ffe08a 87%, #ffd35e 100%);
+    position:relative;
+    z-index:1;
+  }
+
+/* New EV control */
+.ev-control{
+  position:relative; width:100%; height:56px; border-radius:12px;
+  background:var(--chipBg); border:1px solid var(--border); padding:14px 10px;
+  user-select:none; touch-action:none;
+}
+.ev-control:focus{ outline:none; box-shadow:0 0 0 3px var(--ring); border-color:var(--accent); }
+.ev-control .ev-track{
+  position:absolute; left:14px; right:14px; top:50%; height:12px; transform:translateY(-50%);
+  border-radius:999px;
+  background:linear-gradient(90deg,#1b1b2f 0%, #2a3b6a 15%, #3f7ec0 30%, #66c3ff 45%, #bfefff 60%, #fff3b0 75%, #ffe08a 87%, #ffd35e 100%);
+}
+.ev-control .ev-ticks{
+  position:absolute; left:14px; right:14px; top:50%; height:28px; transform:translateY(-50%); pointer-events:none;
+}
+.ev-control .ev-ticks .tick{ position:absolute; bottom:0; width:1px; height:10px; background:var(--border-strong); transform:translateX(-50%); }
+.ev-control .ev-ticks .tick.major{ width:2px; height:18px; background:var(--muted); }
+.ev-control .ev-handle{
+  position:absolute; top:50%; width:6px; height:30px; transform:translate(-50%,-50%);
+  background:var(--accent); border-radius:8px; box-shadow:0 0 6px 6px var(--ring);
+}
+.ev-control .ev-handle{ transition:none; will-change:left; }
+.ev-control.ev-dragging{ cursor:grabbing; }
+
+/* Rectangular thumb for precise alignment */
+.ev-slider input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:4px; height:28px; margin-top:-8px; border-radius:8px;
+  background: var(--accent); box-shadow:0 0 4px 6px var(--ring);
+}
+.ev-slider input[type=range]::-moz-range-thumb{
+  width:4px; height:28px; border:0; border-radius:8px;
+  background: var(--accent); box-shadow:0 0 4px 6px var(--ring);
+}
+
+  /* Tick overlay: minor every 1 EV (20 divisions across -4..16), major every 2 EV (10 divisions) */
+  .ev-scale{
+    position:absolute;
+    top:50%;
+    left:0;
+    width:100%;
+    transform:translateY(-50%);
+    height:40px;
+    pointer-events:none;
+    mix-blend-mode:difference;
+    z-index:3;
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .ev-scale .tick{
+    position:absolute; top:50%; transform:translateY(-50%);
+    width:1px; height:24px; background:#fff;
+    margin-left:-0.5px;
+  }
+  .ev-scale .tick.major{ width:2px; height:34px; }
+  /* Desktop improvements */
+  @media (min-width: 900px){
+    .wrap{max-width:1200px}
+    .col{min-width:220px}
+    .row{align-items:flex-end}
+  }
+  /* Table cells wrap on small screens, stay tidy on desktop */
+  th,td{white-space:nowrap}
+
+  /* Prefer dark scheme styles */
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#04112a;
+      --card:#0e1525;
+      --text:#e6edf3;
+      --muted:#9aa7b5;
+      --border:#1f2a3a;
+      --accent:#60a5fa;
+      --accent-contrast:#07111f;
+      --ring: rgba(186, 217, 255, 0.35);
+      --btn-bg:#152036;
+      --btn-bg-hover:hsl(221, 37%, 32%);
+      --tableHead:#293956;
+      --rowHover:#0f1c31;
+      --chipBg:#0f172a;
+      --track:#2a3b52;
+      --border-strong:#657080;
+      --recommended-bg:rgba(37,99,235,0.18);
+      --flash-bg:rgba(48,76,128,0.28);
+      --flash-glow:rgba(59,130,246,0.6);
+      --flash-glow-outer:rgba(59,130,246,0.2);
+    }
+    header{background:linear-gradient(180deg, rgba(96,165,250,0.06), rgba(14,21,37,0)) , var(--card); border-bottom-color:var(--border)}
+    .card{background:var(--card); border-color:var(--border)}
+    .icon-btn{background:var(--card); color:var(--text); border-color:var(--border)}
+    input,select,textarea{background:var(--card);color:var(--text);border-color:var(--border)}
+    button{background:var(--btn-bg);color:var(--text);border-color:var(--border)}
+    button:hover{background:var(--btn-bg-hover)}
+    table{background:var(--card);border-color:var(--border)}
+    thead th{background:var(--tableHead);color:var(--text)}
+    tbody tr:hover{background:var(--rowHover)}
+    .settings-menu{background:var(--card);border-color:var(--border)}
+    .divider{background:var(--border)}
+    .ev-descriptor{background:var(--chipBg);border-color:var(--border);color:var(--text)}
+    .ev-label-badge{background:var(--card);border-color:var(--border);color:var(--muted)}
+    .modal{background:rgba(5,9,17,.7)}
+    .modal-content{background:var(--card);color:var(--text);border-color:var(--border)}
+    .seg{background:var(--chipBg);border-color:var(--border)}
+    .seg-btn:hover{background:var(--btn-bg-hover)}
+    .header-recommendation{color:rgba(148,181,222,0.9);}
+  }
+  /* Manual theme overrides via data-theme attribute */
+  :root[data-theme="dark"]{
+    --bg:#0b1220;
+    --card:#0e1525;
+    --text:#e6edf3;
+    --muted:#9aa7b5;
+    --border:#1f2a3a;
+    --accent:#60a5fa;
+    --accent-contrast:#07111f;
+    --ring: rgba(96,165,250,.35);
+    --btn-bg:#152036;
+    --btn-bg-hover:#1a2742;
+    --tableHead:#121c2f;
+    --rowHover:#0f1c31;
+    --chipBg:#0f172a;
+    --track:#2a3b52;
+    --border-strong:#3a4b65;
+    --recommended-bg:rgba(37,99,235,0.18);
+    --flash-bg:rgba(48,76,128,0.28);
+    --flash-glow:rgba(59,130,246,0.6);
+    --flash-glow-outer:rgba(59,130,246,0.2);
+  }
+  :root[data-theme="dark"] .header-recommendation{color:rgba(148,181,222,0.9);}
+  
+  :root[data-theme="light"]{
+    --bg:#f7f7f9;
+    --card:#ffffff;
+    --text:#111318;
+    --muted:#667085;
+    --border:#e6e8ec;
+    --accent:#0d6efd;
+    --accent-contrast:#ffffff;
+    --ring: rgba(13,110,253,.25);
+    --btn-bg:#f4f6f8;
+    --btn-bg-hover:#eef2f6;
+    --tableHead:#f8fafc;
+    --rowHover:#fafbff;
+    --chipBg:#fafafa;
+    --track:#d0d5dd;
+    --border-strong:#dce2e8;
+    --flash-bg:var(--flash-bg-light);
+    --flash-glow:var(--flash-glow-light);
+    --flash-glow-outer:var(--flash-glow-outer-light);
+  }
+  :root[data-theme="light"] .header-recommendation{color:var(--muted);}
+  /* High-contrast hover overrides (placed last for priority) */
+  #advancedToggle:hover,
+  #altToggle:hover,
+  #toggleFull:hover,
+  .settings-menu button:hover{
+    background: var(--accent) !important;
+    color: var(--accent-contrast) !important;
+    border-color: var(--accent) !important;
+  }
+  /* Ensure selected Creative Intent segments stay readable on hover */
+  .seg-btn.active:hover,
+  .seg-btn.active:focus{
+    background: var(--accent) !important;          /* keep the same base */
+    color: var(--accent-contrast) !important;      /* keep strong contrast */
+    /* very subtle darken overlay to indicate hover without big shift */
+    box-shadow: 0 0 0 1px var(--accent) inset, inset 0 0 0 1000px rgba(0,0,0,0.05) !important;
+    filter: none !important;                       /* avoid dimming text */
+  }
+  /* Make segmented toggle hover more obvious */
+  .seg-btn:hover{
+    box-shadow: 0 0 0 1px var(--accent) inset;
+  }
+  /* Advanced tools: compact, obvious and touch-friendly */
+  #advancedDrawer details{border-top:1px solid var(--border);margin:0}
+  #advancedDrawer details:last-child{border-bottom:1px solid var(--border)}
+  #advancedDrawer details > summary{
+    list-style:none;display:flex;align-items:center;gap:10px;cursor:pointer;
+    border-radius:8px;padding:12px 6px;min-height:48px;user-select:none;-webkit-user-select:none;
+  }
+  #advancedDrawer details > summary::-webkit-details-marker{display:none}
+  #advancedDrawer details > summary::marker{display:none}
+  #advancedDrawer details > summary:hover{background:var(--rowHover)}
+  .adv-chevron{flex:0 0 18px;width:18px;display:inline-flex;justify-content:center;color:var(--muted);font-size:20px;line-height:1;transition:transform .15s ease}
+  details[open] > summary .adv-chevron{transform:rotate(90deg)}
+  .summary-label{flex:1 1 auto;font-weight:650}
+  button.info-btn{width:28px !important;height:28px !important;padding:0 !important}
+  .info-btn{flex:0 0 28px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-size:13px;font-weight:750;line-height:1;background:var(--btn-bg);color:var(--text);border:1px solid var(--border);pointer-events:auto}
+  .info-btn:hover{background:var(--btn-bg-hover);border-color:var(--accent)}
+  .info-inline{margin:0 8px 10px 34px;font-size:13px;line-height:1.45;color:var(--muted);min-height:0}
+  .advanced-intro{margin:0 0 8px 0;line-height:1.45}
+  .ambient-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:8px}
+  .ambient-buttons{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-start;flex:0 0 auto}
+  .ambient-buttons button{flex:1 1 auto;white-space:nowrap;min-width:0}
+  @media (max-width: 640px){
+    .ambient-actions{flex-direction:column;align-items:stretch}
+    .ambient-buttons{justify-content:flex-start}
+    .incident-readouts{width:100%;max-width:none}
+  }
+  .incident-card{max-width:360px}
+  .incident-wrap{display:flex;flex-direction:column;gap:8px;margin-top:8px;padding-top:4px}
+  .incident-wrap label{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .incident-dial-box{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.incident-dial{width:78px;height:78px;border-radius:50%;position:relative;background:radial-gradient(circle at 35% 35%, rgba(255,255,255,0.3), rgba(0,0,0,0.25));border:1px solid var(--border);box-shadow:0 4px 12px rgba(15,23,42,0.18), inset 0 2px 4px rgba(255,255,255,0.15);transition:box-shadow .15s ease, border-color .15s ease;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:none;user-select:none}
+  .incident-dial::before{content:'';position:absolute;inset:9px;border-radius:50%;background:radial-gradient(circle, rgba(255,255,255,0.4), rgba(0,0,0,0.25));opacity:0.7;pointer-events:none}
+  .incident-pointer{position:absolute;left:50%;top:50%;width:5px;height:44%;background:var(--accent);border-radius:999px;transform-origin:50% 90%;transform:translate(-50%, -90%) rotate(-135deg);box-shadow:0 0 6px rgba(13,110,253,0.35);transition:transform .08s ease;pointer-events:none}
+  .incident-dial.incident-empty .incident-pointer{background:var(--muted);box-shadow:none;opacity:0.7}
+  .incident-center{position:absolute;left:50%;top:50%;width:22px;height:22px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle, rgba(255,255,255,0.85), rgba(0,0,0,0.3));border:1px solid var(--border);box-shadow:inset 0 2px 4px rgba(0,0,0,0.3);pointer-events:none}
+  .incident-readouts{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted);flex:0 0 auto;width:clamp(180px,32vw,220px);min-height:110px;max-height:110px;padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--chipBg);overflow:hidden}
+  .incident-readouts div{display:flex;align-items:baseline;justify-content:space-between}
+  .incident-readouts .label{text-transform:uppercase;letter-spacing:.6px;font-size:10px;flex:0 0 auto}
+  .incident-readouts .value{font-size:14px;font-weight:600;color:var(--text);flex:0 0 auto;min-width:6ch;text-align:right;font-variant-numeric:tabular-nums}
+  #incidentClear{width:auto;padding:6px 10px;font-size:12px;background:var(--btn-bg);border:1px solid var(--border);border-radius:8px}
+  #incidentClear:hover{background:var(--btn-bg-hover)}
+  .incident-descriptor-group{margin-top:10px;display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted)}
+  .incident-note{font-size:12px;color:var(--muted);line-height:1.4;word-break:break-word;font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
-<div id="boot">Loading Photography App…</div>
+<header>
+  <h1>Photography App</h1>
+  <div id="headerRecommendation" class="header-recommendation" role="status" aria-live="polite"></div>
+  <div style="position:relative;display:flex;gap:8px;align-items:center">
+    <button id="helpBtn" class="icon-btn" title="Quick Start & Help" aria-label="Quick Start and Help" style="font-size:18px;width:auto;">❓</button>
+    <button id="shareAppBtn" class="icon-btn" title="Share Photography App" aria-label="Share Photography App" style="width:auto;display:inline-flex;align-items:center;justify-content:center;">
+      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="m7 8 5-5 5 5"></path><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path></svg>
+    </button>
+    <button id="settingsBtn" class="icon-btn" title="Settings">⋮</button>
+    <div id="settingsMenu" class="settings-menu">
+     <button id="manageBtn">Manage custom gear</button>
+        <button id="saveAppBtn">Save updated app (embed custom gear)</button>
+        <button id="themeBtn">Theme: Auto</button>
+        <button id="shareAppMenuBtn">Share app</button>
+        <div class="divider"></div>
+        <button id="aboutBtn">About</button>
+        <button id="closeSettings">Close</button>
+    </div>
+  </div>
+</header>
+
+<div id="helpModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="modal-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
+      <div id="helpTitle" style="font-weight:600">Quick Start & Help</div>
+      <button id="helpClose" class="icon-btn" style="width:auto" aria-label="Close Help">✕</button>
+    </div>
+    <div style="font-size:15px;line-height:1.6">
+      <b>1. Match the light:</b> Move the scene-light slider until the description matches what you see. A general recommendation appears immediately.<br>
+      <b>2. Get your settings:</b> Use the recommended ISO, aperture, and shutter, or open Alternatives.<br>
+      <b>3. Refine if you want:</b> Open <b>Gear</b> and/or <b>Creative Intent</b> in any order. Neither is required.<br>
+      <b>4. More Tools:</b> Open the specialized tools only when you need them.<br>
+      <hr>
+      <b>Tips:</b>
+      <ul style="margin-top:0">
+        <li>The real-world light description is the easiest way to set scene brightness; EV is shown alongside it so you learn the relationship naturally.</li>
+        <li>Tap <b>Match camera meter</b> if you want the slider to match a reflected reading from your camera.</li>
+        <li>Use <b>Copy</b> to save or send your settings.</li>
+        <li>All controls work on desktop and mobile. Use keyboard for fast navigation.</li>
+      </ul>
+      <div style="font-size:13px;color:#888;margin-top:8px">For more help, see the About section or contact the developer.</div>
+    </div>
+  </div>
+</div>
+<!-- Share App Modal -->
+<div id="shareAppModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="shareAppTitle" style="display:none;">
+  <div class="modal-content" style="max-width:430px;text-align:center;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;text-align:left">
+      <div id="shareAppTitle" style="font-weight:650">Share Photography App</div>
+      <button id="shareAppClose" class="icon-btn" style="width:auto" aria-label="Close Share App">✕</button>
+    </div>
+    <div class="sub" style="font-size:13px;line-height:1.45;margin:0 0 12px">Scan the QR code or send the link to open the web app.</div>
+    <div id="shareAppQRWrap" style="display:flex;justify-content:center;margin:8px auto 14px;">
+      <div id="shareAppQR" style="display:inline-flex;align-items:center;justify-content:center;min-width:236px;min-height:236px;padding:8px;background:#fff;border-radius:12px;border:1px solid var(--border);"></div>
+    </div>
+    <label for="shareAppUrl" style="text-align:left">Web app link</label>
+    <input id="shareAppUrl" type="text" readonly value="https://andrewscookies-ops.github.io/Photography_App/" style="font-size:13px">
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <button id="copyAppLinkBtn" style="flex:1 1 140px">Copy Link</button>
+      <button id="nativeShareAppBtn" style="flex:1 1 140px">Share…</button>
+    </div>
+  </div>
+</div>
+<!-- About Modal -->
+<div id="aboutModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" style="display:none;">
+  <div class="modal-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
+      <div id="aboutTitle" style="font-weight:600">About This App</div>
+      <button id="aboutClose" class="icon-btn" style="width:auto" aria-label="Close About">✕</button>
+    </div>
+    <div style="font-size:15px;line-height:1.6">
+      <b>Photography Exposure App</b><br>
+      Version 4.3.2 — September 2026<br><br>
+      This tool helps photographers quickly determine optimal camera settings for any scene, balancing light, creative intent, and film/camera gear. All calculations run locally in your browser. No data is sent or stored externally.<br><br>
+      <b>Author:</b> Andrew H.<br>
+      <b>Contact:</b> <a href="mailto:ajlh.photography@gmail.com">ajlh.photography@gmail.com</a><br>
+      <b>Source:</b> <a href="https://github.com/andrewscookies-ops/Photography_App" target="_blank">GitHub</a><br>
+      <b>Credits:</b> Made with AI Assistance
+    </div>
+  </div>
+</div>
+<div class="wrap">
+  <!-- Gear, Scene, Recommended, Advanced UI blocks go here -->
+  <div class="card"><div class="section-header">Gear Setup</div>
+    <!-- Capture Mode placed under the Gear Setup header for quick access -->
+    <div style="margin-bottom:8px;">
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Capture Mode</label>
+      <select id="captureMode" aria-label="Capture mode">
+        <option value="film" selected>Film</option>
+        <option value="digital">Digital</option>
+      </select>
+    </div>
+    
+    <div class="row">
+      <div class="col"><label>Camera</label><select id="cameraSelect"></select></div>
+      <div class="col"><label>Lens</label><select id="lensSelect"></select></div>
+      <div class="col"><label>Focal length (mm)</label><input type="number" id="focalInput" value="50" inputmode="decimal" autocomplete="off"></div>
+      <!-- Capture Mode moved below Gear Setup so it sits just under the card -->
+      <div class="col" id="filmCol"><label>Film Brand</label><select id="filmSelect"></select></div>
+      <div class="col" id="isoCol"><label>ISO</label>
+        <select id="isoSelect">
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="200">200</option>
+          <option value="400" selected>400</option>
+          <option value="800">800</option>
+          <option value="1600">1600</option>
+          <option value="3200">3200</option>
+        </select>
+        <input type="number" id="isoNumeric" aria-label="ISO numeric input" style="display:none;margin-top:6px;" value="400" min="1">
+      </div>
+    </div>
+  </div>
+  
+  <button id="creativeToggle" style="margin-bottom:8px;">Show Creative Intent</button>
+  <div class="card" id="creativeCard" style="display:none;">
+  <div class="section-header">Creative Intent</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px 12px;align-items:flex-end;justify-content:space-between;padding:4px 0 0 0;">
+    <div style="flex:2 1 180px;min-width:120px;">
+      <label style="font-size:12px;margin-bottom:4px;color:#667085;">Depth of field</label>
+      <div class="seg" id="ciBlurSeg" style="margin-bottom:0;">
+        <button class="seg-btn" data-val="vdeep">Very deep</button>
+        <button class="seg-btn" data-val="deep">Deep</button>
+        <button class="seg-btn active" data-val="balanced">Balanced</button>
+        <button class="seg-btn" data-val="shallow">Shallow</button>
+        <button class="seg-btn" data-val="vshallow">Very shallow</button>
+      </div>
+    </div>
+    <div style="flex:2 1 180px;min-width:120px;">
+      <label style="font-size:12px;margin-bottom:4px;color:#667085;">Motion blur</label>
+      <div class="seg" id="ciMoveSeg" style="margin-bottom:0;">
+        <button class="seg-btn" data-val="blur">Blurred</button>
+        <button class="seg-btn" data-val="slow">Slight blur</button>
+        <button class="seg-btn active" data-val="balanced">Neutral</button>
+        <button class="seg-btn" data-val="fast">Sharp</button>
+        <button class="seg-btn" data-val="freeze">Frozen</button>
+      </div>
+    </div>
+    <div style="flex:2 1 180px;min-width:120px;">
+      <label id="grainLabel" style="font-size:12px;margin-bottom:4px;color:#667085;">Grain preference</label>
+      <div class="seg" id="ciGrainSeg" style="margin-bottom:0;">
+        <button class="seg-btn" data-val="clean">Clean</button>
+        <button class="seg-btn" data-val="low">Low</button>
+        <button class="seg-btn active" data-val="balanced">Balanced</button>
+        <button class="seg-btn" data-val="high">High</button>
+        <button class="seg-btn" data-val="gritty">Gritty</button>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;margin:6px 0 0 0;align-items:center;flex-wrap:wrap;">
+    <label style="font-size:12px;display:flex;align-items:center;gap:4px;margin:0;">Tripod <input type="checkbox" id="ciTripod2" style="margin:0;vertical-align:middle;"></label>
+    <label style="font-size:12px;display:flex;align-items:center;gap:4px;margin:0;">Panning <input type="checkbox" id="ciPanning2" style="margin:0;vertical-align:middle;"></label>
+  </div>
+  <div class="sub" id="ciSummary" style="margin-top:4px;">Balanced DOF • Balanced motion • Balanced grain/noise</div>
+</div>
+  
+
+  <div class="card" id="lightCard"><div class="section-header">Light in the Scene</div>
+    <div class="sub" style="margin-bottom:8px;">
+      Move the slider until the description best matches the light you are seeing. The EV number updates with it.
+    </div>
+    <div id="evCtrl" class="ev-control" role="slider"
+      aria-label="Scene light exposure value" aria-valuemin="-4" aria-valuemax="16" aria-valuenow="13" tabindex="0">
+      <div class="ev-track"></div>
+      <div class="ev-ticks"></div>
+      <div class="ev-handle"></div>
+    </div>
+    <input type="range" id="evSlider" min="-4" max="16" step="0.1" value="13"
+      style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" aria-hidden="true">
+
+    <div id="evDescriptor" class="ev-descriptor">
+      <div class="ev-headline">
+        <span class="descriptor-tag">Scene light</span>
+        <span id="evDescLabel">—</span>
+      </div>
+      <div id="meterSourceLine" class="meter-source-line">Using scene-light estimate for recommendations</div>
+      <div class="ev-numeric">
+        <label>EV<input type="number" id="evInput" value="13" step="0.1"></label>
+        <label>≈ lux<input type="number" id="luxInput" value="20480"></label>
+      </div>
+      <div class="sub" style="margin-top:-6px">Lux is an approximate reference here; EV is the exposure value used by the app.</div>
+      <div class="ambient-actions">
+        <div class="ambient-buttons">
+          <button id="calBtn" style="width:auto;padding:6px 9px">Match camera meter</button>
+          <button id="incidentToggle" style="width:auto;padding:6px 9px;min-width:unset;" class="secondary" aria-label="Enter an incident meter reading">Use incident meter reading</button>
+        </div>
+      </div>
+
+      <div id="incidentDrawer" style="display:none;" class="incident-wrap incident-compact">
+        <div class="incident-explain">
+          <strong>Incident light</strong> is the light falling on your subject. If you have a handheld light meter, enter its reading here and the app will use it instead of the scene-light estimate.
+        </div>
+
+        <div class="incident-entry">
+          <label>Incident EV (EV100)
+            <input id="incidentExactInput" type="number" min="-4" max="20" step="0.1" inputmode="decimal" placeholder="e.g. 12.3">
+          </label>
+          <button type="button" id="incidentUseExact">Use EV</button>
+        </div>
+
+        <div class="sub">If your meter does not report EV100, enter the exposure combination it shows instead:</div>
+        <div class="meter-exposure-entry">
+          <label>Meter ISO<input id="incidentMeterISO" type="number" min="1" step="1" value="100"></label>
+          <label>Aperture<input id="incidentMeterN" type="number" min="0.7" max="128" step="0.1" value="4"></label>
+          <label>Shutter<input id="incidentMeterT" type="text" value="1/125" inputmode="text"></label>
+          <button type="button" id="incidentUseExposure">Use meter exposure</button>
+        </div>
+
+        <div class="sub">No meter? You can also estimate subject light with the dial.</div>
+        <div class="incident-dial-box">
+          <div id="incidentDial" class="incident-dial" role="slider" aria-label="Incident EV estimate" aria-valuemin="-4" aria-valuemax="16" aria-valuenow="13" tabindex="0">
+            <div class="incident-pointer" id="incidentPointer"></div>
+            <div class="incident-center"></div>
+          </div>
+          <div class="incident-readouts">
+            <div><span class="label">Incident EV</span><span class="value" id="incidentEvReadout">—</span></div>
+            <div><span class="label">≈ Lux</span><span class="value" id="incidentLuxReadout">—</span></div>
+            <button type="button" id="incidentClear">Use scene light instead</button>
+          </div>
+        </div>
+        <input type="hidden" id="incidentEvInput">
+        <input type="hidden" id="incidentLuxInput">
+        <div class="incident-descriptor-group">
+          <div class="incident-note" id="incidentNote">No incident reading is active.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="recommendedCard"><div class="section-header">Recommended Settings</div>
+    <div id="output" class="output-main">—</div>
+    <style>
+      .flash-animate {
+        animation: flashHighlight 0.7s cubic-bezier(.4,0,.2,1);
+      }
+      @keyframes flashHighlight {
+        0% { background: var(--flash-bg); box-shadow: 0 0 0 0 var(--flash-glow); }
+        40% { background: var(--flash-bg); box-shadow: 0 0 0 8px var(--flash-glow-outer); }
+        100% { background: none; box-shadow: none; }
+      }
+    </style>
+    <div id="warning" class="warning"></div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">
+      <button id="altToggle" style="width:auto;flex:1 1 180px">Show Alternatives</button>
+      <button id="copyBtn" style="width:auto">Copy</button>
+      <button id="shareBtn" style="width:auto">Share Settings</button>
+    </div>
+    <div id="altSection" style="display:none;margin-top:8px;">
+      <div class="alt-grid">
+        <table id="altTable">
+          <thead><tr><th>ISO</th><th>Aperture</th><th>Shutter</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div style="margin-top:8px;">
+        <button id="toggleFull">Show All Alternatives</button>
+        <div id="fullAlt" style="display:none;margin-top:8px" class="alt-grid">
+          <table id="altTableFull">
+            <thead><tr><th>ISO</th><th>Aperture</th><th>Shutter</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button id="advancedToggle">Open Advanced</button>
+  <div class="card" id="advancedDrawer" style="display:none;">
+    <div class="section-header">Advanced</div>
+    <div class="sub advanced-intro">Optional tools for specific situations. Open only what you need; tap ? for a quick explanation.</div>
+
+    <details>
+      <summary><span class="adv-chevron" aria-hidden="true">›</span><span class="summary-label">Depth of Field</span><button type="button" class="info-btn" data-info="dof" aria-label="What is depth of field?">?</button></summary>
+      <div class="info-inline" data-info-desc="dof"></div>
+      <div id="dofOut">—</div>
+    </details>
+    <details>
+      <summary><span class="adv-chevron" aria-hidden="true">›</span><span class="summary-label">Motion &amp; Panning</span><button type="button" class="info-btn" data-info="motion" aria-label="What are motion and panning settings?">?</button></summary>
+      <div class="info-inline" data-info-desc="motion"></div>
+      <div id="motOut">—</div>
+    </details>
+    <details>
+      <summary><span class="adv-chevron" aria-hidden="true">›</span><span class="summary-label">Bracketing</span><button type="button" class="info-btn" data-info="bracket" aria-label="What is bracketing?">?</button></summary>
+      <div class="info-inline" data-info-desc="bracket"></div>
+      <div id="brOut">—</div>
+    </details>
+    <details>
+      <summary><span class="adv-chevron" aria-hidden="true">›</span><span class="summary-label">Long Exposure (Reciprocity)</span><button type="button" class="info-btn" data-info="reciprocity" aria-label="What is reciprocity correction?">?</button></summary>
+      <div class="info-inline" data-info-desc="reciprocity"></div>
+      <div id="recipOut">—</div>
+    </details>
+    <details>
+      <summary><span class="adv-chevron" aria-hidden="true">›</span><span class="summary-label">Push / Pull Film</span><button type="button" class="info-btn" data-info="pushpull" aria-label="What is push or pull film processing?">?</button></summary>
+      <div class="info-inline" data-info-desc="pushpull"></div>
+      <div id="ppOut">—</div>
+    </details>
+  </div>
+</div>
+<!-- Calibrate Modal -->
+<div id="calModal" class="modal" role="dialog" aria-modal="true">
+  <div class="modal-content" tabindex="0" aria-label="Calibrate to camera meter dialog">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
+      <div style="font-weight:600">Calibrate to camera meter</div>
+      <button id="calClose" class="icon-btn" style="width:auto">✕</button>
+    </div>
+    <div>
+      <label>Working ISO (defaults to current ISO)</label>
+      <input id="calISO" type="number" min="3" max="25600" step="1" value="400">
+      <label>Aperture f/N</label>
+      <input id="calN" type="number" min="0.7" max="64" step="0.1" value="1.8">
+      <label>Shutter time</label>
+      <input id="calT" type="text" value="1/125">
+      <div class="sub">Examples: 1/60, 1/1000, 0.5, 2</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button id="calApply">Set EV from meter</button>
+      <button id="calReset" title="Reset EV to default">Reset</button>
+      <button id="calCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+<!-- Custom Gear Modal -->
+<div id="customModal" class="modal" role="dialog" aria-modal="true">
+  <div class="modal-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
+      <div id="customTitle" style="font-weight:600">Add Custom</div>
+      <button id="customClose" class="icon-btn" style="width:auto">✕</button>
+    </div>
+    <div id="customForm"></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button id="customSave">Save</button>
+      <button id="customCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+<!-- Manage Custom Gear Modal -->
+<div id="manageModal" class="modal" role="dialog" aria-modal="true">
+  <div class="modal-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
+      <div style="font-weight:600">Manage custom gear</div>
+      <button id="manageClose" class="icon-btn" style="width:auto">✕</button>
+    </div>
+    <div class="sub">Add or delete items you previously added. Built-ins cannot be deleted.</div>
+    <div style="margin-top:10px">
+      <details open>
+        <summary>Cameras</summary>
+        <div id="manageCameras"></div>
+        <button id="addCameraBtn">+ Add Camera</button>
+      </details>
+      <details open>
+        <summary>Lenses</summary>
+        <div id="manageLenses"></div>
+        <button id="addLensBtn">+ Add Lens</button>
+      </details>
+      <details open>
+        <summary>Films</summary>
+        <div id="manageFilms"></div>
+        <button id="addFilmBtn">+ Add Film</button>
+      </details>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <button id="manageDeleteAll" style="background:#b00020;color:#fff">Delete ALL custom items</button>
+      <button id="manageDone">Done</button>
+    </div>
+  </div>
+</div>
+<!-- BEGIN compat shim: insert BEFORE your main <script> -->
 <script>
+// About modal logic
+document.getElementById('aboutBtn')?.addEventListener('click',function(){ openModal('aboutModal'); });
+document.getElementById('aboutClose')?.addEventListener('click',function(){ closeModal('aboutModal'); });
+document.getElementById('aboutModal')?.addEventListener('click',function(e){
+  if(e.target===this){ closeModal('aboutModal'); }
+});
 (function(){
-  fetch('app-core.html?v=432',{cache:'no-store'})
-    .then(function(r){if(!r.ok)throw new Error('Could not load app');return r.text();})
-    .then(function(html){
-      var injection='<script src="auto-iso-layout.js?v=440"><\/script>';
-      if(html.indexOf('</body>')>=0) html=html.replace('</body>',injection+'</body>');
-      else html+=injection;
-      document.open();
-      document.write(html);
-      document.close();
-    })
-    .catch(function(err){
-      document.getElementById('boot').textContent='Could not load Photography App. Refresh the page.';
-      console.error(err);
+  try{
+    var creativeToggle = document.getElementById('creativeToggle');
+    var creativeCard = document.getElementById('creativeCard');
+    if(!creativeToggle || !creativeCard) return;
+    creativeToggle.addEventListener('click', function() {
+      var cs = window.getComputedStyle(creativeCard);
+      var visible = cs.display !== 'none';
+      creativeCard.style.display = visible ? 'none' : 'block';
+      creativeToggle.setAttribute('aria-expanded', String(!visible));
+      creativeToggle.textContent = visible ? 'Show Creative Intent' : 'Hide Creative Intent';
     });
+  }catch(e){ /* ignore */ }
+})();
+// Hide helpBtn when help modal is open, restore when closed
+document.getElementById('helpBtn')?.addEventListener('click',function(){ this.style.display='none'; openModal('helpModal'); });
+document.getElementById('helpClose')?.addEventListener('click',function(){ document.getElementById('helpBtn').style.display=''; closeModal('helpModal'); });
+// Also hide helpBtn if modal is closed by clicking outside or Escape
+document.getElementById('helpModal')?.addEventListener('click',function(e){
+  if(e.target===this){ document.getElementById('helpBtn').style.display=''; closeModal('helpModal'); }
+});
+document.addEventListener('keydown',function(e){
+  var modal=document.getElementById('helpModal');
+  if(modal && modal.style.display==='flex' && (e.key==='Escape'||e.key==='Esc')){
+    document.getElementById('helpBtn').style.display='';
+    closeModal('helpModal');
+  }
+});
+(function(){
+// Copy/share logic for recommended settings
+document.getElementById('copyBtn')?.addEventListener('click',function(){
+  var out=document.getElementById('output')?.textContent||'';
+  if(!out){alert('No settings to copy.');return;}
+  navigator.clipboard.writeText(out).then(function(){
+    document.getElementById('copyBtn').textContent='Copied!';
+    setTimeout(function(){document.getElementById('copyBtn').textContent='Copy';},1200);
+  },function(){alert('Copy failed.');});
+});
+document.getElementById('shareBtn')?.addEventListener('click',function(){
+  var out=document.getElementById('output')?.textContent||'';
+  var url=window.location.href;
+  var summary='Recommended settings: '+out+'\n'+url;
+  if(navigator.share){
+    navigator.share({title:'Photo Settings',text:out,url:url});
+  }else{
+    // Fallback: show a dialog with the summary to copy
+    var dlg=document.createElement('div');
+    dlg.style.position='fixed';dlg.style.left='0';dlg.style.top='0';dlg.style.width='100vw';dlg.style.height='100vh';dlg.style.background='rgba(0,0,0,0.4)';dlg.style.display='flex';dlg.style.justifyContent='center';dlg.style.alignItems='center';dlg.style.zIndex='9999';
+    var inner=document.createElement('div');
+    inner.style.background='#fff';inner.style.padding='18px';inner.style.borderRadius='12px';inner.style.maxWidth='90vw';inner.style.boxShadow='0 8px 32px rgba(0,0,0,0.18)';
+    inner.innerHTML='<div style="font-weight:600;margin-bottom:8px">Share Settings</div>'+
+      '<textarea style="width:320px;max-width:80vw;height:60px;resize:none;font-size:14px">'+summary+'</textarea>'+
+      '<div style="margin-top:10px;text-align:right"><button id="closeShareDlg">Close</button></div>';
+    dlg.appendChild(inner);
+    document.body.appendChild(dlg);
+    inner.querySelector('textarea').select();
+    inner.querySelector('#closeShareDlg').onclick=function(){document.body.removeChild(dlg);};
+  }
+});
+  function hiddenNumber(id,val){
+    if(document.getElementById(id)) return;
+    var i=document.createElement('input');
+    i.type='number'; i.id=id; i.value=val; i.style.display='none';
+    document.body.appendChild(i);
+  }
+  function hiddenSelect(id, values){
+    if(document.getElementById(id)) return;
+    var s=document.createElement('select'); s.id=id; s.style.display='none';
+    values.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)});
+    document.body.appendChild(s);
+  }
+
+  // Needed by recommend()/advanced helpers
+  hiddenNumber('evBias', 0);
+
+  // DOF
+  hiddenNumber('dofDist', 3);
+  hiddenNumber('dofCoC', 0.03);
+
+  // Motion
+  hiddenNumber('motDist', 10);
+  hiddenSelect('motSpeed', ['1.4','5','8','15','27','40']);
+  hiddenSelect('motDir', ['across','toward']);
+
+  // Bracketing
+  hiddenNumber('brSpan', 1);
+  hiddenSelect('brStep', ['1/3','1/2','1']);
+  hiddenSelect('brParam', ['shutter','aperture','iso']);
+
+  // Push/Pull
+  hiddenNumber('ppStops', 0);
+})();
+</script>
+<!-- END compat shim -->
+<script>
+
+// ---- Restored helpers to prevent init crashes and populate selects ----
+function brandOfFilm(f){
+  return f && f.brand ? f.brand : '';
+}
+function allFilms(){
+  var st = loadUserStore();
+  return (st.films || []).concat(filmsBuiltin);
+}
+function refreshISOForSelectedBrand(){
+  var brand = document.getElementById('filmSelect')?.value;
+  var isoSel = document.getElementById('isoSelect');
+  if(!isoSel) return;
+  var films = allFilms().filter(function(f){ return f.brand === brand; });
+  var isos = films.map(function(f){ return f.box_iso; })
+                   .filter(function(x){ return typeof x === 'number' && !isNaN(x); })
+                   .filter(function(x, i, a){ return a.indexOf(x) === i; })
+                   .sort(function(a,b){ return a-b; });
+  if(isos.length === 0){
+    // fallback list so the control never ends up empty
+    isos = [50,100,200,400,800,1600,3200];
+  }
+  isoSel.innerHTML = isos.map(function(i){ return '<option value="'+i+'">'+i+'</option>'; }).join('');
+  var cur = parseInt(isoSel.value||'0',10);
+  if(isos.indexOf(cur) === -1){
+    // choose closest available ISO to current selection, else first
+    var closest = isos[0];
+    for(var k=1;k<isos.length;k++){
+      if(Math.abs(isos[k]-cur) < Math.abs(closest-cur)) closest = isos[k];
+    }
+    isoSel.value = String(closest);
+  }
+}
+// Basic modal helpers used by settings/custom dialogs. Safe if modals are absent.
+function openModal(id){ var el = document.getElementById(id); if(el){ el.style.display = 'flex'; } }
+function closeModal(id){ var el = document.getElementById(id); if(el){ el.style.display = 'none'; } }
+// Modal close wiring (safe if elements absent)
+document.addEventListener('click',function(e){
+   if(e.target && (e.target.id==='customClose' || e.target.id==='customCancel')){
+    closeModal('customModal');
+    var manage=document.getElementById('manageModal');
+    if(manage && manage.getAttribute('data-return')==='1'){
+        manage.removeAttribute('data-return');
+        openModal('manageModal');
+    }
+}  if(e.target && (e.target.id==='calClose' || e.target.id==='calCancel')){ closeModal('calModal'); }
+  if(e.target && (e.target.id==='manageClose' || e.target.id==='manageDone')){ closeModal('manageModal'); }
+});
+// ===== Storage =====
+// Embedded store: lives inside this HTML file for portable customs
+function getEmbeddedNode(){
+  var n=document.getElementById('embeddedUserData');
+  if(!n){
+    n=document.createElement('script');
+    n.id='embeddedUserData';
+    n.type='application/json';
+    n.textContent='{"cameras":[],"lenses":[],"films":[]}';
+    document.body.appendChild(n);
+  }
+  return n;
+}
+var USER_STORE_KEY='photoAppUserGear_v2';
+function normalizeUserStore(obj){
+  if(!obj||typeof obj!=='object') obj={};
+  obj.cameras=Array.isArray(obj.cameras)?obj.cameras:[];
+  obj.lenses=Array.isArray(obj.lenses)?obj.lenses:[];
+  obj.films=Array.isArray(obj.films)?obj.films:[];
+  return obj;
+}
+function loadUserStore(){
+  try{
+    var saved=localStorage.getItem(USER_STORE_KEY);
+    if(saved){ return normalizeUserStore(JSON.parse(saved)); }
+  }catch(e){}
+  try{
+    var n=getEmbeddedNode();
+    var txt=n.textContent||n.innerText||'{}';
+    return normalizeUserStore(JSON.parse(txt));
+  }catch(e){ return {cameras:[],lenses:[],films:[]}; }
+}
+function saveUserStore(obj){
+  try{
+    var clean=normalizeUserStore(obj);
+    var payload=JSON.stringify({cameras:clean.cameras,lenses:clean.lenses,films:clean.films});
+    var n=getEmbeddedNode();
+    n.textContent=payload;
+    try{ localStorage.setItem(USER_STORE_KEY,payload); }catch(_e){}
+  }catch(e){}
+}
+// Download a new HTML with embedded customs
+function downloadUpdatedHTML(){
+  try{
+    var store=loadUserStore(); saveUserStore(store);
+    var html='<!doctype html>\n'+document.documentElement.outerHTML;
+    var blob=new Blob([html],{type:'text/html'});
+    var a=document.createElement('a');
+    var ts=new Date().toISOString().replace(/[:.]/g,'-');
+    a.download='Photography_App_custom_'+ts+'.html';
+    a.href=URL.createObjectURL(blob);
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href); a.remove();},0);
+  }catch(e){ alert('Could not save file: '+e.message); }
+}
+// Persist a custom item into the embedded store
+function addToStore(kind, obj){
+  try{
+    var st = loadUserStore();
+    if(!st[kind]) st[kind]=[];
+    var key = obj && obj.name;
+    st[kind] = st[kind].filter(function(x){ return x && x.name !== key; });
+    st[kind].unshift(obj);
+    saveUserStore(st);
+  }catch(e){ console.warn('addToStore failed', e); }
+}
+function delFromStore(kind, name){
+  try{
+    var st=loadUserStore();
+    if(Array.isArray(st[kind])){
+      st[kind]=st[kind].filter(function(x){ return x && x.name !== name; });
+      saveUserStore(st);
+    }
+  }catch(e){ console.warn('delFromStore failed', e); }
+}
+function renderManageList(){
+  var st=loadUserStore();
+  function render(kind, elId){
+    var host=document.getElementById(elId); if(!host) return;
+    var arr=Array.isArray(st[kind])?st[kind]:[];
+    if(!arr.length){ host.innerHTML='<div class="sub">No custom '+kind+' added.</div>'; return; }
+    host.innerHTML='';
+    arr.forEach(function(item){
+      var row=document.createElement('div');
+      row.style.display='flex'; row.style.justifyContent='space-between'; row.style.alignItems='center'; row.style.gap='8px'; row.style.padding='6px 0';
+      var name=document.createElement('div'); name.textContent=item.name; name.style.flex='1';
+      var btn=document.createElement('button'); btn.textContent='Delete'; btn.style.width='auto';
+      btn.addEventListener('click',function(){
+        delFromStore(kind,item.name);
+        renderManageList(); refreshCameras(); refreshFilms(); refreshLenses(); recalc();
+      });
+      row.appendChild(name); row.appendChild(btn); host.appendChild(row);
+    });
+  }
+  render('cameras','manageCameras');
+  render('lenses','manageLenses');
+  render('films','manageFilms');
+}
+// ===== Built-ins =====
+var camerasBuiltin=[
+  {name:"Nikon F100",mount:"nikon_f",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'},
+  {name:"Nikon FE2",mount:"nikon_f",max_shutter_den:4000,aperture_step:'full',shutter_step:'full'},
+  {name:"Canon AE-1",mount:"canon_fd",max_shutter_den:1000,aperture_step:'full',shutter_step:'full'},
+  {name:"Pentax K1000",mount:"pentax_k",max_shutter_den:1000,aperture_step:'full',shutter_step:'full'},
+  {name:"Minolta X-700",mount:"minolta_sr",max_shutter_den:1000,aperture_step:'full',shutter_step:'full'},
+  {name:"Olympus OM-1",mount:"olympus_om",max_shutter_den:1000,aperture_step:'full',shutter_step:'full'}
+];
+// Modern digital cameras (kept as built-in options but only shown when Digital is selected)
+var camerasDigitalBuiltin=[
+  {name:"Sony A7 III",mount:"sony_e",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'},
+  {name:"Canon EOS R6",mount:"canon_rf",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'},
+  {name:"Nikon Z6 II",mount:"nikon_z",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'},
+  {name:"Nikon Zf",mount:"nikon_z",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'},
+  {name:"Fujifilm X-T4",mount:"fujifilm_x",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'},
+  {name:"Panasonic Lumix S5",mount:"l_mount",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'},
+  {name:"Canon 5D Mark IV",mount:"canon_eos",max_shutter_den:8000,aperture_step:'third',shutter_step:'third'}
+];
+var lensesBuiltin=[
+  // Nikon F mount — F100 / FE2
+  {name:"Nikon 20mm f/2.8",mount:"nikon_f",type:"prime",focal_mm:20,max_aperture:2.8,min_aperture:22},
+  {name:"Nikon 24mm f/2.8",mount:"nikon_f",type:"prime",focal_mm:24,max_aperture:2.8,min_aperture:22},
+  {name:"Nikon 28mm f/2.8",mount:"nikon_f",type:"prime",focal_mm:28,max_aperture:2.8,min_aperture:22},
+  {name:"Nikon 35mm f/2",mount:"nikon_f",type:"prime",focal_mm:35,max_aperture:2,min_aperture:22},
+  {name:"Nikon 50mm f/1.4",mount:"nikon_f",type:"prime",focal_mm:50,max_aperture:1.4,min_aperture:16},
+  {name:"Nikon 50mm f/1.8",mount:"nikon_f",type:"prime",focal_mm:50,max_aperture:1.8,min_aperture:16},
+  {name:"Nikon 55mm f/2.8 Micro",mount:"nikon_f",type:"prime",focal_mm:55,max_aperture:2.8,min_aperture:32},
+  {name:"Nikon 85mm f/1.8",mount:"nikon_f",type:"prime",focal_mm:85,max_aperture:1.8,min_aperture:22},
+  {name:"Nikon 105mm f/2.5",mount:"nikon_f",type:"prime",focal_mm:105,max_aperture:2.5,min_aperture:22},
+  {name:"Nikon 135mm f/2.8",mount:"nikon_f",type:"prime",focal_mm:135,max_aperture:2.8,min_aperture:22},
+  {name:"Nikon 180mm f/2.8",mount:"nikon_f",type:"prime",focal_mm:180,max_aperture:2.8,min_aperture:22},
+  {name:"Nikon 24-50mm f/3.3-4.5",mount:"nikon_f",type:"zoom",focal_min_mm:24,focal_max_mm:50,max_aperture_wide:3.3,max_aperture_tele:4.5,min_aperture:22},
+  {name:"Nikon 28-70mm f/2.8",mount:"nikon_f",type:"zoom",focal_min_mm:28,focal_max_mm:70,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Nikon 35-70mm f/2.8",mount:"nikon_f",type:"zoom",focal_min_mm:35,focal_max_mm:70,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Nikon 70-210mm f/4",mount:"nikon_f",type:"zoom",focal_min_mm:70,focal_max_mm:210,max_aperture_wide:4,max_aperture_tele:4,min_aperture:32},
+  {name:"Nikon 80-200mm f/2.8",mount:"nikon_f",type:"zoom",focal_min_mm:80,focal_max_mm:200,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Nikon 70-200mm f/2.8",mount:"nikon_f",type:"zoom",focal_min_mm:70,focal_max_mm:200,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+
+  // Canon FD mount — AE-1
+  {name:"Canon FD 20mm f/2.8",mount:"canon_fd",type:"prime",focal_mm:20,max_aperture:2.8,min_aperture:22},
+  {name:"Canon FD 24mm f/2.8",mount:"canon_fd",type:"prime",focal_mm:24,max_aperture:2.8,min_aperture:22},
+  {name:"Canon FD 28mm f/2.8",mount:"canon_fd",type:"prime",focal_mm:28,max_aperture:2.8,min_aperture:22},
+  {name:"Canon FD 35mm f/2",mount:"canon_fd",type:"prime",focal_mm:35,max_aperture:2,min_aperture:22},
+  {name:"Canon FD 50mm f/1.4",mount:"canon_fd",type:"prime",focal_mm:50,max_aperture:1.4,min_aperture:22},
+  {name:"Canon FD 50mm f/1.8",mount:"canon_fd",type:"prime",focal_mm:50,max_aperture:1.8,min_aperture:16},
+  {name:"Canon FD 55mm f/1.2",mount:"canon_fd",type:"prime",focal_mm:55,max_aperture:1.2,min_aperture:16},
+  {name:"Canon FD 85mm f/1.8",mount:"canon_fd",type:"prime",focal_mm:85,max_aperture:1.8,min_aperture:22},
+  {name:"Canon FD 100mm f/2.8",mount:"canon_fd",type:"prime",focal_mm:100,max_aperture:2.8,min_aperture:22},
+  {name:"Canon FD 135mm f/2.8",mount:"canon_fd",type:"prime",focal_mm:135,max_aperture:2.8,min_aperture:32},
+  {name:"Canon FD 200mm f/2.8",mount:"canon_fd",type:"prime",focal_mm:200,max_aperture:2.8,min_aperture:32},
+  {name:"Canon FD 20-35mm f/3.5 L",mount:"canon_fd",type:"zoom",focal_min_mm:20,focal_max_mm:35,max_aperture_wide:3.5,max_aperture_tele:3.5,min_aperture:22},
+  {name:"Canon FD 35-70mm f/4",mount:"canon_fd",type:"zoom",focal_min_mm:35,focal_max_mm:70,max_aperture_wide:4,max_aperture_tele:4,min_aperture:22},
+  {name:"Canon FD 35-105mm f/3.5",mount:"canon_fd",type:"zoom",focal_min_mm:35,focal_max_mm:105,max_aperture_wide:3.5,max_aperture_tele:3.5,min_aperture:22},
+  {name:"Canon FD 70-210mm f/4",mount:"canon_fd",type:"zoom",focal_min_mm:70,focal_max_mm:210,max_aperture_wide:4,max_aperture_tele:4,min_aperture:32},
+  {name:"Canon FD 80-200mm f/4",mount:"canon_fd",type:"zoom",focal_min_mm:80,focal_max_mm:200,max_aperture_wide:4,max_aperture_tele:4,min_aperture:32},
+
+  // Pentax K mount — K1000
+  {name:"Pentax 24mm f/2.8",mount:"pentax_k",type:"prime",focal_mm:24,max_aperture:2.8,min_aperture:22},
+  {name:"Pentax 28mm f/2.8",mount:"pentax_k",type:"prime",focal_mm:28,max_aperture:2.8,min_aperture:22},
+  {name:"Pentax 35mm f/2.8",mount:"pentax_k",type:"prime",focal_mm:35,max_aperture:2.8,min_aperture:22},
+  {name:"Pentax 40mm f/2.8",mount:"pentax_k",type:"prime",focal_mm:40,max_aperture:2.8,min_aperture:22},
+  {name:"Pentax 50mm f/1.4",mount:"pentax_k",type:"prime",focal_mm:50,max_aperture:1.4,min_aperture:22},
+  {name:"Pentax 50mm f/1.7",mount:"pentax_k",type:"prime",focal_mm:50,max_aperture:1.7,min_aperture:22},
+  {name:"Pentax 50mm f/2",mount:"pentax_k",type:"prime",focal_mm:50,max_aperture:2,min_aperture:22},
+  {name:"Pentax 85mm f/1.8",mount:"pentax_k",type:"prime",focal_mm:85,max_aperture:1.8,min_aperture:22},
+  {name:"Pentax 100mm f/2.8 Macro",mount:"pentax_k",type:"prime",focal_mm:100,max_aperture:2.8,min_aperture:32},
+  {name:"Pentax 135mm f/3.5",mount:"pentax_k",type:"prime",focal_mm:135,max_aperture:3.5,min_aperture:32},
+  {name:"Pentax 200mm f/4",mount:"pentax_k",type:"prime",focal_mm:200,max_aperture:4,min_aperture:32},
+  {name:"Pentax 28-80mm f/3.5-4.5",mount:"pentax_k",type:"zoom",focal_min_mm:28,focal_max_mm:80,max_aperture_wide:3.5,max_aperture_tele:4.5,min_aperture:22},
+  {name:"Pentax 35-70mm f/3.5-4.5",mount:"pentax_k",type:"zoom",focal_min_mm:35,focal_max_mm:70,max_aperture_wide:3.5,max_aperture_tele:4.5,min_aperture:22},
+  {name:"Pentax 70-210mm f/4",mount:"pentax_k",type:"zoom",focal_min_mm:70,focal_max_mm:210,max_aperture_wide:4,max_aperture_tele:4,min_aperture:32},
+  {name:"Pentax 80-200mm f/4.5",mount:"pentax_k",type:"zoom",focal_min_mm:80,focal_max_mm:200,max_aperture_wide:4.5,max_aperture_tele:4.5,min_aperture:32},
+
+  // Minolta SR/MD mount — X-700
+  {name:"Minolta Rokkor 24mm f/2.8",mount:"minolta_sr",type:"prime",focal_mm:24,max_aperture:2.8,min_aperture:22},
+  {name:"Minolta Rokkor 28mm f/2.8",mount:"minolta_sr",type:"prime",focal_mm:28,max_aperture:2.8,min_aperture:22},
+  {name:"Minolta Rokkor 35mm f/1.8",mount:"minolta_sr",type:"prime",focal_mm:35,max_aperture:1.8,min_aperture:22},
+  {name:"Minolta Rokkor 45mm f/2",mount:"minolta_sr",type:"prime",focal_mm:45,max_aperture:2,min_aperture:16},
+  {name:"Minolta Rokkor 50mm f/1.4",mount:"minolta_sr",type:"prime",focal_mm:50,max_aperture:1.4,min_aperture:16},
+  {name:"Minolta Rokkor 50mm f/1.7",mount:"minolta_sr",type:"prime",focal_mm:50,max_aperture:1.7,min_aperture:22},
+  {name:"Minolta Rokkor 58mm f/1.2",mount:"minolta_sr",type:"prime",focal_mm:58,max_aperture:1.2,min_aperture:16},
+  {name:"Minolta Rokkor 85mm f/1.7",mount:"minolta_sr",type:"prime",focal_mm:85,max_aperture:1.7,min_aperture:22},
+  {name:"Minolta Rokkor 100mm f/2.5",mount:"minolta_sr",type:"prime",focal_mm:100,max_aperture:2.5,min_aperture:22},
+  {name:"Minolta Rokkor 135mm f/2.8",mount:"minolta_sr",type:"prime",focal_mm:135,max_aperture:2.8,min_aperture:22},
+  {name:"Minolta Rokkor 200mm f/4",mount:"minolta_sr",type:"prime",focal_mm:200,max_aperture:4,min_aperture:22},
+  {name:"Minolta MD 35-70mm f/3.5",mount:"minolta_sr",type:"zoom",focal_min_mm:35,focal_max_mm:70,max_aperture_wide:3.5,max_aperture_tele:3.5,min_aperture:22},
+  {name:"Minolta MD 70-210mm f/4",mount:"minolta_sr",type:"zoom",focal_min_mm:70,focal_max_mm:210,max_aperture_wide:4,max_aperture_tele:4,min_aperture:22},
+  {name:"Minolta MD 75-200mm f/4.5",mount:"minolta_sr",type:"zoom",focal_min_mm:75,focal_max_mm:200,max_aperture_wide:4.5,max_aperture_tele:4.5,min_aperture:22},
+  {name:"Minolta MD 100-300mm f/5.6",mount:"minolta_sr",type:"zoom",focal_min_mm:100,focal_max_mm:300,max_aperture_wide:5.6,max_aperture_tele:5.6,min_aperture:32},
+
+  // Olympus OM mount — OM-1
+  {name:"Olympus Zuiko 21mm f/3.5",mount:"olympus_om",type:"prime",focal_mm:21,max_aperture:3.5,min_aperture:16},
+  {name:"Olympus Zuiko 24mm f/2.8",mount:"olympus_om",type:"prime",focal_mm:24,max_aperture:2.8,min_aperture:16},
+  {name:"Olympus Zuiko 28mm f/2.8",mount:"olympus_om",type:"prime",focal_mm:28,max_aperture:2.8,min_aperture:22},
+  {name:"Olympus Zuiko 35mm f/2.8",mount:"olympus_om",type:"prime",focal_mm:35,max_aperture:2.8,min_aperture:16},
+  {name:"Olympus Zuiko 40mm f/2",mount:"olympus_om",type:"prime",focal_mm:40,max_aperture:2,min_aperture:16},
+  {name:"Olympus Zuiko 50mm f/1.4",mount:"olympus_om",type:"prime",focal_mm:50,max_aperture:1.4,min_aperture:16},
+  {name:"Olympus Zuiko 50mm f/1.8",mount:"olympus_om",type:"prime",focal_mm:50,max_aperture:1.8,min_aperture:16},
+  {name:"Olympus Zuiko 50mm f/3.5 Macro",mount:"olympus_om",type:"prime",focal_mm:50,max_aperture:3.5,min_aperture:22},
+  {name:"Olympus Zuiko 85mm f/2",mount:"olympus_om",type:"prime",focal_mm:85,max_aperture:2,min_aperture:16},
+  {name:"Olympus Zuiko 100mm f/2.8",mount:"olympus_om",type:"prime",focal_mm:100,max_aperture:2.8,min_aperture:22},
+  {name:"Olympus Zuiko 135mm f/3.5",mount:"olympus_om",type:"prime",focal_mm:135,max_aperture:3.5,min_aperture:22},
+  {name:"Olympus Zuiko 200mm f/4",mount:"olympus_om",type:"prime",focal_mm:200,max_aperture:4,min_aperture:32},
+  {name:"Olympus Zuiko 35-70mm f/3.5-4.5",mount:"olympus_om",type:"zoom",focal_min_mm:35,focal_max_mm:70,max_aperture_wide:3.5,max_aperture_tele:4.5,min_aperture:22},
+  {name:"Olympus Zuiko 65-200mm f/4",mount:"olympus_om",type:"zoom",focal_min_mm:65,focal_max_mm:200,max_aperture_wide:4,max_aperture_tele:4,min_aperture:32},
+  {name:"Olympus Zuiko 75-150mm f/4",mount:"olympus_om",type:"zoom",focal_min_mm:75,focal_max_mm:150,max_aperture_wide:4,max_aperture_tele:4,min_aperture:22}
+];
+// Add a few common modern digital-mount lenses to the builtin list (they won't be removed for film mode)
+var lensesDigitalBuiltin=[
+  // Sony E / FE — A7 III
+  {name:"Sony FE 20mm f/1.8 G",mount:"sony_e",type:"prime",focal_mm:20,max_aperture:1.8,min_aperture:22},
+  {name:"Sony FE 24mm f/1.4 GM",mount:"sony_e",type:"prime",focal_mm:24,max_aperture:1.4,min_aperture:16},
+  {name:"Sony FE 28mm f/2",mount:"sony_e",type:"prime",focal_mm:28,max_aperture:2,min_aperture:22},
+  {name:"Sony FE 35mm f/1.8",mount:"sony_e",type:"prime",focal_mm:35,max_aperture:1.8,min_aperture:22},
+  {name:"Sony FE 35mm f/1.4 GM",mount:"sony_e",type:"prime",focal_mm:35,max_aperture:1.4,min_aperture:16},
+  {name:"Sony FE 50mm f/1.8",mount:"sony_e",type:"prime",focal_mm:50,max_aperture:1.8,min_aperture:22},
+  {name:"Sony FE 50mm f/1.2 GM",mount:"sony_e",type:"prime",focal_mm:50,max_aperture:1.2,min_aperture:16},
+  {name:"Sony Zeiss 55mm f/1.8",mount:"sony_e",type:"prime",focal_mm:55,max_aperture:1.8,min_aperture:22},
+  {name:"Sony FE 85mm f/1.8",mount:"sony_e",type:"prime",focal_mm:85,max_aperture:1.8,min_aperture:22},
+  {name:"Sony FE 85mm f/1.4 GM",mount:"sony_e",type:"prime",focal_mm:85,max_aperture:1.4,min_aperture:16},
+  {name:"Sony FE 90mm f/2.8 Macro G",mount:"sony_e",type:"prime",focal_mm:90,max_aperture:2.8,min_aperture:22},
+  {name:"Sony FE 24-70mm f/2.8 GM",mount:"sony_e",type:"zoom",focal_min_mm:24,focal_max_mm:70,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Sony FE 24-105mm f/4 G",mount:"sony_e",type:"zoom",focal_min_mm:24,focal_max_mm:105,max_aperture_wide:4,max_aperture_tele:4,min_aperture:22},
+  {name:"Sony FE 28-70mm f/3.5-5.6",mount:"sony_e",type:"zoom",focal_min_mm:28,focal_max_mm:70,max_aperture_wide:3.5,max_aperture_tele:5.6,min_aperture:22},
+  {name:"Sony FE 70-200mm f/2.8 GM",mount:"sony_e",type:"zoom",focal_min_mm:70,focal_max_mm:200,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Sony FE 70-200mm f/4 G",mount:"sony_e",type:"zoom",focal_min_mm:70,focal_max_mm:200,max_aperture_wide:4,max_aperture_tele:4,min_aperture:22},
+  {name:"Sony FE 200-600mm f/5.6-6.3 G",mount:"sony_e",type:"zoom",focal_min_mm:200,focal_max_mm:600,max_aperture_wide:5.6,max_aperture_tele:6.3,min_aperture:32},
+  {name:"Sigma 24-70mm f/2.8 DG DN (Sony E)",mount:"sony_e",type:"zoom",focal_min_mm:24,focal_max_mm:70,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Tamron 28-75mm f/2.8 (Sony E)",mount:"sony_e",type:"zoom",focal_min_mm:28,focal_max_mm:75,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+
+  // Canon RF — EOS R6
+  {name:"Canon RF 16mm f/2.8",mount:"canon_rf",type:"prime",focal_mm:16,max_aperture:2.8,min_aperture:22},
+  {name:"Canon RF 24mm f/1.8 Macro",mount:"canon_rf",type:"prime",focal_mm:24,max_aperture:1.8,min_aperture:22},
+  {name:"Canon RF 28mm f/2.8",mount:"canon_rf",type:"prime",focal_mm:28,max_aperture:2.8,min_aperture:22},
+  {name:"Canon RF 35mm f/1.8 Macro",mount:"canon_rf",type:"prime",focal_mm:35,max_aperture:1.8,min_aperture:22},
+  {name:"Canon RF 50mm f/1.8",mount:"canon_rf",type:"prime",focal_mm:50,max_aperture:1.8,min_aperture:22},
+  {name:"Canon RF 50mm f/1.2 L",mount:"canon_rf",type:"prime",focal_mm:50,max_aperture:1.2,min_aperture:16},
+  {name:"Canon RF 85mm f/2 Macro",mount:"canon_rf",type:"prime",focal_mm:85,max_aperture:2,min_aperture:29},
+  {name:"Canon RF 85mm f/1.2 L",mount:"canon_rf",type:"prime",focal_mm:85,max_aperture:1.2,min_aperture:16},
+  {name:"Canon RF 100mm f/2.8 L Macro",mount:"canon_rf",type:"prime",focal_mm:100,max_aperture:2.8,min_aperture:32},
+  {name:"Canon RF 24-70mm f/2.8 L",mount:"canon_rf",type:"zoom",focal_min_mm:24,focal_max_mm:70,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Canon RF 24-105mm f/4 L",mount:"canon_rf",type:"zoom",focal_min_mm:24,focal_max_mm:105,max_aperture_wide:4,max_aperture_tele:4,min_aperture:22},
+  {name:"Canon RF 24-105mm f/4-7.1",mount:"canon_rf",type:"zoom",focal_min_mm:24,focal_max_mm:105,max_aperture_wide:4,max_aperture_tele:7.1,min_aperture:40},
+  {name:"Canon RF 70-200mm f/2.8 L",mount:"canon_rf",type:"zoom",focal_min_mm:70,focal_max_mm:200,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:32},
+  {name:"Canon RF 70-200mm f/4 L",mount:"canon_rf",type:"zoom",focal_min_mm:70,focal_max_mm:200,max_aperture_wide:4,max_aperture_tele:4,min_aperture:32},
+  {name:"Canon RF 100-400mm f/5.6-8",mount:"canon_rf",type:"zoom",focal_min_mm:100,focal_max_mm:400,max_aperture_wide:5.6,max_aperture_tele:8,min_aperture:45},
+  {name:"Canon RF 100-500mm f/4.5-7.1 L",mount:"canon_rf",type:"zoom",focal_min_mm:100,focal_max_mm:500,max_aperture_wide:4.5,max_aperture_tele:7.1,min_aperture:54},
+
+  // Nikon Z — Z6 II / Zf
+  {name:"Nikon Z 20mm f/1.8 S",mount:"nikon_z",type:"prime",focal_mm:20,max_aperture:1.8,min_aperture:16},
+  {name:"Nikon Z 24mm f/1.8 S",mount:"nikon_z",type:"prime",focal_mm:24,max_aperture:1.8,min_aperture:16},
+  {name:"Nikon Z 28mm f/2.8",mount:"nikon_z",type:"prime",focal_mm:28,max_aperture:2.8,min_aperture:16},
+  {name:"Nikon Z 35mm f/1.8 S",mount:"nikon_z",type:"prime",focal_mm:35,max_aperture:1.8,min_aperture:16},
+  {name:"Nikon Z 40mm f/2",mount:"nikon_z",type:"prime",focal_mm:40,max_aperture:2,min_aperture:16},
+  {name:"Nikon Z 50mm f/1.8 S",mount:"nikon_z",type:"prime",focal_mm:50,max_aperture:1.8,min_aperture:16},
+  {name:"Nikon Z 50mm f/1.2 S",mount:"nikon_z",type:"prime",focal_mm:50,max_aperture:1.2,min_aperture:16},
+  {name:"Nikon Z 85mm f/1.8 S",mount:"nikon_z",type:"prime",focal_mm:85,max_aperture:1.8,min_aperture:16},
+  {name:"Nikon Z MC 105mm f/2.8 VR S",mount:"nikon_z",type:"prime",focal_mm:105,max_aperture:2.8,min_aperture:32},
+  {name:"Nikon Z 14-30mm f/4 S",mount:"nikon_z",type:"zoom",focal_min_mm:14,focal_max_mm:30,max_aperture_wide:4,max_aperture_tele:4,min_aperture:22},
+  {name:"Nikon Z 24-70mm f/4 S",mount:"nikon_z",type:"zoom",focal_min_mm:24,focal_max_mm:70,max_aperture_wide:4,max_aperture_tele:4,min_aperture:22},
+  {name:"Nikon Z 24-70mm f/2.8 S",mount:"nikon_z",type:"zoom",focal_min_mm:24,focal_max_mm:70,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Nikon Z 24-120mm f/4 S",mount:"nikon_z",type:"zoom",focal_min_mm:24,focal_max_mm:120,max_aperture_wide:4,max_aperture_tele:4,min_aperture:22},
+  {name:"Nikon Z 28-75mm f/2.8",mount:"nikon_z",type:"zoom",focal_min_mm:28,focal_max_mm:75,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Nikon Z 70-180mm f/2.8",mount:"nikon_z",type:"zoom",focal_min_mm:70,focal_max_mm:180,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Nikon Z 70-200mm f/2.8 VR S",mount:"nikon_z",type:"zoom",focal_min_mm:70,focal_max_mm:200,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Nikon Z 100-400mm f/4.5-5.6 VR S",mount:"nikon_z",type:"zoom",focal_min_mm:100,focal_max_mm:400,max_aperture_wide:4.5,max_aperture_tele:5.6,min_aperture:32},
+  {name:"Nikon Z 180-600mm f/5.6-6.3 VR",mount:"nikon_z",type:"zoom",focal_min_mm:180,focal_max_mm:600,max_aperture_wide:5.6,max_aperture_tele:6.3,min_aperture:36},
+
+  // Fujifilm X — X-T4
+  {name:"Fujifilm XF 14mm f/2.8",mount:"fujifilm_x",type:"prime",focal_mm:14,max_aperture:2.8,min_aperture:22},
+  {name:"Fujifilm XF 16mm f/1.4",mount:"fujifilm_x",type:"prime",focal_mm:16,max_aperture:1.4,min_aperture:16},
+  {name:"Fujifilm XF 18mm f/2",mount:"fujifilm_x",type:"prime",focal_mm:18,max_aperture:2,min_aperture:16},
+  {name:"Fujifilm XF 23mm f/1.4",mount:"fujifilm_x",type:"prime",focal_mm:23,max_aperture:1.4,min_aperture:16},
+  {name:"Fujifilm XF 23mm f/2",mount:"fujifilm_x",type:"prime",focal_mm:23,max_aperture:2,min_aperture:16},
+  {name:"Fujifilm XF 27mm f/2.8",mount:"fujifilm_x",type:"prime",focal_mm:27,max_aperture:2.8,min_aperture:16},
+  {name:"Fujifilm XF 33mm f/1.4",mount:"fujifilm_x",type:"prime",focal_mm:33,max_aperture:1.4,min_aperture:16},
+  {name:"Fujifilm XF 35mm f/1.4",mount:"fujifilm_x",type:"prime",focal_mm:35,max_aperture:1.4,min_aperture:16},
+  {name:"Fujifilm XF 35mm f/2",mount:"fujifilm_x",type:"prime",focal_mm:35,max_aperture:2,min_aperture:16},
+  {name:"Fujifilm XF 50mm f/2",mount:"fujifilm_x",type:"prime",focal_mm:50,max_aperture:2,min_aperture:16},
+  {name:"Fujifilm XF 56mm f/1.2",mount:"fujifilm_x",type:"prime",focal_mm:56,max_aperture:1.2,min_aperture:16},
+  {name:"Fujifilm XF 90mm f/2",mount:"fujifilm_x",type:"prime",focal_mm:90,max_aperture:2,min_aperture:16},
+  {name:"Fujifilm XF 8-16mm f/2.8",mount:"fujifilm_x",type:"zoom",focal_min_mm:8,focal_max_mm:16,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Fujifilm XF 10-24mm f/4",mount:"fujifilm_x",type:"zoom",focal_min_mm:10,focal_max_mm:24,max_aperture_wide:4,max_aperture_tele:4,min_aperture:22},
+  {name:"Fujifilm XF 16-55mm f/2.8",mount:"fujifilm_x",type:"zoom",focal_min_mm:16,focal_max_mm:55,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Fujifilm XF 18-55mm f/2.8-4",mount:"fujifilm_x",type:"zoom",focal_min_mm:18,focal_max_mm:55,max_aperture_wide:2.8,max_aperture_tele:4,min_aperture:22},
+  {name:"Fujifilm XF 16-80mm f/4",mount:"fujifilm_x",type:"zoom",focal_min_mm:16,focal_max_mm:80,max_aperture_wide:4,max_aperture_tele:4,min_aperture:22},
+  {name:"Fujifilm XF 50-140mm f/2.8",mount:"fujifilm_x",type:"zoom",focal_min_mm:50,focal_max_mm:140,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Fujifilm XF 55-200mm f/3.5-4.8",mount:"fujifilm_x",type:"zoom",focal_min_mm:55,focal_max_mm:200,max_aperture_wide:3.5,max_aperture_tele:4.8,min_aperture:22},
+  {name:"Fujifilm XF 70-300mm f/4-5.6",mount:"fujifilm_x",type:"zoom",focal_min_mm:70,focal_max_mm:300,max_aperture_wide:4,max_aperture_tele:5.6,min_aperture:22},
+
+  // L mount — Panasonic Lumix S5
+  {name:"Panasonic S 18mm f/1.8",mount:"l_mount",type:"prime",focal_mm:18,max_aperture:1.8,min_aperture:16},
+  {name:"Panasonic S 24mm f/1.8",mount:"l_mount",type:"prime",focal_mm:24,max_aperture:1.8,min_aperture:16},
+  {name:"Panasonic S 35mm f/1.8",mount:"l_mount",type:"prime",focal_mm:35,max_aperture:1.8,min_aperture:22},
+  {name:"Panasonic S 50mm f/1.8",mount:"l_mount",type:"prime",focal_mm:50,max_aperture:1.8,min_aperture:22},
+  {name:"Panasonic S 85mm f/1.8",mount:"l_mount",type:"prime",focal_mm:85,max_aperture:1.8,min_aperture:22},
+  {name:"Panasonic S 20-60mm f/3.5-5.6",mount:"l_mount",type:"zoom",focal_min_mm:20,focal_max_mm:60,max_aperture_wide:3.5,max_aperture_tele:5.6,min_aperture:22},
+  {name:"Panasonic S PRO 24-70mm f/2.8",mount:"l_mount",type:"zoom",focal_min_mm:24,focal_max_mm:70,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Panasonic S 24-105mm f/4 Macro OIS",mount:"l_mount",type:"zoom",focal_min_mm:24,focal_max_mm:105,max_aperture_wide:4,max_aperture_tele:4,min_aperture:22},
+  {name:"Panasonic S PRO 70-200mm f/2.8 OIS",mount:"l_mount",type:"zoom",focal_min_mm:70,focal_max_mm:200,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Panasonic S PRO 70-200mm f/4 OIS",mount:"l_mount",type:"zoom",focal_min_mm:70,focal_max_mm:200,max_aperture_wide:4,max_aperture_tele:4,min_aperture:22},
+  {name:"Sigma 14-24mm f/2.8 DG DN (L)",mount:"l_mount",type:"zoom",focal_min_mm:14,focal_max_mm:24,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Sigma 24-70mm f/2.8 DG DN (L)",mount:"l_mount",type:"zoom",focal_min_mm:24,focal_max_mm:70,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Sigma 28-70mm f/2.8 DG DN (L)",mount:"l_mount",type:"zoom",focal_min_mm:28,focal_max_mm:70,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Sigma 35mm f/1.4 DG DN (L)",mount:"l_mount",type:"prime",focal_mm:35,max_aperture:1.4,min_aperture:16},
+  {name:"Sigma 50mm f/1.4 DG DN (L)",mount:"l_mount",type:"prime",focal_mm:50,max_aperture:1.4,min_aperture:16},
+  {name:"Sigma 85mm f/1.4 DG DN (L)",mount:"l_mount",type:"prime",focal_mm:85,max_aperture:1.4,min_aperture:16},
+  {name:"Sigma 100-400mm f/5-6.3 DG DN (L)",mount:"l_mount",type:"zoom",focal_min_mm:100,focal_max_mm:400,max_aperture_wide:5,max_aperture_tele:6.3,min_aperture:22},
+
+  // Canon EF — 5D Mark IV
+  {name:"Canon EF 24mm f/1.4 L",mount:"canon_eos",type:"prime",focal_mm:24,max_aperture:1.4,min_aperture:22},
+  {name:"Canon EF 28mm f/1.8",mount:"canon_eos",type:"prime",focal_mm:28,max_aperture:1.8,min_aperture:22},
+  {name:"Canon EF 35mm f/1.4 L",mount:"canon_eos",type:"prime",focal_mm:35,max_aperture:1.4,min_aperture:22},
+  {name:"Canon EF 40mm f/2.8 STM",mount:"canon_eos",type:"prime",focal_mm:40,max_aperture:2.8,min_aperture:22},
+  {name:"Canon EF 50mm f/1.4",mount:"canon_eos",type:"prime",focal_mm:50,max_aperture:1.4,min_aperture:22},
+  {name:"Canon EF 50mm f/1.8 STM",mount:"canon_eos",type:"prime",focal_mm:50,max_aperture:1.8,min_aperture:22},
+  {name:"Canon EF 85mm f/1.8",mount:"canon_eos",type:"prime",focal_mm:85,max_aperture:1.8,min_aperture:22},
+  {name:"Canon EF 100mm f/2.8 L Macro",mount:"canon_eos",type:"prime",focal_mm:100,max_aperture:2.8,min_aperture:32},
+  {name:"Canon EF 135mm f/2 L",mount:"canon_eos",type:"prime",focal_mm:135,max_aperture:2,min_aperture:32},
+  {name:"Canon EF 16-35mm f/2.8 L",mount:"canon_eos",type:"zoom",focal_min_mm:16,focal_max_mm:35,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Canon EF 17-40mm f/4 L",mount:"canon_eos",type:"zoom",focal_min_mm:17,focal_max_mm:40,max_aperture_wide:4,max_aperture_tele:4,min_aperture:22},
+  {name:"Canon EF 24-70mm f/2.8 L",mount:"canon_eos",type:"zoom",focal_min_mm:24,focal_max_mm:70,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22},
+  {name:"Canon EF 24-105mm f/4 L",mount:"canon_eos",type:"zoom",focal_min_mm:24,focal_max_mm:105,max_aperture_wide:4,max_aperture_tele:4,min_aperture:22},
+  {name:"Canon EF 70-200mm f/2.8 L",mount:"canon_eos",type:"zoom",focal_min_mm:70,focal_max_mm:200,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:32},
+  {name:"Canon EF 70-200mm f/4 L",mount:"canon_eos",type:"zoom",focal_min_mm:70,focal_max_mm:200,max_aperture_wide:4,max_aperture_tele:4,min_aperture:32},
+  {name:"Canon EF 100-400mm f/4.5-5.6 L",mount:"canon_eos",type:"zoom",focal_min_mm:100,focal_max_mm:400,max_aperture_wide:4.5,max_aperture_tele:5.6,min_aperture:32},
+  {name:"Sigma 35mm f/1.4 Art (Canon EF)",mount:"canon_eos",type:"prime",focal_mm:35,max_aperture:1.4,min_aperture:16},
+  {name:"Tamron 24-70mm f/2.8 G2 (Canon EF)",mount:"canon_eos",type:"zoom",focal_min_mm:24,focal_max_mm:70,max_aperture_wide:2.8,max_aperture_tele:2.8,min_aperture:22}
+];
+
+function currentCaptureMode(){
+  return document.getElementById('captureMode')?.value || 'film';
+}
+function showAllBuiltinsEnabled(){
+  return !!document.getElementById('showAllBuiltins')?.checked;
+}
+function builtinCamerasForMode(mode, showAll){
+  if(showAll || mode==='all'){ return camerasBuiltin.concat(camerasDigitalBuiltin); }
+  return mode==='digital' ? camerasDigitalBuiltin : camerasBuiltin;
+}
+function builtinLensesForMode(mode, showAll){
+  if(showAll || mode==='all'){ return lensesBuiltin.concat(lensesDigitalBuiltin); }
+  return mode==='digital' ? lensesDigitalBuiltin : lensesBuiltin;
+}
+function availableCameras(){
+  return (loadUserStore().cameras||[]).concat(builtinCamerasForMode(currentCaptureMode(), showAllBuiltinsEnabled()));
+}
+function availableLenses(){
+  return (loadUserStore().lenses||[]).concat(builtinLensesForMode(currentCaptureMode(), showAllBuiltinsEnabled()));
+}
+function findCameraByName(name){
+  return availableCameras().find(function(c){ return c.name===name; });
+}
+function findLensByName(name){
+  return availableLenses().find(function(l){ return l.name===name; });
+}
+function currentGrainLabel(){
+  // TODO: When capture modes expand (e.g., color vs B&W), revisit terminology defaults per stock brand.
+  return currentCaptureMode()==='digital' ? 'Noise' : 'Grain';
+}
+function updateGrainTerminology(){
+  var termLower=currentGrainLabel().toLowerCase();
+  var quick=document.getElementById('grainTermText');
+  if(quick){ quick.textContent = termLower; }
+  var grainLabel=document.getElementById('grainLabel');
+  if(grainLabel){
+    grainLabel.textContent=currentGrainLabel()+' preference';
+  }
+}
+var filmsBuiltin=[
+  {name:"Kodak Portra 160",brand:"Kodak Portra",box_iso:160,push_limit:2,pull_limit:1},
+  {name:"Kodak Portra 400",brand:"Kodak Portra",box_iso:400,push_limit:2,pull_limit:1},
+  {name:"Kodak Portra 800",brand:"Kodak Portra",box_iso:800,push_limit:2,pull_limit:0},
+  {name:"Kodak Ektar 100",brand:"Kodak Ektar",box_iso:100,push_limit:2,pull_limit:1},
+  {name:"Kodak Gold 200",brand:"Kodak Gold",box_iso:200,push_limit:1,pull_limit:1},
+  {name:"Kodak Ultramax 400",brand:"Kodak Ultramax",box_iso:400,push_limit:1,pull_limit:1},
+  {name:"Kodak Tri-X 400",brand:"Kodak Tri-X",box_iso:400,push_limit:3,pull_limit:1},
+  {name:"Kodak T-Max 100",brand:"Kodak T-Max",box_iso:100,push_limit:2,pull_limit:1},
+  {name:"Kodak T-Max 400",brand:"Kodak T-Max",box_iso:400,push_limit:2,pull_limit:1},
+
+  {name:"Fujifilm Pro 400H",brand:"Fujifilm Pro",box_iso:400,push_limit:1,pull_limit:1},
+  {name:"Fujifilm Superia 200",brand:"Fujifilm Superia",box_iso:200,push_limit:2,pull_limit:1},
+  {name:"Fujifilm Superia 400",brand:"Fujifilm Superia",box_iso:400,push_limit:2,pull_limit:1},
+  {name:"Fujifilm Superia 800",brand:"Fujifilm Superia",box_iso:800,push_limit:1,pull_limit:0},
+  {name:"Fujifilm Acros 100",brand:"Fujifilm Acros",box_iso:100,push_limit:2,pull_limit:1},
+
+  {name:"Ilford HP5+ 400",brand:"Ilford HP5+",box_iso:400,push_limit:3,pull_limit:1},
+  {name:"Ilford FP4+ 125",brand:"Ilford FP4+",box_iso:125,push_limit:1,pull_limit:1},
+  {name:"Ilford Delta 100",brand:"Ilford Delta",box_iso:100,push_limit:2,pull_limit:1},
+  {name:"Ilford Delta 400",brand:"Ilford Delta",box_iso:400,push_limit:2,pull_limit:1},
+  {name:"Ilford Delta 3200",brand:"Ilford Delta",box_iso:3200,push_limit:1,pull_limit:0},
+  {name:"Ilford Pan F 50",brand:"Ilford Pan F",box_iso:50,push_limit:1,pull_limit:1},
+
+  {name:"Cinestill 50D",brand:"Cinestill Daylight",box_iso:50,push_limit:1,pull_limit:1},
+  {name:"Cinestill 800T",brand:"Cinestill Tungsten",box_iso:800,push_limit:1,pull_limit:0}
+];
+
+// --- EV constants (true range) and a tiny visual fudge so the thumb can reach notches at both ends
+var EV_MIN = -4;
+var EV_MAX = 16;
+
+var ambientEvStored = 13;
+var incidentEvStored = null;
+var exposureMeterSource = 'scene';
+var headerRecommendationObserver = null;
+function storeAmbientEV(ev){
+  ambientEvStored = Math.max(EV_MIN, Math.min(EV_MAX, parseFloat(ev)||ambientEvStored));
+}
+function ambientEV(){
+  return Math.max(EV_MIN, Math.min(EV_MAX, parseFloat(document.getElementById('evInput')?.value)||ambientEvStored));
+}
+function incidentEV(){
+  return isFinite(incidentEvStored)?incidentEvStored:null;
+}
+function effectiveEV(){
+  var inc=incidentEV();
+  if(exposureMeterSource==='incident' && inc!==null) return inc;
+  return ambientEV();
+}
+function updateMeterSourceUI(){
+  var line=document.getElementById('meterSourceLine');
+  if(!line) return;
+  var inc=incidentEV();
+  var usingIncident=(exposureMeterSource==='incident' && inc!==null);
+  line.textContent=usingIncident
+    ? 'Using incident meter reading (EV '+inc.toFixed(1)+') for recommendations'
+    : 'Using scene-light estimate for recommendations';
+  line.classList.toggle('incident-active',usingIncident);
+}
+function updateIncidentNote(){
+  var note=document.getElementById('incidentNote');
+  if(!note) return;
+  var inc=incidentEV();
+  if(!(typeof inc === 'number' && isFinite(inc))){
+    note.textContent='No incident reading is active. Recommendations are using the scene-light estimate.';
+  }else{
+    var desc = INCIDENT_DESC[String(Math.round(inc))] || ('Incident EV '+inc.toFixed(1));
+    var diff = inc - ambientEV();
+    var diffText = Math.abs(diff) < 0.05 ? 'Matches the scene estimate.' : ('Difference from scene estimate: '+(diff>0?'+':'')+diff.toFixed(1)+' stops.');
+    note.textContent='Incident EV '+inc.toFixed(1)+' • '+desc+' • '+diffText;
+  }
+  updateMeterSourceUI();
+}
+
+function incidentEvToAngle(ev){
+  var t=(ev-EV_MIN)/(EV_MAX-EV_MIN);
+  t=Math.max(0, Math.min(1,t));
+  return -135 + t*270; // sweep 270°
+}
+function updateIncidentDial(ev){
+  var dial=document.getElementById('incidentDial');
+  var pointer=document.getElementById('incidentPointer');
+  var evRead=document.getElementById('incidentEvReadout');
+  var luxRead=document.getElementById('incidentLuxReadout');
+  var descEl=document.getElementById('incidentDescLabel');
+  var has = (typeof ev === 'number') && isFinite(ev);
+  if(evRead) evRead.textContent = has?ev.toFixed(1):'—';
+  if(luxRead) luxRead.textContent = has?Math.round(evToLux(ev)):'—';
+  if(!dial || !pointer){ return; }
+  var base;
+  if(has){
+    base = Math.max(EV_MIN, Math.min(EV_MAX, ev));
+    pointer.style.transform='translate(-50%, -90%) rotate('+incidentEvToAngle(base)+'deg)';
+    var baseNorm=(base-EV_MIN)/(EV_MAX-EV_MIN);
+    var val;
+    if(base<=0){
+      // Map EV_MIN..0 to black..18% gray
+      var ratio=(base - EV_MIN)/(0 - EV_MIN);
+      val=Math.round(46 * ratio);
+    }else{
+      // Map 0..EV_MAX to 18% gray .. white
+      var ratio=(base - 0)/(EV_MAX - 0);
+      val=Math.round(46 + (255-46)*ratio);
+    }
+    val=Math.max(0, Math.min(255, val));
+    pointer.style.background='rgb('+val+','+val+','+val+')';
+  }else{
+    base = 0; // show 0 EV when not set
+    pointer.style.transform='translate(-50%, -90%) rotate(-90deg)';
+    pointer.style.background='rgb(46,46,46)';
+  }
+  pointer.style.border='1px solid rgba(0,0,0,0.6)';
+  pointer.style.boxShadow='0 0 0 1px rgba(255,255,255,0.6)';
+  if(has){
+    dial.classList.remove('incident-empty');
+    dial.setAttribute('aria-valuenow', base.toFixed(1));
+    dial.setAttribute('aria-valuetext', 'Incident EV '+base.toFixed(1));
+    if(descEl){
+      var desc=INCIDENT_DESC[String(Math.round(base))]||('Incident EV '+base.toFixed(1));
+      descEl.textContent=desc;
+    }
+  }else{
+    dial.classList.add('incident-empty');
+    dial.setAttribute('aria-valuenow', base.toFixed(1));
+    dial.setAttribute('aria-valuetext', 'No incident reading; ambient '+base.toFixed(1));
+    if(descEl){ descEl.textContent='—'; }
+  }
+}
+function setIncidentEV(ev, opts){
+  var evInput=document.getElementById('incidentEvInput');
+  var luxInput=document.getElementById('incidentLuxInput');
+  var exactInput=document.getElementById('incidentExactInput');
+  if(ev===null || !isFinite(ev)){
+    incidentEvStored = null;
+    exposureMeterSource='scene';
+    if(evInput) evInput.value='';
+    if(luxInput) luxInput.value='';
+    if(exactInput) exactInput.value='';
+  }else{
+    var clamped=Math.max(EV_MIN, Math.min(20, ev));
+    incidentEvStored = clamped;
+    exposureMeterSource='incident';
+    if(evInput) evInput.value=clamped.toFixed(1);
+    if(luxInput) luxInput.value=Math.round(evToLux(clamped));
+    if(exactInput && document.activeElement!==exactInput) exactInput.value=clamped.toFixed(1);
+  }
+  updateIncidentDial(incidentEvStored);
+  updateIncidentNote();
+  updateMeterSourceUI();
+  if(!opts || !opts.skipRecalc){ recalc(); }
+}
+function initIncidentExactEntry(){
+  var exact=document.getElementById('incidentExactInput');
+  var useExact=document.getElementById('incidentUseExact');
+  var iso=document.getElementById('incidentMeterISO');
+  var n=document.getElementById('incidentMeterN');
+  var t=document.getElementById('incidentMeterT');
+  var useExposure=document.getElementById('incidentUseExposure');
+  if(exact && exact.getAttribute('data-meter-init')!=='1'){
+    exact.setAttribute('data-meter-init','1');
+    exact.addEventListener('keydown',function(e){
+      if(e.key==='Enter' && useExact){ useExact.click(); e.preventDefault(); }
+    });
+  }
+  if(useExact && useExact.getAttribute('data-meter-init')!=='1'){
+    useExact.setAttribute('data-meter-init','1');
+    useExact.addEventListener('click',function(){
+      var ev=parseFloat(exact?.value);
+      if(!isFinite(ev)){ alert('Enter an incident EV, such as 12.3.'); return; }
+      setIncidentEV(ev);
+    });
+  }
+  if(useExposure && useExposure.getAttribute('data-meter-init')!=='1'){
+    useExposure.setAttribute('data-meter-init','1');
+    useExposure.addEventListener('click',function(){
+      var ISO=Math.max(1,parseFloat(iso?.value)||100);
+      var N=parseFloat(n?.value);
+      var T=parseShutterText(t?.value);
+      if(!(N>0) || !(T>0)){ alert('Enter a valid aperture and shutter, such as f/4 and 1/125.'); return; }
+      var ev=evFromExposure(N,T,ISO);
+      if(!isFinite(ev)){ alert('Could not calculate an EV from that meter reading.'); return; }
+      setIncidentEV(ev);
+    });
+  }
+}
+
+function initIncidentDial(){
+  initIncidentExactEntry();
+  var dial=document.getElementById('incidentDial');
+  var clearBtn=document.getElementById('incidentClear');
+  if(clearBtn && clearBtn.getAttribute('data-dial-init')!=='1'){
+    clearBtn.addEventListener('click', function(){ setIncidentEV(null); });
+    clearBtn.setAttribute('data-dial-init','1');
+  }
+  if(!dial || dial.getAttribute('data-dial-init')==='1') return;
+  dial.setAttribute('data-dial-init','1');
+  var pointer=document.getElementById('incidentPointer');
+  if(!pointer) return;
+  var dragging=false;
+  var dragStartY=0;
+  var dragStartEv=0;
+  var moved=false;
+  var sensitivity=0.02; // base sensitivity for small motions
+  function adjust(delta){
+    var current=incidentEV();
+    if(current===null) current=0;
+    setIncidentEV(current + delta);
+  }
+  function beginDrag(y){
+    dragging=true;
+    dragStartY=y;
+    dragStartEv=incidentEV();
+    if(dragStartEv===null) dragStartEv=0;
+    var rect=dial.getBoundingClientRect();
+    var ratio=(y-rect.top)/Math.max(1, rect.height);
+    dragStartEv = Math.max(EV_MIN, Math.min(EV_MAX, EV_MIN + ratio*(EV_MAX-EV_MIN)));
+    moved=false;
+  }
+  function moveDrag(y){
+    if(!dragging) return;
+    var delta = dragStartY - y;
+    if(Math.abs(delta) < 1) return;
+    moved=true;
+    var base = Math.abs(delta)*sensitivity;
+    var ev = dragStartEv + Math.sign(delta) * (base + 2*Math.pow(base, 1.5));
+    setIncidentEV(ev,{source:'drag'});
+  }
+  function endDrag(){
+    if(!dragging) return;
+    if(!moved){ setIncidentEV(null); }
+    dragging=false;
+  }
+  dial.addEventListener('pointerdown', function(e){
+    if(e.pointerType==='mouse' && e.button!==0) return;
+    if(e.isPrimary===false) return;
+    if(typeof dial.setPointerCapture==='function'){
+      try{ dial.setPointerCapture(e.pointerId); }catch(_e){}
+    }
+    beginDrag(e.clientY);
+    moveDrag(e.clientY);
+    e.preventDefault();
+  });
+  dial.addEventListener('pointermove', function(e){
+    if(!dragging) return;
+    moveDrag(e.clientY);
+    e.preventDefault();
+  });
+  dial.addEventListener('pointerup', function(e){
+    if(typeof dial.releasePointerCapture==='function'){
+      try{ dial.releasePointerCapture(e.pointerId); }catch(_e){}
+    }
+    endDrag();
+    e.preventDefault();
+  });
+  dial.addEventListener('pointercancel', function(e){
+    if(typeof dial.releasePointerCapture==='function'){
+      try{ dial.releasePointerCapture(e.pointerId); }catch(_e){}
+    }
+    endDrag();
+  });
+  // Scroll wheel intentionally ignored to avoid accidental changes
+  dial.addEventListener('keydown', function(e){
+    var step=e.shiftKey?0.5:0.1;
+    if(e.key==='ArrowLeft' || e.key==='ArrowDown'){ adjust(-step); e.preventDefault(); }
+    else if(e.key==='ArrowRight' || e.key==='ArrowUp'){ adjust(step); e.preventDefault(); }
+    else if(e.key==='PageDown'){ adjust(-1); e.preventDefault(); }
+    else if(e.key==='PageUp'){ adjust(1); e.preventDefault(); }
+    else if(e.key==='Home'){ setIncidentEV(EV_MIN); e.preventDefault(); }
+    else if(e.key==='End'){ setIncidentEV(EV_MAX); e.preventDefault(); }
+  });
+  updateIncidentDial(incidentEV());
+  updateIncidentNote();
+}
+
+// New EV ticks builder and interactions (no geometry coupling)
+function buildEVScale(){
+  var host = document.querySelector('.ev-slider2 .ev-ticks');
+  if(!host) return;
+  host.innerHTML = '';
+  for(var ev=EV_MIN; ev<=EV_MAX+1e-9; ev+=0.5){
+    var t = document.createElement('div');
+    var isInt = Math.abs(ev - Math.round(ev)) < 1e-6;
+    t.className = 'tick' + (isInt ? ' major' : '');
+    t.style.left = ((ev - EV_MIN)/(EV_MAX - EV_MIN)*100) + '%';
+    host.appendChild(t);
+  }
+}
+
+function bindEVSliderClicks(){
+  var box = document.querySelector('.ev-slider2');
+  if(!box) return;
+  function posToEV(x){
+    var rect = box.getBoundingClientRect();
+    var t = (x - rect.left)/Math.max(1, rect.width);
+    t = Math.max(0, Math.min(1, t));
+    var ev = EV_MIN + t*(EV_MAX - EV_MIN);
+    return Math.round(ev*10)/10;
+  }
+  box.addEventListener('click', function(e){
+    var ev = posToEV(e.clientX);
+    var s = document.getElementById('evSlider');
+    if(s){ s.value = ev; s.dispatchEvent(new Event('input', {bubbles:true})); }
+  });
+  box.addEventListener('mousemove', function(e){ var ev = posToEV(e.clientX); showEVBadge(ev); });
+  box.addEventListener('mouseleave', function(){ showEVBadge(null); });
+  box.addEventListener('touchstart', function(e){ if(e.cancelable) e.preventDefault(); var ev=posToEV((e.touches[0]||{}).clientX||0); showEVBadge(ev); }, {passive:false});
+  box.addEventListener('touchmove', function(e){ if(e.cancelable) e.preventDefault(); var ev=posToEV((e.touches[0]||{}).clientX||0); showEVBadge(ev); }, {passive:false});
+  box.addEventListener('touchend', function(e){ showEVBadge(null); var t=(e.changedTouches||[])[0]; if(!t) return; var ev=posToEV(t.clientX); var s=document.getElementById('evSlider'); if(s){ s.value=ev; s.dispatchEvent(new Event('input', {bubbles:true})); }});
+  box.addEventListener('touchcancel', function(){ showEVBadge(null); });
+}
+var EV_FUDGE = 0; // allow extra thumb travel; we clamp computed EV to true range
+// Visual width scale for EV bar (relative to thumb center travel)
+var EV_BAR_SCALE = 0.96; // reduce width a bit to align exactly with slider ends
+// Horizontal calibration for EV bar vs slider (positive shifts bar to the right)
+// ===== Math =====
+function luxToEV(lux){return Math.log2(Math.max(1e-6,lux)/2.5);}
+function evToLux(ev){return Math.pow(2,ev)*2.5;}
+var shuttersThird=[30,25,20,15,13,10,8,6,5,4,3.2,2.5,2,1.6,1.3,1,0.8,0.6,0.5,0.4,1/3,1/4,1/5,1/6,1/8,1/10,1/13,1/15,1/20,1/25,1/30,1/40,1/50,1/60,1/80,1/100,1/125,1/160,1/200,1/250,1/320,1/400,1/500,1/640,1/800,1/1000,1/1250,1/1600,1/2000,1/2500,1/3200,1/4000,1/5000,1/6400,1/8000];
+function nearestShutterThird(t){
+  var b=shuttersThird[0],d=Math.abs(b-t);
+  for(var i=0;i<shuttersThird.length;i++){
+    var s=shuttersThird[i],dd=Math.abs(s-t);
+    if(dd<d){d=dd;b=s}
+  }
+  return b
+}
+// Common full-stop shutter values (seconds)
+var shuttersFull=[30,15,8,4,2,1,0.5,0.25,1/8,1/15,1/30,1/60,1/125,1/250,1/500,1/1000,1/2000,1/4000,1/8000];
+function nearestShutterForCamera(camera,t){
+  try{
+    var step = (camera && camera.shutter_step) || 'third';
+    var list = (step==='full') ? shuttersFull : shuttersThird;
+    var b=list[0],d=Math.abs(b-t);
+    for(var i=0;i<list.length;i++){ var s=list[i],dd=Math.abs(s-t); if(dd<d){d=dd;b=s} }
+    return b;
+  }catch(e){ return nearestShutterThird(t); }
+}
+function fmtSh(s){return s>=1?(Math.round(s)+'s'):('1/'+Math.round(1/s))}
+function requiredShutter(ev100,iso,N){return (N*N)/(Math.pow(2,ev100)*(iso/100));}
+// === Meter calibration helpers ===
+function parseShutterText(txt){
+  txt = String(txt||'').trim();
+  if(!txt) return NaN;
+  if(/^([0-9]*\.?[0-9]+)s?$/.test(txt)){
+    var v=parseFloat(RegExp.$1); return isFinite(v)?v:NaN;
+  }
+  if(/^1\s*\/\s*([0-9]+)$/.test(txt)){
+    var d=parseFloat(RegExp.$1); return isFinite(d)&&d>0 ? 1/d : NaN;
+  }
+  return NaN;
+}
+function evFromExposure(N, t, ISO){
+  if(!(N>0) || !(t>0) || !(ISO>0)) return NaN;
+  return Math.log2((N*N)/(t*(ISO/100)));
+}
+function handholdLimit(focal){return 1/Math.max(1,focal)}
+function lensApertureAtFocal(lens,focal){
+  if(lens.type==='prime')return{minA:lens.max_aperture,maxA:lens.min_aperture};
+  var t=(focal-lens.focal_min_mm)/(lens.focal_max_mm-lens.focal_min_mm);
+  var w=lens.max_aperture_wide,te=(lens.max_aperture_tele||w),c=Math.max(0,Math.min(1,isFinite(t)?t:0));
+  var maxA=w+c*(te-w);
+  return{minA:maxA,maxA:lens.min_aperture}
+}
+
+// Snap aperture to camera-supported increments. camera.aperture_step === 'full'|'third'
+function nearestAperture(N, lens, camera){
+  try{
+    var step = (camera && camera.aperture_step) || 'third';
+    var log = Math.log2(N);
+    var quant = (step==='full') ? 1 : (1/3);
+    var q = Math.round(log/quant) * quant;
+    var snapped = Math.pow(2, q);
+    // clamp to lens limits
+    var ap = lensApertureAtFocal(lens, focalValueForLens(lens));
+    snapped = Math.max(ap.minA, Math.min(ap.maxA, snapped));
+    // round to one decimal for display consistency
+    return parseFloat(snapped.toFixed(1));
+  }catch(e){ return parseFloat(N.toFixed(1)); }
+}
+
+// ===== EV descriptors =====
+var EV_DESC = {
+  "-4":"Starlight / very dark night",
+  "-3":"Dark night outdoors",
+  "-2":"Moonlit landscape",
+  "-1":"Very dim candlelit scene",
+  "0":"Candlelight / very dark room",
+  "1":"Dark night street / very low light",
+  "2":"Very dim interior",
+  "3":"Dim interior",
+  "4":"Dim home interior",
+  "5":"Typical home interior",
+  "6":"Bright home interior",
+  "7":"Office / bright indoor light",
+  "8":"Very bright indoor / stage light",
+  "9":"Dusk / just after sunset",
+  "10":"Heavy overcast / deep outdoor shade",
+  "11":"Overcast daylight / shade",
+  "12":"Open shade / bright overcast",
+  "13":"Cloudy-bright daylight",
+  "14":"Hazy or weak direct sun",
+  "15":"Bright direct sun",
+  "16":"Bright sun on snow or sand"
+};
+
+var INCIDENT_DESC = {
+  "-4":"Starlight-level illumination on subject",
+  "-3":"Very dark night illumination on subject",
+  "-2":"Moonlight on subject",
+  "-1":"Very dim candlelight on subject",
+  "0":"Candlelight on subject",
+  "1":"Very low light on subject",
+  "2":"Very dim indoor light on subject",
+  "3":"Dim indoor light on subject",
+  "4":"Dim home light on subject",
+  "5":"Typical home light on subject",
+  "6":"Bright home light on subject",
+  "7":"Office / bright indoor light on subject",
+  "8":"Very bright indoor / stage light on subject",
+  "9":"Dusk-level light on subject",
+  "10":"Heavy overcast / deep shade on subject",
+  "11":"Overcast / shade light on subject",
+  "12":"Open-shade light on subject",
+  "13":"Cloudy-bright daylight on subject",
+  "14":"Hazy direct sun on subject",
+  "15":"Bright direct sun on subject",
+  "16":"Very bright sun / snow-sand illumination"
+};
+
+// ...
+function updateEvDescriptor(ev){
+  var lbl=document.getElementById('evDescLabel'); if(!lbl) return;
+  var desc=EV_DESC[String(Math.round(ev))]||('EV '+ev.toFixed(1));
+  lbl.textContent=desc;
+  var ctrl=document.getElementById('evCtrl'); if(ctrl){ ctrl.setAttribute('aria-valuetext', desc+', EV '+ev.toFixed(1)); }
+  var ambientNote=document.getElementById('reflectedNote');
+  if(ambientNote){
+    ambientNote.textContent='Reflected meter EV '+ev.toFixed(1)+' • '+desc;
+  }
+}
+function restoreEVDescriptor(){
+  var s=document.getElementById('evSlider');
+  var ev=parseFloat(s&&s.value||13);
+  updateEvDescriptor(ev);
+}
+function showEVBadge(ev){
+  if(ev===null||ev===undefined){ restoreEVDescriptor(); return; }
+  updateEvDescriptor(ev);
+}
+
+// ===== Recommendation =====
+var intent='neutral'; // legacy; concise intent below supersedes this
+function segActiveValue(id){
+  var wrap=document.getElementById(id); if(!wrap) return null;
+  var btn=wrap.querySelector('.seg-btn.active');
+  return btn?btn.getAttribute('data-val'):null;
+}
+function getCI(){
+  // Map segment choices to 0..1 scales
+  var blurVal=segActiveValue('ciBlurSeg');
+  var moveVal=segActiveValue('ciMoveSeg');
+  var grainVal=segActiveValue('ciGrainSeg');
+  // DOF scale (0 = very deep, 1 = very shallow)
+  var blurMap={vdeep:0.0, deep:0.25, balanced:0.5, shallow:0.75, vshallow:1.0};
+  var blur=(blurMap[blurVal]!==undefined)?blurMap[blurVal]:0.5;
+  // Motion target scale
+  var freezeMap={blur:0.0, slow:0.25, balanced:0.5, fast:0.75, freeze:1.0};
+  var freeze=(freezeMap[moveVal]!==undefined)?freezeMap[moveVal]:0.5;
+  // Grain tolerance scale
+  var grainMap={clean:0.0, low:0.25, balanced:0.5, high:0.75, gritty:1.0};
+  var grain=(grainMap[grainVal]!==undefined)?grainMap[grainVal]:0.5;
+  var tripod=!!document.getElementById('ciTripod2')?.checked;
+  var panning=!!document.getElementById('ciPanning2')?.checked;
+  return {blur,freeze,grain,tripod,panning};
+}
+  // Calibrate to meter handlers
+  (function(){
+    var btn=document.getElementById('calBtn'); if(!btn) return;
+    btn.addEventListener('click',function(){
+      try{
+        var isoSel=document.getElementById('isoSelect');
+        var iso=parseInt(isoSel?.value,10)||400;
+        document.getElementById('calISO').value=iso;
+        // Prefill from current recommendation if parsable
+        var out=document.getElementById('output')?.textContent||'';
+        var Nm=parseFloat(out.match(/f\/([0-9.]+)/)?.[1]);
+        var tm=out.match(/\b(\d+\/\d+|[0-9]*\.?[0-9]+s?)\b/);
+        document.getElementById('calN').value = isFinite(Nm)?Nm:1.8;
+        document.getElementById('calT').value = tm?tm[1]:'1/125';
+      }catch(e){}
+      openModal('calModal');
+    });
+    var apply=document.getElementById('calApply'); if(apply){
+      apply.addEventListener('click',function(){
+        try{
+          var ISO=parseInt(document.getElementById('calISO').value,10)||400;
+          var N=parseFloat(document.getElementById('calN').value)||1.8;
+          var t=parseShutterText(document.getElementById('calT').value);
+          if(!(t>0)){ alert('Enter shutter like 1/60 or 0.5'); return; }
+          var ev = evFromExposure(N,t,ISO);
+          if(!isFinite(ev)){ alert('Could not compute EV'); return; }
+          ev = Math.max(-4, Math.min(16, ev));
+          exposureMeterSource='scene'; updateMeterSourceUI();
+          if(typeof window.setEvControlValue==='function'){
+            window.setEvControlValue(ev, 'cal');
+          }else{
+            document.getElementById('evSlider').value=ev;
+            document.getElementById('evInput').value=ev.toFixed(1);
+            document.getElementById('luxInput').value=Math.round(evToLux(ev));
+            if(typeof storeAmbientEV==='function'){ storeAmbientEV(ev); }
+            updateEvDescriptor(ev);
+            recalc();
+          }
+          closeModal('calModal');
+        }catch(err){ alert('Calibration failed: '+err.message); }
+      });
+    }
+        var reset=document.getElementById('calReset'); if(reset){
+      reset.addEventListener('click',function(){
+        try{
+          var ev=13; // default EV
+          exposureMeterSource='scene'; updateMeterSourceUI();
+          if(typeof window.setEvControlValue==='function'){
+            window.setEvControlValue(ev, 'cal');
+          }else{
+            document.getElementById('evSlider').value=ev;
+            document.getElementById('evInput').value=ev.toFixed(1);
+            document.getElementById('luxInput').value=Math.round(evToLux(ev));
+            if(typeof storeAmbientEV==='function'){ storeAmbientEV(ev); }
+            updateEvDescriptor(ev);
+            recalc();
+          }
+          closeModal('calModal');
+        }catch(err){ alert('Reset failed: '+err.message); }
+      });
+    }
+  })();
+function updateCISummary(){
+  var c=getCI();
+  var words=[];
+  updateGrainTerminology();
+  // DOF phrasing
+  words.push(c.blur>0.8?'Very shallow DOF':(c.blur>0.6?'Shallow DOF':(c.blur<0.2?'Very deep DOF':(c.blur<0.4?'Deep DOF':'Balanced DOF'))));
+  // Motion phrasing (less specific)
+  words.push(c.freeze>0.8?'Frozen':(c.freeze>0.6?'Sharp':(c.freeze<0.2?'Blurred':(c.freeze<0.4?'Slight blur':'Neutral motion'))));
+  // Grain/texture derived from chosen ISO (not a control)
+  try{
+  var iso=getSelectedISO()||400;
+    var isDigital=currentCaptureMode()==='digital';
+    var label = currentGrainLabel();
+    var desc;
+    if(iso<=200) desc = isDigital?'Low':'Clean';
+    else if(iso<=400) desc = 'Moderate';
+    else if(iso<=800) desc = 'High';
+    else desc = isDigital?'Very high':'Gritty';
+    words.push(label+': '+desc);
+  }catch(e){}
+  if(c.tripod) words.push('Tripod');
+  if(c.panning) words.push('Panning');
+  var el=document.getElementById('ciSummary'); if(el) el.textContent=words.join(' • ');
+}
+function getSelectedISO(){
+  var mode=document.getElementById('captureMode')?.value||'film';
+  if(mode==='digital'){
+    var n=document.getElementById('isoNumeric');
+    return Math.max(1, parseInt(n?.value,10) || parseInt(document.getElementById('isoSelect')?.value,10) || 400);
+  }else{
+    return parseInt(document.getElementById('isoSelect')?.value,10) || 400;
+  }
+}
+
+function recommend(ev,film,lens,focal,camera){
+  ev = ev + (parseFloat(document.getElementById('evBias')?.value)||0);
+  var ci=getCI();
+  var mode=currentCaptureMode();
+  var selectedISO = getSelectedISO();
+  var iso = selectedISO || (film?.box_iso) || 400;
+  var isoLock=true; // ISO is controlled by user via dropdown; do not auto-adjust in algorithm
+  var ap=lensApertureAtFocal(lens,focal);
+  // DOF bias: interpolate between ~f/11 and the lens' max aperture (wider)
+  var deepTarget=Math.min(Math.max(11,ap.minA),ap.maxA);
+  var shallowTarget=ap.minA;
+  if(ci.panning){ deepTarget = Math.min(ap.maxA, deepTarget*Math.pow(Math.SQRT2,0.5)); }
+  var grainBiasStops = (ci.grain-0.5)*0.6; // positive -> prefers gritty, negative -> prefers clean
+  var N_target= Math.max(ap.minA, Math.min(ap.maxA, deepTarget + (shallowTarget-deepTarget)*ci.blur));
+  if(Math.abs(grainBiasStops)>0.05){
+    var grainAdjust = Math.pow(Math.SQRT2, -grainBiasStops); // gritty -> open wider, clean -> stop down
+    N_target = Math.max(ap.minA, Math.min(ap.maxA, N_target * grainAdjust));
+  }
+  // Adjust target based on focal length: longer focal lengths require smaller apertures to achieve similar depth
+  if(focal && isFinite(focal)){
+    var focalRatio = Math.max(20, Math.min(200, focal)) / 50; // normalize around 50mm
+    var focalStops = Math.log2(focalRatio);
+    var adjustStops = focalStops * 0.5; // moderate influence
+    var adjustMultiplier = Math.pow(Math.SQRT2, adjustStops);
+    N_target = Math.max(ap.minA, Math.min(ap.maxA, N_target * adjustMultiplier));
+  }
+  var N=N_target;
+  // DOF priority window: limit how far aperture may deviate from target
+  var allowedOpenStops = 0.5 + 1.5*ci.blur + (ci.panning?0.3:0);   // allow slightly more opening
+  var allowedStopStops = 2.0 - 1.5*ci.blur + (ci.panning?0.5:0);   // allow stopping down more for panning
+  allowedOpenStops += grainBiasStops>0 ? Math.min(0.5, grainBiasStops) : 0;
+  allowedStopStops += grainBiasStops<0 ? Math.min(0.5, -grainBiasStops) : 0;
+  var N_open_min = Math.max(ap.minA, N_target/Math.pow(Math.SQRT2, allowedOpenStops));
+  var N_stop_max = Math.min(ap.maxA, N_target*Math.pow(Math.SQRT2, allowedStopStops));
+  if(ci.aperturePickN){ N = Math.max(ap.minA, Math.min(ap.maxA, ci.aperturePickN)); }
+  // Grain preference -> advisory only (no ISO auto-change)
+  var isoFloor=100, isoCeil=3200;
+  // ISO remains as selected.
+  // Motion preference -> target threshold
+  var targets=[1/8,1/30,1/60,1/250,1/500,1/1000];
+  var idx=Math.round(ci.freeze*5);
+  var tGoal=targets[Math.max(0,Math.min(5,idx))];
+  if(focal && isFinite(focal)) tGoal*=Math.max(0.25,Math.min(4,50/focal));
+  if(ci.panning) tGoal*=3; // allow slower shutter while following subject
+  if(ci.shutterPickT){ tGoal = ci.shutterPickT; }
+  var t=requiredShutter(ev,iso,N);
+  // If too slow for freeze, first open aperture, then raise ISO up to ceil
+  if(t>tGoal){
+    // open toward allowed limit
+    while(t>tGoal && N>N_open_min){ N=Math.max(N_open_min, N/Math.SQRT2); t=requiredShutter(ev,iso,N); }
+    // Do not change ISO automatically; user controls ISO.
+  }
+  // If faster than desired and user prefers blur/neutral, slow toward tGoal by stopping down then lowering ISO
+  if(t<tGoal && ci.freeze<=0.6){
+    while(t<tGoal && N<N_stop_max){ N=Math.min(N_stop_max, N*Math.SQRT2); t=requiredShutter(ev,iso,N);} 
+    // Do not change ISO automatically; user controls ISO.
+  }
+  var tMin=1/camera.max_shutter_den,warning="",ndAdvice="";
+  if(t<tMin){
+    var stops=Math.ceil(Math.log2(tMin/t));
+    var nd=Math.pow(2,stops);
+    warning="Current data exceeds camera capability.";
+    ndAdvice="Use ND"+nd+" ("+stops+" stops) or lower ISO / stop down.";
+    t=tMin;
+  }
+  var hh=handholdLimit(focal),hhWarn=(t>hh && !ci.tripod)?("Handheld risk. Use ≥ "+fmtSh(hh)+" or a tripod."):"";
+  if(ci.panning){ hhWarn=''; }
+  var apLimitWarn=(Math.abs(N-ap.minA)<1e-6)?"Aperture limit: lens cannot open wider." : ((Math.abs(N-ap.maxA)<1e-6)?"Aperture limit: lens cannot stop down further.":"");
+  var pp="";
+  if(film){
+    try{
+      var filmBox = film.box_iso || 100;
+      var pushStops=Math.log2(iso/filmBox);
+      if(Math.abs(pushStops)>=0.25){
+        var dir=pushStops>0?"push":"pull";
+        var limit=pushStops>0?(film.push_limit||0):(film.pull_limit||0);
+        var abs=Math.abs(pushStops).toFixed(1);
+        var over=Math.abs(pushStops)>(limit||0)?" (beyond lab limit)":"";
+        var def=pushStops>0?"Underexpose in camera, develop longer.":"Overexpose in camera, develop shorter.";
+        pp=dir+" ~"+abs+" stops"+over+" — "+def;
+      }
+    }catch(e){ pp=""; }
+  }
+  var panAdvice="";
+  if(ci.panning){
+    var desired=tGoal;
+    if(desired>0 && t<desired){
+      var deficit=Math.log2(desired/t);
+      if(deficit>0.1){
+        if(mode==='digital'){
+          var suggestedISO=Math.max(25, Math.round((selectedISO/Math.pow(2, Math.ceil(deficit)))/10)*10);
+          if(suggestedISO<selectedISO){
+            panAdvice='Panning tip: lower ISO to about '+suggestedISO+' or use ND to reach ≈ '+fmtSh(desired);
+          }else{
+            panAdvice='Panning tip: add ND or stop down further to reach ≈ '+fmtSh(desired);
+          }
+        }else if(film){
+          var suggestedFilmISO=Math.max(25, Math.round((film.box_iso/Math.pow(2, Math.ceil(deficit)))/10)*10);
+          panAdvice='Panning tip: consider slower film (ISO ≲ '+suggestedFilmISO+') or use ND to reach ≈ '+fmtSh(desired);
+        }else{
+          panAdvice='Panning tip: add ND or lower ISO to reach ≈ '+fmtSh(desired);
+        }
+      }
+    }
+  }
+  var grainAdvice="";
+  if(ci.grain<0.3){
+    if(mode==='digital' && selectedISO>200){
+      grainAdvice='Noise tip: drop ISO closer to 200 or add light for a cleaner file.';
+    }else if(film && film.box_iso>200){
+      grainAdvice='Grain tip: consider a slower film stock (ISO ≲ 200) for finer grain.';
+    }
+  }else if(ci.grain>0.7){
+    if(mode==='digital' && selectedISO<800){
+      grainAdvice='Noise tip: raise ISO toward 800+ or underexpose slightly for more texture.';
+    }else if(film && film.box_iso<800){
+      grainAdvice='Grain tip: try a faster film (ISO 800+) or push processing for extra grit.';
+    }
+  }
+  // Snap to camera-supported aperture steps for display
+  var displayN = nearestAperture(N, lens, camera);
+  return{iso:Math.round(iso),N:displayN,t:nearestShutterForCamera(camera,t),warns:[warning,ndAdvice,hhWarn,apLimitWarn,pp,panAdvice,grainAdvice].filter(Boolean).join(" • ")}
+}
+
+// ===== Alternatives =====
+function buildCompactAlternatives(ev,film,lens,focal,camera,main){
+  var ap=lensApertureAtFocal(lens,focal),
+      baseISO=getSelectedISO()||(film?.box_iso)||400,
+      isos=[baseISO],
+      rows=[];
+  for(var i=0;i<isos.length;i++){
+    var iso=Math.round(isos[i]),
+        aps=[main.N/2,main.N,main.N*2,ap.minA,ap.maxA].map(x=>Math.min(Math.max(x,ap.minA),ap.maxA)),
+        seen={},uniq=[];
+    aps.forEach(x=>{var k=x.toFixed(1);if(!seen[k]){seen[k]=1;uniq.push(parseFloat(k))}});
+    for(var k=0;k<uniq.length;k++){
+      var Nraw=uniq[k];
+      var N=nearestAperture(Nraw, lens, camera);
+      var t=requiredShutter(ev,iso,N),tMin=1/camera.max_shutter_den;
+      if(t<tMin)continue;
+      rows.push({iso:iso,N:N,t:nearestShutterForCamera(camera,t)})
+    }
+  }
+  var ci=getCI();
+  rows.sort(function(a,b){
+    if(ci.blur>0.66) return a.N-b.N;         // prefer wider apertures
+    if(ci.freeze>0.66) return (1/b.t)-(1/a.t); // prefer faster shutters
+    if(ci.grain<0.34) return a.iso-b.iso;    // prefer lower ISO
+    if(ci.grain>0.66) return b.iso-a.iso;    // prefer higher ISO
+    // default: closeness to main shutter speed
+    return Math.abs(1/a.t-1/main.t)-Math.abs(1/b.t-1/main.t)
+  });
+  var out=[],set={};
+  for(var r=0;r<rows.length;r++){
+    var key=rows[r].iso+'-'+rows[r].N+'-'+rows[r].t;
+    if(!set[key]){out.push(rows[r]);set[key]=1;}
+    if(out.length>=5)break
+  }
+  if(out.length===0 && main){
+    out.push({iso:main.iso,N:main.N,t:main.t});
+  }
+  return out
+}
+function buildFullAlternatives(ev,film,lens,focal,camera){
+  var ap=lensApertureAtFocal(lens,focal),
+      baseISO=getSelectedISO()||(film?.box_iso)||400,
+      isos=[baseISO],
+      Ns=[],cur=ap.minA;
+  while(cur<=ap.maxA+1e-9){Ns.push(parseFloat(cur.toFixed(1)));cur*=Math.SQRT2}
+  var rows=[];
+  for(var i=0;i<isos.length;i++){
+      for(var j=0;j<Ns.length;j++){
+      var Nraw=Ns[j];
+      var N=nearestAperture(Nraw, lens, camera);
+      var t=requiredShutter(ev,isos[i],N),tMin=1/camera.max_shutter_den;
+      if(t<tMin)continue;
+      rows.push({iso:isos[i],N:N,t:nearestShutterForCamera(camera,t)})
+    }
+  }
+  rows.sort(function(a,b){
+    if(a.iso!==b.iso)return a.iso-b.iso;
+    if(a.N!==b.N)return a.N-b.N;
+    return a.t-b.t
+  });
+  if(rows.length===0){
+    var fallbackN=lensApertureAtFocal(lens,focal).minA;
+    var fallbackISO=getSelectedISO()||(film?.box_iso)||400;
+    rows.push({iso:fallbackISO,N:fallbackN,t:nearestShutterForCamera(camera, requiredShutter(ev,fallbackISO,fallbackN))});
+  }
+  return rows
+}
+// Helper: enforce focal constraints without fighting the user while they type.
+function updateFocalConstraint(lens, normalizeValue){
+  var fi=document.getElementById('focalInput'); if(!fi||!lens) return;
+  var normalize = normalizeValue !== false;
+  if(lens.type==='prime'){
+    fi.readOnly=true; fi.min=lens.focal_mm; fi.max=lens.focal_mm; fi.step=1;
+    fi.value=String(lens.focal_mm);
+    fi.dataset.lastValidFocal=String(lens.focal_mm);
+  }else{
+    fi.readOnly=false; fi.min=lens.focal_min_mm; fi.max=lens.focal_max_mm; fi.step=1;
+    var v=parseFloat(fi.value);
+    var valid=isFinite(v) && v>=lens.focal_min_mm && v<=lens.focal_max_mm;
+    if(valid){ fi.dataset.lastValidFocal=String(v); }
+    if(normalize){
+      if(!valid){
+        var last=parseFloat(fi.dataset.lastValidFocal);
+        if(!(isFinite(last) && last>=lens.focal_min_mm && last<=lens.focal_max_mm)){
+          last=(lens.focal_min_mm+lens.focal_max_mm)/2;
+        }
+        v=last;
+      }
+      v=Math.max(lens.focal_min_mm, Math.min(lens.focal_max_mm, v));
+      fi.value=String(Math.round(v));
+      fi.dataset.lastValidFocal=fi.value;
+    }
+  }
+}
+function focalValueForLens(lens){
+  var fi=document.getElementById('focalInput');
+  if(!lens) return 50;
+  if(lens.type==='prime') return lens.focal_mm;
+  var min=lens.focal_min_mm, max=lens.focal_max_mm;
+  var v=fi ? parseFloat(fi.value) : NaN;
+  if(isFinite(v) && v>=min && v<=max){
+    if(fi) fi.dataset.lastValidFocal=String(v);
+    return v;
+  }
+  var last=fi ? parseFloat(fi.dataset.lastValidFocal) : NaN;
+  if(isFinite(last) && last>=min && last<=max) return last;
+  return (min+max)/2;
+}
+// ===== Dropdowns =====
+function refreshCameras(){
+  var sel=document.getElementById('cameraSelect');
+  var st=loadUserStore();var customs=(st.cameras||[]);
+  var opts=[];
+  if(customs.length){
+    opts.push('<optgroup label="Custom / Recent">', 
+      customs.map(c=>'<option value="'+c.name+'">'+c.name+'</option>').join(''),
+      '</optgroup>');
+  }
+  // Include only built-ins relevant to the selected capture mode, unless user asked to show all built-ins
+  var mode=document.getElementById('captureMode')?.value||'film';
+  var showAll = !!document.getElementById('showAllBuiltins')?.checked;
+  if(showAll || mode==='all'){
+    opts.push('<optgroup label="Built-in (Film)">',camerasBuiltin.map(c=>'<option value="'+c.name+'">'+c.name+'</option>').join(''),'</optgroup>');
+    opts.push('<optgroup label="Built-in (Digital)">',camerasDigitalBuiltin.map(c=>'<option value="'+c.name+'">'+c.name+'</option>').join(''),'</optgroup>');
+  } else if(mode==='film'){
+    opts.push('<optgroup label="Built-in">',
+      camerasBuiltin.map(c=>'<option value="'+c.name+'">'+c.name+'</option>').join(''),
+      '</optgroup>');
+  }else{
+    opts.push('<optgroup label="Built-in">',
+      camerasDigitalBuiltin.map(c=>'<option value="'+c.name+'">'+c.name+'</option>').join(''),
+      '</optgroup>');
+  }
+  opts.push('<option value="__custom__">Custom…</option>');
+  sel.innerHTML=opts.join('');
+  if(customs.length){
+    sel.value = customs[0].name;
+  } else {
+    var builtinPool = builtinCamerasForMode(mode, showAll);
+    var def = (mode==='digital') ? (builtinPool.find(c=>c.name==='Sony A7 III')||builtinPool[0]) : (builtinPool.find(c=>c.name==="Pentax K1000")||builtinPool[0]);
+    if(mode==='all' && !def){ def = builtinPool[0]; }
+    if(def){ sel.value = def.name; }
+  }
+}
+function refreshFilms(){
+  var sel=document.getElementById('filmSelect');
+  var st=loadUserStore();var customs=(st.films||[]);
+  var opts=[];
+  function uniqueBrands(list){
+    var seen={}; var out=[]; list.forEach(function(f){ var b=brandOfFilm(f); if(b && !seen[b]){ seen[b]=1; out.push(b);} });
+    return out;
+  }
+  var customBrands=uniqueBrands(customs);
+  var builtinBrands=uniqueBrands(filmsBuiltin);
+  if(customBrands.length){
+    opts.push('<optgroup label="Custom / Recent">', 
+      customBrands.map(b=>'<option value="'+b+'">'+b+'</option>').join(''),
+      '</optgroup>');
+  }
+  opts.push('<optgroup label="Built-in">',
+    builtinBrands.map(b=>'<option value="'+b+'">'+b+'</option>').join(''),
+    '</optgroup>');
+  opts.push('<option value="__custom__">Custom…</option>');
+  sel.innerHTML=opts.join('');
+  var defBrand = customBrands[0] || 'Ilford HP5+';
+  if(builtinBrands.indexOf(defBrand)===-1){ defBrand = builtinBrands[0] || ''; }
+  sel.value = defBrand;
+  try{ refreshISOForSelectedBrand(); }catch(e){}
+}
+function refreshLenses(){
+  var camName=document.getElementById('cameraSelect').value,
+      sel=document.getElementById('lensSelect');
+  if(camName==='__custom__'){openCustom('camera'); return;}
+  var mode=currentCaptureMode();
+  var showAll = showAllBuiltinsEnabled();
+  var cam=findCameraByName(camName);
+  if(!cam){sel.innerHTML='';return}
+  var all=(loadUserStore().lenses||[]).concat(builtinLensesForMode(mode, showAll));
+  var list=all.filter(l=>l.mount===cam.mount);
+  var st=loadUserStore();var customs=(st.lenses||[]).filter(l=>l.mount===cam.mount);
+  var opts=[];
+  if(customs.length){
+    opts.push('<optgroup label="Custom / Recent">',
+      customs.map(l=>'<option value="'+l.name+'">'+l.name+'</option>').join(''),
+      '</optgroup>');
+  }
+  opts.push('<optgroup label="Built-in">',
+    list.map(l=>'<option value="'+l.name+'">'+l.name+'</option>').join(''),
+    '</optgroup>');
+  opts.push('<option value="__custom__">Custom…</option>');
+  sel.innerHTML=opts.join('');
+  sel.selectedIndex=0;
+  var preferredByCamera={
+    "Nikon F100":"Nikon 50mm f/1.4",
+    "Nikon Zf":"Nikon Z 40mm f/2"
+  };
+  var lens;
+  var preferred=preferredByCamera[camName];
+  if(preferred){
+    lens = list.find(function(l){ return l.name===preferred; }) || customs.find(function(l){ return l.name===preferred; });
+  }
+  if(!lens){ lens = customs[0] || list[0]; }
+  if(lens){ sel.value = lens.name; }
+  if(lens){
+    var fi=document.getElementById('focalInput');
+    if(fi){
+      fi.value=(lens.type==='prime')?lens.focal_mm:Math.round((lens.focal_min_mm+lens.focal_max_mm)/2);
+    }
+    updateFocalConstraint(lens);
+  }
+}
+function handleSelectCustoms(){
+  document.getElementById('cameraSelect').addEventListener('change',function(){
+    if(this.value==='__custom__'){openCustom('camera');}
+    else { refreshLenses(); recalc(); }
+  });
+  document.getElementById('lensSelect').addEventListener('change',function(){
+    if(this.value==='__custom__'){openCustom('lens');}
+    else {
+      // Update focal length to suit selected lens
+      try{
+        var lensName=this.value;
+        var lens=findLensByName(lensName);
+        if(lens){
+          var f=(lens.type==='prime')?lens.focal_mm:Math.round((lens.focal_min_mm+lens.focal_max_mm)/2);
+          var fi=document.getElementById('focalInput'); if(fi){ fi.value=f; }
+          updateFocalConstraint(lens);
+        }
+      }catch(e){}
+      recalc();
+    }
+  });
+  document.getElementById('filmSelect').addEventListener('change',function(){
+    if(this.value==='__custom__'){openCustom('film');}
+    else {
+      try{ refreshISOForSelectedBrand(); }catch(e){}
+      recalc();
+    }
+  });
+}
+
+// ===== Custom Modal =====
+function openCustom(type){
+  var titleMap={camera:'Add Custom Camera', lens:'Add Custom Lens', film:'Add Custom Film'};
+  document.getElementById('customTitle').textContent=titleMap[type]||'Add Custom';
+  var form=document.getElementById('customForm'); form.innerHTML='';
+  if(type==='camera'){
+    form.innerHTML='<label>Name</label><input id="c_name">'
+      +'<label>Mount (e.g., nikon_f, canon_fd)</label><input id="c_mount">'
+      +'<label>Max shutter (1/x)</label><input id="c_shutter" type="number" value="1000">';
+  } else if(type==='lens'){
+    form.innerHTML='<label>Name</label><input id="l_name">'
+      +'<label>Mount</label><input id="l_mount">'
+      +'<label>Type</label><select id="l_type"><option value="prime">Prime</option><option value="zoom">Zoom</option></select>'
+      +'<div id="l_prime"><label>Focal (mm)</label><input id="l_focal" type="number" value="50">'
+      +'<label>Max aperture</label><input id="l_max" type="number" step="0.1" value="1.8">'
+      +'<label>Min aperture</label><input id="l_min" type="number" step="0.1" value="16"></div>'
+      +'<div id="l_zoom" style="display:none"><label>Focal min (mm)</label><input id="l_fmin" type="number" value="24">'
+      +'<label>Focal max (mm)</label><input id="l_fmax" type="number" value="70">'
+      +'<label>Max aperture @wide</label><input id="l_maxw" type="number" step="0.1" value="3.5">'
+      +'<label>Max aperture @tele</label><input id="l_maxt" type="number" step="0.1" value="5.6">'
+      +'<label>Min aperture</label><input id="l_minz" type="number" step="0.1" value="22"></div>';
+    // Prefill mount from current camera to reduce mismatch issues
+    try{
+      var camName=document.getElementById('cameraSelect')?.value;
+      var cam=findCameraByName(camName);
+      if(cam&&cam.mount){ var m=document.getElementById('l_mount'); if(m){ m.value=cam.mount; }}
+    }catch(e){}
+  } else if(type==='film'){
+    form.innerHTML='<label>Brand</label><input id="f_brand">'
+      +'<label>Stock name (unique)</label><input id="f_name" placeholder="e.g., YourBrand 400">'
+      +'<label>ISO (box speed)</label><input id="f_iso" type="number" value="400">'
+      +'<label>Push limit (stops)</label><input id="f_push" type="number" value="2">'
+      +'<label>Pull limit (stops)</label><input id="f_pull" type="number" value="1">';
+  }
+    var manage=document.getElementById('manageModal');
+  var wasManageOpen = manage && manage.style.display!=='none';
+  if(wasManageOpen){
+    manage.setAttribute('data-return','1');
+    closeModal('manageModal');
+  }
+  openModal('customModal');
+  var lt=document.getElementById('l_type');
+  if(lt){lt.addEventListener('change',function(){
+    document.getElementById('l_prime').style.display=this.value==='prime'?'block':'none';
+    document.getElementById('l_zoom').style.display=this.value==='zoom'?'block':'none';
+  });}
+  document.getElementById('customSave').onclick=function(){
+    try{
+      if(type==='camera'){
+        var obj={name:document.getElementById('c_name').value.trim(),
+                 mount:document.getElementById('c_mount').value.trim(),
+                 max_shutter_den:parseInt(document.getElementById('c_shutter').value,10)||1000};
+        if(!obj.name||!obj.mount){alert('Name and mount required');return}
+        addToStore('cameras',obj);
+        refreshCameras();
+        document.getElementById('cameraSelect').value=obj.name;
+        refreshLenses();
+        try{ renderManageList(); }catch(e){}      } else if(type==='lens'){
+        var isPrime=(document.getElementById('l_type').value==='prime');
+        var obj={name:document.getElementById('l_name').value.trim(),
+                 mount:document.getElementById('l_mount').value.trim(),
+                 type:isPrime?'prime':'zoom'};
+        if(isPrime){
+          obj.focal_mm=parseFloat(document.getElementById('l_focal').value)||50;
+          obj.max_aperture=parseFloat(document.getElementById('l_max').value)||2;
+          obj.min_aperture=parseFloat(document.getElementById('l_min').value)||16;
+        } else {
+          obj.focal_min_mm=parseFloat(document.getElementById('l_fmin').value)||24;
+          obj.focal_max_mm=parseFloat(document.getElementById('l_fmax').value)||70;
+          obj.max_aperture_wide=parseFloat(document.getElementById('l_maxw').value)||3.5;
+          obj.max_aperture_tele=parseFloat(document.getElementById('l_maxt').value)||5.6;
+          obj.min_aperture=parseFloat(document.getElementById('l_minz').value)||22;
+        }
+        if(!obj.name||!obj.mount){alert('Name and mount required');return}
+        addToStore('lenses',obj);
+        refreshLenses();
+        document.getElementById('lensSelect').value=obj.name;
+        try{ renderManageList(); }catch(e){}
+  } else if(type==='film'){
+        var obj={name:document.getElementById('f_name').value.trim(),
+                 brand:(document.getElementById('f_brand').value.trim()||document.getElementById('f_name').value.trim()),
+                 box_iso:parseInt(document.getElementById('f_iso').value,10)||400,
+                 push_limit:parseFloat(document.getElementById('f_push').value)||0,
+                 pull_limit:parseFloat(document.getElementById('f_pull').value)||0};
+        if(!obj.name||!obj.brand){alert('Brand and stock required');return}
+        addToStore('films',obj);
+        refreshFilms();
+        document.getElementById('filmSelect').value=obj.brand;
+        try{refreshISOForSelectedBrand()}catch(e){}
+        try{ renderManageList(); }catch(e){}  }
+      closeModal('customModal'); recalc();
+            var manage=document.getElementById('manageModal');
+      if(manage && manage.getAttribute('data-return')==='1'){
+        manage.removeAttribute('data-return');
+        openModal('manageModal');
+      }
+      try{ if(confirm('Embed this custom gear into the HTML file now?')){ downloadUpdatedHTML(); } }catch(e){}
+    }catch(e){alert('Could not save: '+e.message)}
+  };
+}
+
+// ===== Settings menu =====
+(function(){
+  var btn=document.getElementById('settingsBtn');
+  var menu=document.getElementById('settingsMenu');
+  btn.addEventListener('click',function(){menu.style.display=menu.style.display==='block'?'none':'block'});
+  document.getElementById('closeSettings').addEventListener('click',function(){menu.style.display='none'});
+  document.getElementById('aboutBtn').addEventListener('click',function(){menu.style.display='none';});
+  var saveBtn=document.getElementById('saveAppBtn');
+  if(saveBtn){ saveBtn.addEventListener('click',function(){ menu.style.display='none'; downloadUpdatedHTML(); }); }
+  // Theme toggle
+  var THEME_KEY='photoAppTheme_v1';
+  function applyTheme(mode){
+    var root=document.documentElement;
+    if(mode==='light'){ root.setAttribute('data-theme','light'); }
+    else if(mode==='dark'){ root.setAttribute('data-theme','dark'); }
+    else { root.removeAttribute('data-theme'); mode='auto'; }
+    try{ localStorage.setItem(THEME_KEY, mode); }catch(e){}
+    var tb=document.getElementById('themeBtn');
+    if(tb){ tb.textContent = 'Theme: '+ (mode==='auto'?'Auto':(mode==='dark'?'Dark':'Light')); }
+    // No geometry coupling in new slider; optional rebuild of ticks
+    try{ requestAnimationFrame(buildEVScale); }catch(_e){ try{ setTimeout(buildEVScale,0); }catch(__e){} }
+  }
+  function currentTheme(){ try{ return localStorage.getItem(THEME_KEY)||'auto'; }catch(e){ return 'auto'; } }
+  var themeBtn=document.getElementById('themeBtn');
+  if(themeBtn){
+    // initialize label/state
+    applyTheme(currentTheme());
+    themeBtn.addEventListener('click',function(){
+      var cur=currentTheme();
+      var next = cur==='auto' ? 'dark' : (cur==='dark' ? 'light' : 'auto');
+      applyTheme(next);
+    });
+  }
+  var manage=document.getElementById('manageBtn');
+  if(manage){
+    manage.addEventListener('click',function(){
+      menu.style.display='none';
+      renderManageList();
+      openModal('manageModal');
+    });
+  }
+  var delAll=document.getElementById('manageDeleteAll');
+  if(delAll){
+    delAll.addEventListener('click',function(){
+      if(confirm('Delete ALL custom cameras, lenses, and films?')){
+        var st=loadUserStore(); st.cameras=[]; st.lenses=[]; st.films=[]; saveUserStore(st);
+        renderManageList(); refreshCameras(); refreshFilms(); refreshLenses(); recalc();
+      }
+    });
+  }
+    var addCam=document.getElementById('addCameraBtn');
+  if(addCam){ addCam.addEventListener('click',function(){ openCustom('camera'); }); }
+  var addLens=document.getElementById('addLensBtn');
+  if(addLens){ addLens.addEventListener('click',function(){ openCustom('lens'); }); }
+  var addFilm=document.getElementById('addFilmBtn');
+  if(addFilm){ addFilm.addEventListener('click',function(){ openCustom('film'); }); }
+})();
+// ===== Advanced: DOF =====
+function calcDOF(N,focal_mm,dist_m,coc_mm){
+  var f=focal_mm,s=dist_m*1000,H=(f*f)/(N*coc_mm)+f;
+  var near=(H*s)/(H+(s-f));
+  var far=(H*s)/(H-(s-f));
+  var near_m=near/1000;
+  var far_m=(H<=(s-f))?Infinity:far/1000;
+  var total=(far_m===Infinity)?Infinity:(far_m-near_m);
+  return{H_m:H/1000,near_m:near_m,far_m:far_m,total_m:total};
+}
+function updateDOF(){
+  var lens=findLensByName(document.getElementById('lensSelect').value);
+  if(!lens){document.getElementById('dofOut').textContent='—';return}
+  var focal=focalValueForLens(lens);
+  var outTxt=document.getElementById('output').textContent||'';
+  var N=parseFloat(outTxt.match(/f\/([0-9.]+)/)?.[1])||lens.max_aperture;
+  var dist=parseFloat(document.getElementById('dofDist')?.value)||3;
+  var coc=parseFloat(document.getElementById('dofCoC')?.value)||0.03;
+  var d=calcDOF(N,focal,dist,coc);
+  function m(v){return v===Infinity?'∞':v.toFixed(2)+' m'}
+  document.getElementById('dofOut').textContent='H ≈ '+m(d.H_m)+' • Near ≈ '+m(d.near_m)+' • Far ≈ '+m(d.far_m)+' • Total ≈ '+(d.total_m===Infinity?'∞':d.total_m.toFixed(2)+' m');
+}
+
+// ===== Advanced: Motion =====
+function updateMotion(){
+  var v=parseFloat(document.getElementById('motSpeed')?.value)||1.4;
+  var d=parseFloat(document.getElementById('motDist')?.value)||10;
+  var dir=document.getElementById('motDir')?.value||'across';
+  var omega=(dir==='across')?(v/d):(v/d)*0.3;
+  var a_freeze=0.001,t_freeze=a_freeze/Math.max(omega,1e-6);
+  var a_pan=0.02,t_pan=a_pan/Math.max(omega,1e-6);
+  function fmt(t){return t>=1?(t.toFixed(1)+'s'):('1/'+Math.round(1/t))}
+  document.getElementById('motOut').textContent='Freeze ≈ '+fmt(t_freeze)+' • Pan ≈ '+fmt(t_pan);
+}
+
+// ===== Advanced: Bracketing =====
+function evStepValue(s){return s==='1/3'?1/3:(s==='1/2'?1/2:1)}
+function updateBracket(){
+  var span=parseFloat(document.getElementById('brSpan')?.value)||1;
+  var step=evStepValue(document.getElementById('brStep')?.value||'1');
+  var param=document.getElementById('brParam')?.value||'shutter';
+  var offs=[];for(var e=-span;e<=span+1e-9;e+=step){offs.push(parseFloat(e.toFixed(3)))}
+  var camName=document.getElementById('cameraSelect').value,lensName=document.getElementById('lensSelect').value,filmName=document.getElementById('filmSelect').value;
+  var camera=findCameraByName(camName);
+  var lens=findLensByName(lensName);
+  var film=currentFilm();
+  if(!camera||!lens||!film){document.getElementById('brOut').textContent='—';return}
+  var focal=focalValueForLens(lens);
+  var evEff=effectiveEV();
+  var base=recommend(evEff,film,lens,focal,camera);
+  var seq=offs.map(function(o){
+    if(param==='shutter'){
+      var t=base.t*Math.pow(2,o);
+      return fmtSh(nearestShutterThird(t));
+    }else if(param==='aperture'){
+      var N=base.N*Math.pow(Math.SQRT2,o);
+      return 'f/'+(Math.round(N*10)/10).toFixed(1);
+    }else{
+      var iso=Math.round(base.iso*Math.pow(2,o));
+      return String(iso);
+    }
+  });
+  var label=(param==='shutter'?'Shutter':param==='aperture'?'Aperture':'ISO');
+  document.getElementById('brOut').textContent='Frames: '+offs.length+' • '+label+' → '+seq.join(', ');
+}
+
+// ===== Advanced: Reciprocity =====
+var RECIP_TABLE={
+  "Kodak Tri-X 400":t=>t<1?t:Math.pow(t,1.26),
+  "Ilford HP5+ 400":t=>t<1?t:Math.pow(t,1.3),
+  "Kodak Portra 400":t=>t<1?t:Math.pow(t,1.2),
+  "Kodak Portra 160":t=>t<1?t:Math.pow(t,1.2),
+  "Kodak Portra 800":t=>t<1?t:Math.pow(t,1.2),
+  "Cinestill 800T":t=>t<1?t:Math.pow(t,1.15),
+  "Cinestill 50D":t=>t<1?t:Math.pow(t,1.12),
+  "Fujifilm Superia 200":t=>t<1?t:Math.pow(t,1.25),
+  "Fujifilm Superia 400":t=>t<1?t:Math.pow(t,1.25),
+  "Kodak Ektar 100":t=>t<1?t:Math.pow(t,1.2),
+  "Kodak Gold 200":t=>t<1?t:Math.pow(t,1.25)
+};
+function currentFilm(){
+  var mode=document.getElementById('captureMode')?.value||'film';
+  if(mode==='digital') return null;
+  var brand=document.getElementById('filmSelect')?.value;
+  var isoSel=document.getElementById('isoSelect'); var iso=parseInt(isoSel?.value,10)||NaN;
+  var films=allFilms().filter(f=>f.brand===brand);
+  if(!films.length) return null;
+  var byIso=films.find(f=>f.box_iso===iso);
+  return byIso||films[0];
+}
+function updateReciprocity(){
+  var film=currentFilm();
+  if(!film){document.getElementById('recipOut').textContent='—';return}
+  var camName=document.getElementById('cameraSelect').value,lensName=document.getElementById('lensSelect').value;
+  var camera=findCameraByName(camName);
+  var lens=findLensByName(lensName);
+  if(!camera||!lens){document.getElementById('recipOut').textContent='—';return}
+  var focal=focalValueForLens(lens);
+  var evEff=effectiveEV();
+  var base=recommend(evEff,film,lens,focal,camera),t=base.t,fn=RECIP_TABLE[film.name];
+  if(t<1){document.getElementById('recipOut').textContent='Not needed below 1s.';return}
+  var corr=fn?fn(t):t;
+  document.getElementById('recipOut').textContent='Metered '+fmtSh(t)+' → Reciprocity corrected ≈ '+fmtSh(corr);
+}
+
+function setupHeaderRecommendation(){
+  var headerEl=document.getElementById('headerRecommendation');
+  var card=document.getElementById('recommendedCard');
+  if(!headerEl || !card){ return; }
+  headerEl.textContent='—';
+  headerEl.style.display='none';
+  if(headerRecommendationObserver){ headerRecommendationObserver.disconnect(); }
+  headerRecommendationObserver=new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      headerEl.style.display = entry.isIntersecting ? 'none' : 'block';
+    });
+  }, {threshold:0.6});
+  headerRecommendationObserver.observe(card);
+}
+
+// ===== Advanced: Push/Pull =====
+
+function updatePushPull(){
+  var film=currentFilm();
+  if(!film){document.getElementById('ppOut').textContent='—';return}
+  var stops=parseFloat(document.getElementById('ppStops')?.value)||0;
+  var action=stops>0?('Push +'+stops+' stops'):(stops<0?('Pull '+stops+' stops'):'No change');
+  var def=stops>0?'Underexpose in camera, develop longer.':(stops<0?'Overexpose in camera, develop shorter.':'');
+  var limit=(stops>0?film.push_limit:film.pull_limit)||0;
+  var over=Math.abs(stops)>(limit)?' (beyond lab limit)':'';
+  document.getElementById('ppOut').textContent=action+over+' — '+def;
+}
+
+
+/* ----- New EV Control ----- */
+(function(){
+  var MIN=EV_MIN, MAX=EV_MAX;
+  var ctrl, track, ticks, handle, tip, hidden;
+  var dragging=false;
+  var initialized=false;
+  var dragRecalcTimer=null;
+
+  function clamp(v){ return Math.max(MIN, Math.min(MAX, v)); }
+  function evToT(ev){ return (clamp(ev)-MIN)/(MAX-MIN); }
+  function tToEv(t){ return MIN + t*(MAX-MIN); }
+  function pxToT(x){
+    var r = track.getBoundingClientRect();
+    return Math.max(0, Math.min(1, (x - r.left)/Math.max(1, r.width)));
+  }
+  function fmtLux(ev){ return Math.round(Math.pow(2,ev)*2.5); }
+
+  function scheduleDragRecalc(){
+    if(dragRecalcTimer!==null) return;
+    dragRecalcTimer=setTimeout(function(){
+      dragRecalcTimer=null;
+      try{ recalc(); }catch(_e){}
+      if(dragging){ scheduleDragRecalc(); }
+    }, 40);
+  }
+
+  function setEV(ev, source){
+    ev = clamp(+ev || 0);
+    var t = evToT(ev);
+    var left = 14 + t*(ctrl.clientWidth-28); // 14px side padding
+    handle.style.left = left + 'px';
+    if(tip){
+      tip.style.left    = left + 'px';
+      var inc=incidentEV();
+      if(exposureMeterSource==='incident' && inc!==null){
+        tip.textContent='Scene EV '+ev.toFixed(1)+' • using incident EV '+inc.toFixed(1);
+      }else{
+        tip.textContent='Scene EV '+ev.toFixed(1)+' • ≈ '+fmtLux(ev)+' lx';
+      }
+    }
+    var evInput=document.getElementById('evInput');
+    var luxInput=document.getElementById('luxInput');
+    if(evInput && document.activeElement!==evInput){ evInput.value = ev.toFixed(1); }
+    if(luxInput && document.activeElement!==luxInput){ luxInput.value = fmtLux(ev); }
+    ctrl.setAttribute('aria-valuenow', ev.toFixed(1));
+    if(hidden){ hidden.value = ev; }
+    if(typeof storeAmbientEV === 'function'){ storeAmbientEV(ev); }
+    updateEvDescriptor(ev);
+    updateIncidentNote();
+    if(source==='drag'){
+      // Keep the thumb/description immediate, while recommendations refresh during the drag.
+      scheduleDragRecalc();
+    }else if(source==='kb'){
+      try{ recalc(); }catch(_e){}
+    }else if(source!=='input' && hidden){
+      hidden.dispatchEvent(new Event('input', {bubbles:true}));
+    }
+  }
+
+  function buildTicks(){
+    ticks.innerHTML = '';
+    for(var ev=MIN; ev<=MAX+1e-9; ev+=0.5){
+      var d=document.createElement('div');
+      var isInt = Math.abs(ev - Math.round(ev)) < 1e-6;
+      d.className='tick'+(isInt?' major':'');
+      d.style.left = (evToT(ev)*100)+'%';
+      ticks.appendChild(d);
+    }
+  }
+
+  function startDrag(clientX){
+    dragging=true;
+    window.__evDragging=true;
+    ctrl.classList.add('ev-dragging');
+    document.getElementById('output')?.classList.remove('flash-animate');
+    setEV(tToEv(pxToT(clientX)), 'drag');
+    if(tip){ tip.removeAttribute('aria-hidden'); }
+  }
+  function moveDrag(clientX){ if(dragging) setEV(tToEv(pxToT(clientX)), 'drag'); }
+  function endDrag(){
+    if(!dragging) return;
+    dragging=false;
+    window.__evDragging=false;
+    ctrl.classList.remove('ev-dragging');
+    if(tip){ tip.setAttribute('aria-hidden','true'); }
+    try{ recalc(); }catch(_e){}
+  }
+
+  function bind(){
+    var activePointerId=null;
+    var captureSupported = typeof ctrl.setPointerCapture==='function';
+
+    function pointerMoveHandler(e){
+      if(activePointerId!==null && e.pointerId!==activePointerId) return;
+      if(!dragging) return;
+      moveDrag(e.clientX);
+      e.preventDefault();
+    }
+    function pointerUpHandler(e){
+      if(activePointerId===null || e.pointerId!==activePointerId) return;
+      if(captureSupported && typeof ctrl.releasePointerCapture==='function'){
+        try{ ctrl.releasePointerCapture(e.pointerId); }catch(_e){}
+      }else{
+        window.removeEventListener('pointermove', pointerMoveHandler, true);
+        window.removeEventListener('pointerup', pointerUpHandler, true);
+        window.removeEventListener('pointercancel', pointerCancelHandler, true);
+      }
+      activePointerId=null;
+      endDrag();
+      e.preventDefault();
+    }
+    function pointerCancelHandler(e){
+      if(activePointerId===null || e.pointerId!==activePointerId) return;
+      if(captureSupported && typeof ctrl.releasePointerCapture==='function'){
+        try{ ctrl.releasePointerCapture(e.pointerId); }catch(_e){}
+      }else{
+        window.removeEventListener('pointermove', pointerMoveHandler, true);
+        window.removeEventListener('pointerup', pointerUpHandler, true);
+        window.removeEventListener('pointercancel', pointerCancelHandler, true);
+      }
+      activePointerId=null;
+      endDrag();
+    }
+
+    ctrl.addEventListener('pointerdown', function(e){
+      if(e.pointerType==='mouse' && e.button!==0) return;
+      if(e.isPrimary===false) return;
+      activePointerId=e.pointerId;
+      if(captureSupported){
+        try{ ctrl.setPointerCapture(e.pointerId); }catch(_e){}
+      }else{
+        window.addEventListener('pointermove', pointerMoveHandler, true);
+        window.addEventListener('pointerup', pointerUpHandler, true);
+        window.addEventListener('pointercancel', pointerCancelHandler, true);
+      }
+      startDrag(e.clientX);
+      e.preventDefault();
+    });
+    ctrl.addEventListener('pointermove', pointerMoveHandler);
+    ctrl.addEventListener('pointerup', pointerUpHandler);
+    ctrl.addEventListener('pointercancel', pointerCancelHandler);
+    ctrl.addEventListener('touchstart', function(e){ if(e.cancelable) e.preventDefault(); }, {passive:false});
+    ctrl.addEventListener('touchmove', function(e){ if(e.cancelable) e.preventDefault(); }, {passive:false});
+
+    ctrl.addEventListener('keydown', function(e){
+      var step = (e.shiftKey?1:0.1);
+      var cur = parseFloat(hidden.value)||13;
+      if(e.key==='ArrowLeft' || e.key==='ArrowDown'){ setEV(cur - step, 'kb'); e.preventDefault(); }
+      else if(e.key==='ArrowRight' || e.key==='ArrowUp'){ setEV(cur + step, 'kb'); e.preventDefault(); }
+      else if(e.key==='PageDown'){ setEV(cur - 1, 'kb'); e.preventDefault(); }
+      else if(e.key==='PageUp'){ setEV(cur + 1, 'kb'); e.preventDefault(); }
+      else if(e.key==='Home'){ setEV(MIN, 'kb'); e.preventDefault(); }
+      else if(e.key==='End'){ setEV(MAX, 'kb'); e.preventDefault(); }
+    });
+
+    window.addEventListener('resize', function(){ buildTicks(); setEV(parseFloat(hidden.value)||13, 'resize'); });
+  }
+
+  // Public init
+  window.initEvControl = function(){
+    if(initialized) return;
+    ctrl   = document.getElementById('evCtrl');
+    if(!ctrl) return;
+    track  = ctrl.querySelector('.ev-track');
+    ticks  = ctrl.querySelector('.ev-ticks');
+    handle = ctrl.querySelector('.ev-handle');
+    tip    = document.getElementById('evTip');
+    hidden = document.getElementById('evSlider'); // legacy bridge
+
+    buildTicks();
+    bind();
+      setEV(parseFloat(hidden.value)||13, 'init');
+
+      // Keep sync with number/lux inputs and always recalc
+      var evIn=document.getElementById('evInput');
+      var lxIn=document.getElementById('luxInput');
+      if(evIn){
+        evIn.addEventListener('input', function(){
+          var raw=String(this.value).trim();
+          if(raw==='' || raw==='-' || raw==='.' || raw==='-.') return;
+          var parsed=parseFloat(raw); if(!isFinite(parsed)) return;
+          var ev=clamp(parsed);
+          setEV(ev, 'input');
+          recalc();
+        });
+        evIn.addEventListener('blur', function(){
+          var parsed=parseFloat(this.value);
+          var fallback=parseFloat(hidden?.value);
+          var ev=clamp(isFinite(parsed)?parsed:(isFinite(fallback)?fallback:13));
+          this.value=ev.toFixed(1);
+          setEV(ev,'input'); recalc();
+        });
+      }
+      if(lxIn){
+        lxIn.addEventListener('input', function(){
+          var raw=String(this.value).trim(); if(raw==='') return;
+          var lx=parseFloat(raw); if(!isFinite(lx) || lx<0) return;
+          var ev=clamp(Math.log2(Math.max(1e-6,lx)/2.5));
+          setEV(ev, 'input');
+          recalc();
+        });
+        lxIn.addEventListener('blur', function(){
+          var lx=parseFloat(this.value);
+          if(!isFinite(lx) || lx<0){ lx=fmtLux(parseFloat(hidden?.value)||13); }
+          this.value=String(Math.round(lx));
+          var ev=clamp(Math.log2(Math.max(1e-6,lx)/2.5));
+          setEV(ev,'input'); recalc();
+        });
+      }
+      // Also keep hidden slider in sync with custom slider
+      if(hidden){
+        hidden.addEventListener('input', function(){
+          var ev = clamp(parseFloat(this.value)||0);
+          setEV(ev, 'input');
+          recalc();
+        });
+      }
+      initialized=true;
+  };
+
+  window.setEvControlValue = function(ev, source){
+    if(!ctrl){ window.initEvControl(); }
+    if(!ctrl) return;
+    setEV(ev, source||'api');
+  };
+
+  // Make old helpers no-ops so existing calls won’t break
+  window.buildEVScale = function(){};
+  window.bindEVSliderClicks = function(){};
+})();
+
+// ===== Recalc & Init =====
+function recalc(){
+  var camName=document.getElementById('cameraSelect').value,
+      lensName=document.getElementById('lensSelect').value,
+      filmName=document.getElementById('filmSelect').value,
+      output=document.getElementById('output'),
+      warn=document.getElementById('warning');
+  var mode=currentCaptureMode();
+  var requireFilm = mode!=='digital';
+  if(!camName||!lensName||camName==='__custom__'||lensName==='__custom__'||(requireFilm && (!filmName||filmName==='__custom__'))){
+    output.textContent="Select camera, lens, and film.";warn.textContent="";return;
+  }
+  var camera=findCameraByName(camName),
+      lens=findLensByName(lensName),
+      film=requireFilm?currentFilm():null;
+  var focal=focalValueForLens(lens);
+  var evEff=effectiveEV();
+  // Keep constraints current, but never rewrite a zoom value mid-keystroke.
+  try{ updateFocalConstraint(lens,false); }catch(e){}
+  var rec=recommend(evEff,film,lens,focal,camera);
+  var newText = 'ISO '+rec.iso+' • f/'+rec.N.toFixed(1)+' • '+fmtSh(rec.t);
+  if (output.textContent !== newText) {
+    output.textContent = newText;
+    if(!window.__evDragging){
+      output.classList.remove('flash-animate');
+      void output.offsetWidth; // force reflow only for settled changes
+      output.classList.add('flash-animate');
+    }
+  } else {
+    output.textContent = newText;
+  }
+  var headerRec=document.getElementById('headerRecommendation');
+  if(headerRec){ headerRec.textContent = newText; }
+  warn.textContent=rec.warns;
+  // Alternatives: populate tables
+  try{
+    var comp=buildCompactAlternatives(evEff,film,lens,focal,camera,rec);
+    var tb=document.querySelector('#altTable tbody');
+    if(tb){
+      tb.innerHTML='';
+      comp.forEach(function(r){
+        var tr=document.createElement('tr');
+        tr.innerHTML='<td>'+r.iso+'</td><td>f/'+r.N.toFixed(1)+'</td><td>'+fmtSh(r.t)+'</td>';
+        tb.appendChild(tr);
+      });
+    }
+    var full=buildFullAlternatives(evEff,film,lens,focal,camera);
+    var tbf=document.querySelector('#altTableFull tbody');
+    if(tbf){
+      tbf.innerHTML='';
+      full.forEach(function(r){
+        var tr=document.createElement('tr');
+        tr.innerHTML='<td>'+r.iso+'</td><td>f/'+r.N.toFixed(1)+'</td><td>'+fmtSh(r.t)+'</td>';
+        tbf.appendChild(tr);
+      });
+    }
+  }catch(e){ /* no-op to keep UI resilient */ }
+  updateDOF();updateMotion();updateBracket();updateReciprocity();updatePushPull();
+}
+
+window.INFO={
+  dof:'Shows how much of the scene is expected to look acceptably sharp around the focus distance.',
+  motion:'Shows whether the current exposure is better suited to freezing movement, showing motion blur, or panning.',
+  bracket:'Shows a short set of exposures above and below the recommendation when you want extra exposure insurance.',
+  reciprocity:'Film can need extra exposure time during long exposures. This shows the correction when the selected film has known reciprocity data.',
+  pushpull:'Shows how rating film above or below box speed affects the push or pull processing you should request.'
+};
+
+function wireInfoButtons(){
+  try{
+    var btns = document.querySelectorAll('#advancedDrawer button.info-btn');
+    btns.forEach(function(b){
+      // Avoid duplicate bindings
+      if(b.getAttribute('data-wired')==='1') return;
+      b.setAttribute('data-wired','1');
+      b.addEventListener('click', function(ev){
+        ev.preventDefault(); ev.stopPropagation();
+        var key = b.getAttribute('data-info');
+        var container = b.closest('details')?.querySelector('.info-inline[data-info-desc="'+key+'"]');
+        if(container){
+          if(container.getAttribute('data-active')==='1'){
+            container.textContent='';
+            container.setAttribute('data-active','0');
+          }else{
+            container.textContent = (window.INFO && window.INFO[key]) || 'No description available.';
+            container.setAttribute('data-active','1');
+          }
+        }
+      }, true);
+    });
+  }catch(e){ /* no-op */ }
+}
+
+function initApp(){
+  refreshCameras();refreshFilms();refreshLenses();
+  initEvControl();
+  // Allow slight overtravel to counter sub‑pixel rounding; values are clamped to EV_MIN..EV_MAX
+  var s = document.getElementById('evSlider');
+  if(s){ s.min = EV_MIN; s.max = EV_MAX; }
+  // Default to a common light level: EV 13 (clear daylight)
+  var EV_DEFAULT = 13;
+  document.getElementById('evSlider').value = EV_DEFAULT;
+  document.getElementById('evInput').value = EV_DEFAULT;
+  document.getElementById('luxInput').value = Math.round(evToLux(EV_DEFAULT));
+  // Old EV bar/notch logic removed
+  // function clampEV(v){ return Math.max(EV_MIN, Math.min(EV_MAX, v)); }
+  // Already handled in initEvControl above for robust sync
+  // While dragging the slider, descriptor follows the thumb; on release it stays at the final value
+  (function(){
+    var s=document.getElementById('evSlider'); if(!s) return;
+    var dragging=false;
+    function follow(){ if(!dragging) return; var ev=parseFloat(s.value)||0; updateEvDescriptor(ev); }
+    s.addEventListener('pointerdown',function(){ dragging=true; follow(); });
+    s.addEventListener('pointermove',follow);
+    function up(){ if(!dragging) return; dragging=false; restoreEVDescriptor(); }
+    s.addEventListener('pointerup',up);
+    s.addEventListener('pointercancel',up);
+  })();
+  // Already handled in initEvControl above for robust sync
+  initIncidentDial();
+  // EI controls: show/hide Rated EI when 'Rate this roll' is on
+  function updateEIRow(){
+    var rr=document.getElementById('rateRoll'); var wrap=document.getElementById('eiWrap');
+    if(wrap){ wrap.style.display = rr && rr.checked ? 'inline-block' : 'none'; }
+  }
+  var rr=document.getElementById('rateRoll'); if(rr){ rr.addEventListener('change',function(){updateEIRow();recalc();}) }
+  var rei=document.getElementById('ratedEI'); if(rei){ rei.addEventListener('input',recalc) }
+  updateEIRow();
+  // Concise Creative Intent: segmented controls + toggles
+  handleSelectCustoms();
+  function bindSeg(id){
+    var wrap=document.getElementById(id); if(!wrap) return;
+    wrap.querySelectorAll('.seg-btn').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        wrap.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));
+        this.classList.add('active');
+        updateCISummary();
+        recalc();
+      });
+    });
+  }
+  bindSeg('ciBlurSeg');
+  bindSeg('ciMoveSeg');
+  bindSeg('ciGrainSeg');
+  var t2=document.getElementById('ciTripod2'); if(t2){ t2.addEventListener('input',function(){updateCISummary();recalc()}) }
+  var p2=document.getElementById('ciPanning2'); if(p2){ p2.addEventListener('input',function(){updateCISummary();recalc()}) }
+  // Capture mode wiring: show/hide film controls and refresh gear lists
+  (function(){
+    var modeSel=document.getElementById('captureMode');
+    function applyMode(){
+      var mode=modeSel?.value||'film';
+      var filmCol=document.getElementById('filmCol');
+      var isoSel=document.getElementById('isoSelect');
+      var isoNum=document.getElementById('isoNumeric');
+      if(filmCol) filmCol.style.display = (mode==='film') ? '' : 'none';
+      if(isoSel) isoSel.style.display = (mode==='digital') ? 'none' : '';
+      if(isoNum) isoNum.style.display = (mode==='digital') ? '' : 'none';
+      try{ refreshCameras(); refreshLenses(); refreshFilms(); }catch(e){}
+      try{ updateCISummary(); }catch(e){}
+      try{ recalc(); }catch(e){}
+    }
+    if(modeSel){ modeSel.addEventListener('change', applyMode); applyMode(); }
+    var isoNum=document.getElementById('isoNumeric'); if(isoNum){ isoNum.addEventListener('input', recalc); }
+    var showAll=document.getElementById('showAllBuiltins'); if(showAll){ showAll.addEventListener('change', function(){ try{ refreshCameras(); refreshLenses(); }catch(e){} }); }
+  })();
+  (function(){
+    var fi=document.getElementById('focalInput');
+    if(!fi) return;
+    function selectedLens(){ return findLensByName(document.getElementById('lensSelect')?.value); }
+    fi.addEventListener('input',function(){
+      try{ var lens=selectedLens(); if(lens){ updateFocalConstraint(lens,false); } }catch(e){}
+      recalc();
+    });
+    fi.addEventListener('blur',function(){
+      try{ var lens=selectedLens(); if(lens){ updateFocalConstraint(lens,true); } }catch(e){}
+      recalc();
+    });
+    fi.addEventListener('keydown',function(e){ if(e.key==='Enter'){ this.blur(); } });
+  })();
+  (function(){
+    var btn=document.getElementById('advancedToggle');
+    var drawer=document.getElementById('advancedDrawer');
+    // Always start closed
+    drawer.style.display = 'none';
+    btn.textContent = 'Open Advanced';
+    btn.addEventListener('click',function(){
+      if(drawer.style.display==='none'){
+        drawer.style.display='block';
+        btn.textContent='Close Advanced';
+      }else{
+        drawer.style.display='none';
+        btn.textContent='Open Advanced';
+      }
+    });
+  })();
+  // Alternatives section toggle inside Recommended card
+  (function(){
+    var btn=document.getElementById('altToggle');
+    var sec=document.getElementById('altSection');
+    if(btn&&sec){
+      var setL=function(){btn.textContent=(sec.style.display==='none'||sec.style.display==='')?'Show Alternatives':'Hide Alternatives'};
+      btn.addEventListener('click',function(){sec.style.display=(sec.style.display==='none'||sec.style.display==='')?'block':'none';setL()});
+      setL();
+    }
+  })();
+  // Alternatives full toggle
+  (function(){
+    var btn=document.getElementById('toggleFull');
+    var full=document.getElementById('fullAlt');
+    if(btn&&full){
+      var setL=function(){btn.textContent=(full.style.display==='none'||full.style.display==='')?'Show All Alternatives':'Hide All Alternatives'};
+      btn.addEventListener('click',function(){full.style.display=(full.style.display==='none'||full.style.display==='')?'block':'none';setL()});
+      setL();
+    }
+  })();
+  updateCISummary();
+  showEVBadge(EV_DEFAULT); updateEvDescriptor(EV_DEFAULT);
+  updateIncidentDial(incidentEV());
+  updateIncidentNote();
+  setupHeaderRecommendation();
+  (function(){
+    var btn=document.getElementById('incidentToggle');
+    var drawer=document.getElementById('incidentDrawer');
+    if(btn&&drawer){
+      var setLabel=function(){
+        var open=(drawer.style.display!=='none' && drawer.style.display!=='');
+        btn.textContent=open?'Close incident meter':'Use incident meter reading';
+      };
+      btn.addEventListener('click',function(){
+        drawer.style.display=(drawer.style.display==='none'||drawer.style.display==='')?'block':'none';
+        if(drawer.style.display==='block'){ var mi=document.getElementById('incidentMeterISO'); if(mi){ mi.value=String(getSelectedISO()||100); } }
+        setLabel();
+      });
+      drawer.style.display='none';
+      setLabel();
+    }
+  })();
+  // Build new EV scale and bind interactions
+  buildEVScale();
+  bindEVSliderClicks();
+  recalc();
+
+  // Ensure Advanced info buttons are wired
+  wireInfoButtons();
+}
+document.addEventListener('DOMContentLoaded',function(){try{initApp()}catch(e){alert('Init error: '+e.message)}});
+
+</script>
+<script id="embeddedUserData" type="application/json">{"cameras":[],"lenses":[],"films":[]}</script>
+<script id="v430DashboardPatch">
+(function(){
+  var modeEl=document.getElementById('captureMode');
+  if(modeEl&&!modeEl.querySelector('option[value="general"]')){var o=document.createElement('option');o.value='general';o.textContent='General / no specific gear';modeEl.insertBefore(o,modeEl.firstChild);modeEl.value='general';}
+  var gearCard=(function(){var h=[].slice.call(document.querySelectorAll('.section-header')).find(function(x){return x.textContent.trim()==='Gear Setup';});var c=h&&h.closest('.card');if(c){c.id='gearCard';c.style.display='none';}return c;})();
+  var fi=document.getElementById('focalInput');if(fi){fi.value='';fi.placeholder='Optional';fi.readOnly=false;fi.removeAttribute('min');fi.removeAttribute('max');}
+  var GENERAL_LENS={name:'General exposure range',type:'zoom',focal_min_mm:1,focal_max_mm:1000,max_aperture_wide:1.4,max_aperture_tele:1.4,min_aperture:22};
+  var GENERAL_CAMERA={name:'General exposure range',max_shutter_den:8000,aperture_step:'third',shutter_step:'third'};
+  currentGrainLabel=function(){var m=currentCaptureMode();return m==='digital'?'Noise':(m==='film'?'Grain':'Grain / noise');};
+  builtinCamerasForMode=function(m,a){if(a||m==='all'||m==='general')return camerasBuiltin.concat(camerasDigitalBuiltin);return m==='digital'?camerasDigitalBuiltin:camerasBuiltin;};
+  builtinLensesForMode=function(m,a){if(a||m==='all'||m==='general')return lensesBuiltin.concat(lensesDigitalBuiltin);return m==='digital'?lensesDigitalBuiltin:lensesBuiltin;};
+  availableCameras=function(){return(loadUserStore().cameras||[]).concat(builtinCamerasForMode(currentCaptureMode(),showAllBuiltinsEnabled()));};
+  availableLenses=function(){return(loadUserStore().lenses||[]).concat(builtinLensesForMode(currentCaptureMode(),showAllBuiltinsEnabled()));};
+  nearestAperture=function(N,lens,camera){try{var step=(camera&&camera.aperture_step)||'third',q=(step==='full')?0.5:(1/6),v=Math.pow(2,Math.round(Math.log2(N)/q)*q),f=parseFloat(document.getElementById('focalInput')?.value);if(!(isFinite(f)&&f>0))f=(lens&&lens.type==='prime')?lens.focal_mm:50;var ap=lensApertureAtFocal(lens||GENERAL_LENS,f);return parseFloat(Math.max(ap.minA,Math.min(ap.maxA,v)).toFixed(1));}catch(e){return parseFloat((N||5.6).toFixed(1));}};
+  refreshCameras=function(){var sel=document.getElementById('cameraSelect');if(!sel)return;var prev=sel.value||'',customs=(loadUserStore().cameras||[]),m=currentCaptureMode(),opts=['<option value="">No specific camera</option>'];if(customs.length)opts.push('<optgroup label="Custom / Recent">'+customs.map(function(c){return'<option value="'+c.name+'">'+c.name+'</option>';}).join('')+'</optgroup>');if(m==='general'||showAllBuiltinsEnabled()){opts.push('<optgroup label="Built-in (Film)">'+camerasBuiltin.map(function(c){return'<option value="'+c.name+'">'+c.name+'</option>';}).join('')+'</optgroup>');opts.push('<optgroup label="Built-in (Digital)">'+camerasDigitalBuiltin.map(function(c){return'<option value="'+c.name+'">'+c.name+'</option>';}).join('')+'</optgroup>');}else{var pool=m==='digital'?camerasDigitalBuiltin:camerasBuiltin;opts.push('<optgroup label="Built-in">'+pool.map(function(c){return'<option value="'+c.name+'">'+c.name+'</option>';}).join('')+'</optgroup>');}opts.push('<option value="__custom__">Custom…</option>');sel.innerHTML=opts.join('');sel.value=[].slice.call(sel.options).some(function(x){return x.value===prev;})?prev:'';};
+  refreshFilms=function(){var sel=document.getElementById('filmSelect');if(!sel)return;var prev=sel.value||'',customs=(loadUserStore().films||[]);function brands(a){var z={},r=[];a.forEach(function(f){var b=brandOfFilm(f);if(b&&!z[b]){z[b]=1;r.push(b);}});return r;}var cb=brands(customs),bb=brands(filmsBuiltin),opts=['<option value="">No specific film stock</option>'];if(cb.length)opts.push('<optgroup label="Custom / Recent">'+cb.map(function(b){return'<option value="'+b+'">'+b+'</option>';}).join('')+'</optgroup>');opts.push('<optgroup label="Built-in">'+bb.map(function(b){return'<option value="'+b+'">'+b+'</option>';}).join('')+'</optgroup><option value="__custom__">Custom…</option>');sel.innerHTML=opts.join('');sel.value=[].slice.call(sel.options).some(function(x){return x.value===prev;})?prev:'';if(sel.value){try{refreshISOForSelectedBrand();}catch(e){}}else{var is=document.getElementById('isoSelect');if(is){is.innerHTML=[50,100,125,160,200,400,800,1600,3200].map(function(x){return'<option value="'+x+'">'+x+'</option>';}).join('');is.value='400';}}};
+  refreshLenses=function(){var cn=document.getElementById('cameraSelect')?.value||'',sel=document.getElementById('lensSelect');if(!sel)return;var prev=sel.value||'',cam=findCameraByName(cn);if(!cam){sel.innerHTML='<option value="">No specific lens</option><option value="__custom__">Custom…</option>';sel.value='';var f=document.getElementById('focalInput');if(f){f.readOnly=false;f.removeAttribute('min');f.removeAttribute('max');}return;}var all=(loadUserStore().lenses||[]).concat(builtinLensesForMode(currentCaptureMode(),showAllBuiltinsEnabled())),list=all.filter(function(l){return l.mount===cam.mount;}),customs=(loadUserStore().lenses||[]).filter(function(l){return l.mount===cam.mount;}),opts=['<option value="">No specific lens</option>'];if(customs.length)opts.push('<optgroup label="Custom / Recent">'+customs.map(function(l){return'<option value="'+l.name+'">'+l.name+'</option>';}).join('')+'</optgroup>');opts.push('<optgroup label="Built-in">'+list.map(function(l){return'<option value="'+l.name+'">'+l.name+'</option>';}).join('')+'</optgroup><option value="__custom__">Custom…</option>');sel.innerHTML=opts.join('');sel.value=[].slice.call(sel.options).some(function(x){return x.value===prev;})?prev:'';var lens=findLensByName(sel.value);if(lens)updateFocalConstraint(lens,true);};
+  getSelectedISO=function(){var m=currentCaptureMode();if(m==='film')return Math.max(1,parseInt(document.getElementById('isoSelect')?.value,10)||400);return Math.max(1,parseInt(document.getElementById('quickISO')?.value,10)||parseInt(document.getElementById('isoNumeric')?.value,10)||400);};
+  function foc(l){if(l)return focalValueForLens(l);var v=parseFloat(document.getElementById('focalInput')?.value);return isFinite(v)&&v>0?v:NaN;}
+  function why(rec,ev,cam,lens,film,focal){var h=document.getElementById('whyDetails');if(!h)return;var ci=getCI(),a=[],d=EV_DESC[String(Math.round(ev))]||('EV '+ev.toFixed(1));a.push(d+' (EV '+ev.toFixed(1)+') sets the available light.');a.push('ISO '+rec.iso+' sets the working sensitivity.');if(isFinite(focal)&&focal>0)a.push(Math.round(focal)+'mm affects depth of field and handheld camera-shake risk; longer focal lengths generally need faster handheld shutter speeds.');if(lens){var lf=isFinite(focal)?focal:focalValueForLens(lens),ap=lensApertureAtFocal(lens,lf);a.push(lens.name+' limits the usable aperture range here to about f/'+ap.minA.toFixed(1)+' through f/'+ap.maxA.toFixed(1)+'.');}if(cam)a.push(cam.name+' contributes its shutter limit and exposure-step increments.');if(film)a.push(film.name+' contributes its box speed (ISO '+film.box_iso+') and push/pull guidance.');if(ci.blur!==0.5)a.push(ci.blur>0.5?'Your shallow-depth choice pushes toward a wider aperture.':'Your deep-depth choice pushes toward a smaller aperture.');if(ci.freeze!==0.5)a.push(ci.freeze>0.5?'Your motion choice pushes toward a faster shutter.':'Your motion-blur choice allows a slower shutter.');if(!cam&&!lens&&!film)a.push('No specific gear is selected, so this is a general exposure recommendation rather than a simulated default camera setup.');h.innerHTML='<ul>'+a.map(function(x){return'<li>'+x+'</li>';}).join('')+'</ul>';}
+  recalc=function(){var out=document.getElementById('output'),warn=document.getElementById('warning');if(!out||!warn)return;var cn=document.getElementById('cameraSelect')?.value||'',ln=document.getElementById('lensSelect')?.value||'';if(cn==='__custom__'||ln==='__custom__')return;var cam=findCameraByName(cn)||null,lens=findLensByName(ln)||null,film=currentFilm(),focal=foc(lens),ev=effectiveEV(),cc=cam||GENERAL_CAMERA,cl=lens||GENERAL_LENS,rec=recommend(ev,film,cl,focal,cc);var w=String(rec.warns||'').split(' • ').filter(function(x){if(!cam&&(x.indexOf('camera capability')>=0||x.indexOf('Use ND')===0))return false;if(!lens&&x.indexOf('Aperture limit:')===0)return false;return true;}).join(' • ');var txt='ISO '+rec.iso+' • f/'+rec.N.toFixed(1)+' • '+fmtSh(rec.t);if(out.textContent!==txt){out.textContent=txt;if(!window.__evDragging){out.classList.remove('flash-animate');void out.offsetWidth;out.classList.add('flash-animate');}}var hr=document.getElementById('headerRecommendation');if(hr)hr.textContent=txt;warn.textContent=w;var sc=document.getElementById('recommendationScope');if(sc){var a=[];if(cam)a.push(cam.name);if(lens)a.push(lens.name);if(film)a.push(film.name);sc.textContent=a.length?'Refined for: '+a.join(' • '):'General recommendation — no specific camera, lens, or film limits applied.';}why(rec,ev,cam,lens,film,focal);try{var c=buildCompactAlternatives(ev,film,cl,isFinite(focal)?focal:50,cc,rec),tb=document.querySelector('#altTable tbody');if(tb){tb.innerHTML='';c.forEach(function(r){var tr=document.createElement('tr');tr.innerHTML='<td>'+r.iso+'</td><td>f/'+r.N.toFixed(1)+'</td><td>'+fmtSh(r.t)+'</td>';tb.appendChild(tr);});}var f=buildFullAlternatives(ev,film,cl,isFinite(focal)?focal:50,cc),tbf=document.querySelector('#altTableFull tbody');if(tbf){tbf.innerHTML='';f.forEach(function(r){var tr=document.createElement('tr');tr.innerHTML='<td>'+r.iso+'</td><td>f/'+r.N.toFixed(1)+'</td><td>'+fmtSh(r.t)+'</td>';tbf.appendChild(tr);});}}catch(e){}updateDOF();updateMotion();updateBracket();updateReciprocity();updatePushPull();};
+  document.addEventListener('DOMContentLoaded',function(){var st=document.createElement('style');st.textContent='.dashboard-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px}.dashboard-actions button{font-weight:650;min-height:46px}.gear-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.gear-heading .section-header{margin:0}#gearReset{width:auto;padding:7px 10px;font-size:12px}.intent-stack{display:grid;gap:14px;padding-top:4px}.intent-row>label{font-size:13px!important;font-weight:650;color:var(--text)!important;margin-bottom:6px!important}.intent-row .seg{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));flex-wrap:nowrap}.intent-row .seg-btn{min-width:0;flex:none;padding:10px 5px;font-size:12px}.intent-extra{display:flex;gap:18px;margin-top:12px;align-items:center;flex-wrap:wrap}.recommendation-scope{font-size:12px;color:var(--muted);margin:2px 0 8px}.why-settings{margin-top:8px;border-top:1px solid var(--border);padding-top:8px}#whyToggle{width:auto;padding:7px 10px}#whyDetails{display:none;margin-top:8px;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--chipBg);font-size:13px;line-height:1.5}#whyDetails ul{margin:0;padding-left:20px}.quick-meter-row{display:flex;align-items:end;gap:10px;margin:0 0 10px}.quick-meter-row label{margin:0;max-width:150px}.quick-meter-row input{margin-top:4px}@media(max-width:520px){.intent-row .seg-btn{font-size:11px;padding:9px 3px}}';document.head.appendChild(st);var wrap=document.querySelector('.wrap'),light=document.getElementById('lightCard'),rec=document.getElementById('recommendedCard'),creative=document.getElementById('creativeCard'),ct=document.getElementById('creativeToggle'),mb=document.getElementById('advancedToggle'),more=document.getElementById('advancedDrawer');if(!gearCard||!wrap||!light||!rec||!creative||!ct||!mb||!more)return;var gh=gearCard.querySelector('.section-header');if(gh)gh.textContent='Gear (Optional)';if(!document.getElementById('gearReset')){var head=document.createElement('div');head.className='gear-heading';gh.parentNode.insertBefore(head,gh);head.appendChild(gh);var reset=document.createElement('button');reset.id='gearReset';reset.type='button';reset.textContent='Reset gear';head.appendChild(reset);var sub=document.createElement('div');sub.className='sub';sub.style.marginBottom='8px';sub.textContent='Leave this blank for a general recommendation. Add only the equipment details you want the app to account for.';head.insertAdjacentElement('afterend',sub);}var ev=document.getElementById('evCtrl');if(ev&&!document.getElementById('quickISOGroup')){var q=document.createElement('div');q.className='quick-meter-row';q.id='quickISOGroup';q.innerHTML='<label>Working ISO<input type="number" id="quickISO" value="400" min="1" step="1" inputmode="numeric"></label>';ev.parentNode.insertBefore(q,ev);}document.getElementById('quickISO')?.addEventListener('input',function(){var n=document.getElementById('isoNumeric');if(n)n.value=this.value;recalc();});if(!document.getElementById('recommendationScope')){var scope=document.createElement('div');scope.id='recommendationScope';scope.className='recommendation-scope';var output=document.getElementById('output');output.insertAdjacentElement('afterend',scope);var wd=document.createElement('div');wd.className='why-settings';wd.innerHTML='<button type="button" id="whyToggle" aria-expanded="false">Why these settings?</button><div id="whyDetails"></div>';scope.insertAdjacentElement('afterend',wd);}var stack=creative.querySelector('.section-header')?.nextElementSibling;if(stack){stack.className='intent-stack';stack.removeAttribute('style');[].slice.call(stack.children).forEach(function(x){x.className='intent-row';x.removeAttribute('style');});}var extra=document.getElementById('ciTripod2')?.closest('div');if(extra){extra.className='intent-extra';extra.removeAttribute('style');}var actions=document.createElement('div');actions.className='dashboard-actions';var gb=document.createElement('button');gb.type='button';gb.textContent='Gear (optional)';actions.appendChild(gb);actions.appendChild(ct);ct.textContent='Creative Intent';ct.style.marginBottom='0';wrap.insertBefore(light,wrap.firstElementChild);light.insertAdjacentElement('afterend',rec);rec.insertAdjacentElement('afterend',actions);actions.insertAdjacentElement('afterend',gearCard);gearCard.insertAdjacentElement('afterend',creative);creative.insertAdjacentElement('afterend',mb);mb.insertAdjacentElement('afterend',more);gearCard.style.display='none';creative.style.display='none';more.style.display='none';mb.textContent='More Tools';var mh=more.querySelector('.section-header');if(mh)mh.textContent='More Tools';gb.addEventListener('click',function(){var open=gearCard.style.display!=='none';gearCard.style.display=open?'none':'block';gb.textContent=open?'Gear (optional)':'Hide Gear';});ct.addEventListener('click',function(){ct.textContent=creative.style.display==='none'?'Creative Intent':'Hide Creative Intent';});mb.addEventListener('click',function(){mb.textContent=more.style.display==='none'?'More Tools':'Close More Tools';});function sync(){var m=currentCaptureMode(),fc=document.getElementById('filmCol'),ic=document.getElementById('isoCol'),is=document.getElementById('isoSelect'),num=document.getElementById('isoNumeric'),qg=document.getElementById('quickISOGroup');if(fc)fc.style.display=m==='film'?'':'none';if(ic)ic.style.display=m==='film'?'':'none';if(is)is.style.display=m==='film'?'':'none';if(num)num.style.display='none';if(qg)qg.style.display=m==='film'?'none':'flex';}sync();modeEl?.addEventListener('change',function(){sync();recalc();});document.getElementById('gearReset')?.addEventListener('click',function(){var keep=getSelectedISO()||400;modeEl.value='general';var c=document.getElementById('cameraSelect');if(c)c.value='';refreshCameras();refreshFilms();refreshLenses();var f=document.getElementById('focalInput');if(f){f.value='';f.readOnly=false;f.removeAttribute('min');f.removeAttribute('max');}var q=document.getElementById('quickISO');if(q)q.value=String(keep);var n=document.getElementById('isoNumeric');if(n)n.value=String(keep);sync();recalc();});var wb=document.getElementById('whyToggle'),wh=document.getElementById('whyDetails');wb?.addEventListener('click',function(){var open=wh.style.display==='block';wh.style.display=open?'none':'block';wb.textContent=open?'Why these settings?':'Hide explanation';wb.setAttribute('aria-expanded',String(!open));});refreshCameras();refreshFilms();refreshLenses();sync();recalc();});
+})();
+</script>
+<script id="v431GeneralExposureFix">
+(function(){
+  function snapGeneralAperture(N,camera){
+    var step=(camera&&camera.aperture_step)||'third';
+    var q=step==='full'?0.5:(1/6);
+    return parseFloat(Math.pow(2,Math.round(Math.log2(Math.max(0.7,N))/q)*q).toFixed(1));
+  }
+  function interp(vals,x){
+    x=Math.max(0,Math.min(1,x))*(vals.length-1);
+    var i=Math.floor(x),j=Math.min(vals.length-1,i+1),f=x-i;
+    return vals[i]+(vals[j]-vals[i])*f;
+  }
+  function generalRecommend(ev,camera,focal,film){
+    ev=ev+(parseFloat(document.getElementById('evBias')?.value)||0);
+    var ci=getCI(),iso=getSelectedISO()||400;
+    var N=interp([16,11,8,4,2],ci.blur);
+    var target=interp([1/15,1/30,1/125,1/500,1/1000],ci.freeze);
+    if(focal&&isFinite(focal)) target*=Math.max(0.25,Math.min(4,50/focal));
+    if(ci.panning) target*=3;
+    var t=requiredShutter(ev,iso,N),notes=[];
+    if(t>target&&ci.freeze>0.55){
+      while(t>target&&N>1){N=Math.max(1,N/Math.SQRT2);t=requiredShutter(ev,iso,N)}
+      if(t>target) notes.push('More light or a higher ISO may be needed to freeze motion.');
+    }else if(t<target&&ci.freeze<0.45){
+      while(t<target&&N<32){N=Math.min(32,N*Math.SQRT2);t=requiredShutter(ev,iso,N)}
+      if(t<target) notes.push('A lower ISO or ND filter may be needed for more motion blur.');
+    }
+    if(camera&&camera.max_shutter_den){
+      var fastest=1/camera.max_shutter_den;
+      if(t<fastest){notes.push(camera.name+' tops out at '+fmtSh(fastest)+'. Adjust ISO/aperture or use ND if needed.');t=fastest;}
+    }
+    if(focal&&isFinite(focal)&&!ci.tripod&&!ci.panning){
+      var hh=handholdLimit(focal);
+      if(t>hh) notes.push('At '+Math.round(focal)+'mm, handheld camera shake is more likely below about '+fmtSh(hh)+'.');
+    }
+    if(film){
+      var ps=Math.log2(iso/(film.box_iso||iso));
+      if(Math.abs(ps)>=0.25) notes.push((ps>0?'Push ':'Pull ')+Math.abs(ps).toFixed(1)+' stops relative to '+film.name+' box speed.');
+    }
+    if(ci.grain<0.3&&iso>200) notes.push('For a cleaner look, a lower ISO would reduce grain/noise if the light allows.');
+    if(ci.grain>0.7&&iso<800) notes.push('For more visible texture, a higher ISO can increase grain/noise if desired.');
+    return {iso:Math.round(iso),N:snapGeneralAperture(N,camera),t:camera?nearestShutterForCamera(camera,t):nearestShutterThird(t),warns:notes.join(' • ')};
+  }
+  function generalAlternatives(ev,rec,camera){
+    var iso=rec.iso,vals=[rec.N/2,rec.N/Math.SQRT2,rec.N,rec.N*Math.SQRT2,rec.N*2],out=[],seen={};
+    vals.forEach(function(n){
+      n=Math.max(1,Math.min(32,snapGeneralAperture(n,camera)));
+      var t=requiredShutter(ev,iso,n);
+      if(camera&&camera.max_shutter_den&&t<1/camera.max_shutter_den)return;
+      t=camera?nearestShutterForCamera(camera,t):nearestShutterThird(t);
+      var k=n+'-'+t;if(!seen[k]){seen[k]=1;out.push({iso:iso,N:n,t:t});}
+    });
+    return out;
+  }
+  function renderWhy(rec,ev,cam,lens,film,focal,isGeneral){
+    var h=document.getElementById('whyDetails');if(!h)return;
+    var ci=getCI(),a=[],d=EV_DESC[String(Math.round(ev))]||('EV '+ev.toFixed(1));
+    a.push(d+' (EV '+ev.toFixed(1)+') sets the available light.');
+    a.push('ISO '+rec.iso+' sets the working sensitivity.');
+    if(focal&&isFinite(focal)){
+      a.push(Math.round(focal)+'mm changes both depth-of-field behavior and motion/camera-shake sensitivity; longer focal lengths push motion guidance toward faster shutter speeds.');
+    }
+    if(lens){
+      var ap=lensApertureAtFocal(lens,focal||focalValueForLens(lens));
+      a.push(lens.name+' constrains the recommendation to about f/'+ap.minA.toFixed(1)+' through f/'+ap.maxA.toFixed(1)+'.');
+    }
+    if(cam)a.push(cam.name+' supplies the camera-specific shutter limit and exposure-step increments.');
+    if(film)a.push(film.name+' contributes its box speed (ISO '+film.box_iso+') and push/pull guidance.');
+    if(ci.blur>0.55)a.push('Your shallow-depth choice pushes toward a wider aperture.');
+    else if(ci.blur<0.45)a.push('Your deep-depth choice pushes toward a smaller aperture.');
+    if(ci.freeze>0.55)a.push('Your motion choice pushes toward a faster shutter.');
+    else if(ci.freeze<0.45)a.push('Your motion-blur choice pushes toward a slower shutter.');
+    if(isGeneral)a.push('No lens is selected, so the aperture is a photographic target rather than a hidden default-lens assumption. Verify that your lens can reach it.');
+    if(!cam)a.push('No camera is selected, so no camera-specific shutter-speed limit is being imposed.');
+    h.innerHTML='<ul>'+a.map(function(x){return'<li>'+x+'</li>';}).join('')+'</ul>';
+  }
+  recalc=function(){
+    var out=document.getElementById('output'),warn=document.getElementById('warning');if(!out||!warn)return;
+    var cn=document.getElementById('cameraSelect')?.value||'',ln=document.getElementById('lensSelect')?.value||'';
+    if(cn==='__custom__'||ln==='__custom__')return;
+    var cam=findCameraByName(cn)||null,lens=findLensByName(ln)||null,film=currentFilm(),focal=(lens?focalValueForLens(lens):parseFloat(document.getElementById('focalInput')?.value)),ev=effectiveEV();
+    if(!(isFinite(focal)&&focal>0))focal=null;
+    var rec=lens?recommend(ev,film,lens,focal,cam):generalRecommend(ev,cam,focal,film);
+    var txt='ISO '+rec.iso+' • f/'+rec.N.toFixed(1)+' • '+fmtSh(rec.t);
+    if(out.textContent!==txt){out.textContent=txt;if(!window.__evDragging){out.classList.remove('flash-animate');void out.offsetWidth;out.classList.add('flash-animate');}}
+    var hr=document.getElementById('headerRecommendation');if(hr)hr.textContent=txt;warn.textContent=rec.warns||'';
+    var sc=document.getElementById('recommendationScope');if(sc){var a=[];if(cam)a.push(cam.name);if(lens)a.push(lens.name);if(film)a.push(film.name);sc.textContent=a.length?'Refined for: '+a.join(' • '):'General recommendation — no specific camera, lens, or film limits applied.';}
+    renderWhy(rec,ev,cam,lens,film,focal,!lens);
+    try{
+      var rows=lens?buildCompactAlternatives(ev,film,lens,focal,cam,rec):generalAlternatives(ev,rec,cam),tb=document.querySelector('#altTable tbody');
+      if(tb){tb.innerHTML='';rows.forEach(function(r){var tr=document.createElement('tr');tr.innerHTML='<td>'+r.iso+'</td><td>f/'+r.N.toFixed(1)+'</td><td>'+fmtSh(r.t)+'</td>';tb.appendChild(tr);});}
+      var tbf=document.querySelector('#altTableFull tbody');if(tbf){tbf.innerHTML=tb?tb.innerHTML:'';}
+    }catch(e){}
+    updateDOF();updateMotion();updateBracket();updateReciprocity();updatePushPull();
+  };
+  document.addEventListener('DOMContentLoaded',function(){
+    var qi=document.getElementById('quickISO');
+    if(qi&&!qi.dataset.v431){qi.dataset.v431='1';qi.addEventListener('input',function(){
+      var n=document.getElementById('isoNumeric');if(n)n.value=this.value;
+      var s=document.getElementById('isoSelect');if(s&&s.options.length){var v=parseInt(this.value,10)||400,best=s.options[0];Array.from(s.options).forEach(function(o){if(Math.abs((parseInt(o.value,10)||0)-v)<Math.abs((parseInt(best.value,10)||0)-v))best=o;});s.value=best.value;}
+      recalc();
+    });}
+    getSelectedISO=function(){var q=document.getElementById('quickISO');if(q&&parseInt(q.value,10)>0)return parseInt(q.value,10);var m=currentCaptureMode();return m==='film'?(parseInt(document.getElementById('isoSelect')?.value,10)||400):(parseInt(document.getElementById('isoNumeric')?.value,10)||400);};
+    var fs=document.getElementById('filmSelect');if(fs&&!fs.dataset.v431){fs.dataset.v431='1';fs.addEventListener('change',function(){setTimeout(function(){var f=currentFilm(),q=document.getElementById('quickISO');if(f&&q){q.value=String(f.box_iso);var n=document.getElementById('isoNumeric');if(n)n.value=q.value;}recalc();},0);});}
+    recalc();
+  });
+})();
+</script>
+<script id="shareAppQrLibrary" src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script id="shareAppFeature">
+(function(){
+  var SHARE_APP_URL='https://andrewscookies-ops.github.io/Photography_App/';
+  var qrRendered=false;
+  function modal(){ return document.getElementById('shareAppModal'); }
+  function renderQR(){
+    var host=document.getElementById('shareAppQR');
+    if(!host || qrRendered) return;
+    host.innerHTML='';
+    if(typeof QRCode==='function'){
+      try{
+        new QRCode(host,{text:SHARE_APP_URL,width:220,height:220,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+        qrRendered=true;
+        return;
+      }catch(e){}
+    }
+    host.innerHTML='<div style="max-width:210px;color:#333;font-size:13px;line-height:1.4">QR code could not load. Use Copy Link below.</div>';
+  }
+  function openShareApp(){
+    var m=modal(); if(!m) return;
+    var input=document.getElementById('shareAppUrl'); if(input) input.value=SHARE_APP_URL;
+    var menu=document.getElementById('settingsMenu'); if(menu) menu.style.display='none';
+    m.style.display='flex';
+    renderQR();
+  }
+  function closeShareApp(){ var m=modal(); if(m) m.style.display='none'; }
+  function copiedState(btn){
+    if(!btn) return;
+    var old=btn.textContent;
+    btn.textContent='Copied!';
+    setTimeout(function(){btn.textContent=old;},1200);
+  }
+  function copyLink(){
+    var btn=document.getElementById('copyAppLinkBtn');
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(SHARE_APP_URL).then(function(){copiedState(btn);},fallbackCopy);
+    }else fallbackCopy();
+    function fallbackCopy(){
+      var input=document.getElementById('shareAppUrl');
+      if(!input) return;
+      input.focus(); input.select(); input.setSelectionRange(0,input.value.length);
+      try{ document.execCommand('copy'); copiedState(btn); }catch(e){}
+    }
+  }
+  function nativeShare(){
+    if(navigator.share){
+      navigator.share({title:'Photography App',text:'Photography App',url:SHARE_APP_URL}).catch(function(){});
+    }else{
+      copyLink();
+    }
+  }
+  function bind(){
+    document.getElementById('shareAppBtn')?.addEventListener('click',openShareApp);
+    document.getElementById('shareAppMenuBtn')?.addEventListener('click',openShareApp);
+    document.getElementById('shareAppClose')?.addEventListener('click',closeShareApp);
+    document.getElementById('copyAppLinkBtn')?.addEventListener('click',copyLink);
+    document.getElementById('nativeShareAppBtn')?.addEventListener('click',nativeShare);
+    modal()?.addEventListener('click',function(e){if(e.target===this)closeShareApp();});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape' && modal()?.style.display==='flex')closeShareApp();});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind); else bind();
 })();
 </script>
 </body>
