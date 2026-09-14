@@ -1,4 +1,4 @@
-name: Apply Photography App v4.3.2 sharing UI
+name: Apply Photography App Auto ISO
 'on':
   push:
     paths:
@@ -12,43 +12,55 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Apply v4.3.2 app sharing UI
+      - name: Apply Auto ISO, ISO stepper, and input layout
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import base64,re
+          import re
           p=Path('index.html')
           s=p.read_text()
-          dec=lambda x: base64.b64decode(x).decode('utf-8')
-          header_old=dec('ICAgIDxidXR0b24gaWQ9ImhlbHBCdG4iIGNsYXNzPSJpY29uLWJ0biIgdGl0bGU9IlF1aWNrIFN0YXJ0ICYgSGVscCIgYXJpYS1sYWJlbD0iUXVpY2sgU3RhcnQgYW5kIEhlbHAiIHN0eWxlPSJmb250LXNpemU6MThweDt3aWR0aDphdXRvOyI+4p2TPC9idXR0b24+CiAgICA8YnV0dG9uIGlkPSJzZXR0aW5nc0J0biIgY2xhc3M9Imljb24tYnRuIiB0aXRsZT0iU2V0dGluZ3MiPuKLrjwvYnV0dG9uPg==')
-          header_new=dec('ICAgIDxidXR0b24gaWQ9ImhlbHBCdG4iIGNsYXNzPSJpY29uLWJ0biIgdGl0bGU9IlF1aWNrIFN0YXJ0ICYgSGVscCIgYXJpYS1sYWJlbD0iUXVpY2sgU3RhcnQgYW5kIEhlbHAiIHN0eWxlPSJmb250LXNpemU6MThweDt3aWR0aDphdXRvOyI+4p2TPC9idXR0b24+CiAgICA8YnV0dG9uIGlkPSJzaGFyZUFwcEJ0biIgY2xhc3M9Imljb24tYnRuIiB0aXRsZT0iU2hhcmUgUGhvdG9ncmFwaHkgQXBwIiBhcmlhLWxhYmVsPSJTaGFyZSBQaG90b2dyYXBoeSBBcHAiIHN0eWxlPSJ3aWR0aDphdXRvO2Rpc3BsYXk6aW5saW5lLWZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpjZW50ZXI7Ij4KICAgICAgPHN2ZyBhcmlhLWhpZGRlbj0idHJ1ZSIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTEyIDN2MTIiPjwvcGF0aD48cGF0aCBkPSJtNyA4IDUtNSA1IDUiPjwvcGF0aD48cGF0aCBkPSJNNSAxM3Y2YTIgMiAwIDAgMCAyIDJoMTBhMiAyIDAgMCAwIDItMnYtNiI+PC9wYXRoPjwvc3ZnPgogICAgPC9idXR0b24+CiAgICA8YnV0dG9uIGlkPSJzZXR0aW5nc0J0biIgY2xhc3M9Imljb24tYnRuIiB0aXRsZT0iU2V0dGluZ3MiPuKLrjwvYnV0dG9uPg==')
-          settings_old=dec('ICAgICAgICA8YnV0dG9uIGlkPSJ0aGVtZUJ0biI+VGhlbWU6IEF1dG88L2J1dHRvbj4KICAgICAgICA8ZGl2IGNsYXNzPSJkaXZpZGVyIj48L2Rpdj4=')
-          settings_new=dec('ICAgICAgICA8YnV0dG9uIGlkPSJ0aGVtZUJ0biI+VGhlbWU6IEF1dG88L2J1dHRvbj4KICAgICAgICA8YnV0dG9uIGlkPSJzaGFyZUFwcE1lbnVCdG4iPlNoYXJlIGFwcDwvYnV0dG9uPgogICAgICAgIDxkaXYgY2xhc3M9ImRpdmlkZXIiPjwvZGl2Pg==')
-          modal=dec('PCEtLSBTaGFyZSBBcHAgTW9kYWwgLS0+CjxkaXYgaWQ9InNoYXJlQXBwTW9kYWwiIGNsYXNzPSJtb2RhbCIgcm9sZT0iZGlhbG9nIiBhcmlhLW1vZGFsPSJ0cnVlIiBhcmlhLWxhYmVsbGVkYnk9InNoYXJlQXBwVGl0bGUiIHN0eWxlPSJkaXNwbGF5Om5vbmU7Ij4KICA8ZGl2IGNsYXNzPSJtb2RhbC1jb250ZW50IiBzdHlsZT0ibWF4LXdpZHRoOjQzMHB4O3RleHQtYWxpZ246Y2VudGVyOyI+CiAgICA8ZGl2IHN0eWxlPSJkaXNwbGF5OmZsZXg7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW47YWxpZ24taXRlbXM6Y2VudGVyO2dhcDoxMnB4O21hcmdpbi1ib3R0b206MTJweDt0ZXh0LWFsaWduOmxlZnQiPgogICAgICA8ZGl2IGlkPSJzaGFyZUFwcFRpdGxlIiBzdHlsZT0iZm9udC13ZWlnaHQ6NjUwIj5TaGFyZSBQaG90b2dyYXBoeSBBcHA8L2Rpdj4KICAgICAgPGJ1dHRvbiBpZD0ic2hhcmVBcHBDbG9zZSIgY2xhc3M9Imljb24tYnRuIiBzdHlsZT0id2lkdGg6YXV0byIgYXJpYS1sYWJlbD0iQ2xvc2UgU2hhcmUgQXBwIj7inJU8L2J1dHRvbj4KICAgIDwvZGl2PgogICAgPGRpdiBjbGFzcz0ic3ViIiBzdHlsZT0iZm9udC1zaXplOjEzcHg7bGluZS1oZWlnaHQ6MS40NTttYXJnaW46MCAwIDEycHgiPlNjYW4gdGhlIFFSIGNvZGUgb3Igc2VuZCB0aGUgbGluayB0byBvcGVuIHRoZSB3ZWIgYXBwLjwvZGl2PgogICAgPGRpdiBpZD0ic2hhcmVBcHBRUldyYXAiIHN0eWxlPSJkaXNwbGF5OmZsZXg7anVzdGlmeS1jb250ZW50OmNlbnRlcjttYXJnaW46OHB4IGF1dG8gMTRweDsiPgogICAgICA8ZGl2IGlkPSJzaGFyZUFwcFFSIiBzdHlsZT0iZGlzcGxheTppbmxpbmUtZmxleDthbGlnbi1pdGVtczpjZW50ZXI7anVzdGlmeS1jb250ZW50OmNlbnRlcjttaW4td2lkdGg6MjM2cHg7bWluLWhlaWdodDoyMzZweDtwYWRkaW5nOjhweDtiYWNrZ3JvdW5kOiNmZmY7Ym9yZGVyLXJhZGl1czoxMnB4O2JvcmRlcjoxcHggc29saWQgdmFyKC0tYm9yZGVyKTsiPjwvZGl2PgogICAgPC9kaXY+CiAgICA8bGFiZWwgZm9yPSJzaGFyZUFwcFVybCIgc3R5bGU9InRleHQtYWxpZ246bGVmdCI+V2ViIGFwcCBsaW5rPC9sYWJlbD4KICAgIDxpbnB1dCBpZD0ic2hhcmVBcHBVcmwiIHR5cGU9InRleHQiIHJlYWRvbmx5IHZhbHVlPSJodHRwczovL2FuZHJld3Njb29raWVzLW9wcy5naXRodWIuaW8vUGhvdG9ncmFwaHlfQXBwLyIgc3R5bGU9ImZvbnQtc2l6ZToxM3B4Ij4KICAgIDxkaXYgc3R5bGU9ImRpc3BsYXk6ZmxleDtnYXA6OHB4O21hcmdpbi10b3A6MTJweDtmbGV4LXdyYXA6d3JhcCI+CiAgICAgIDxidXR0b24gaWQ9ImNvcHlBcHBMaW5rQnRuIiBzdHlsZT0iZmxleDoxIDEgMTQwcHgiPkNvcHkgTGluazwvYnV0dG9uPgogICAgICA8YnV0dG9uIGlkPSJuYXRpdmVTaGFyZUFwcEJ0biIgc3R5bGU9ImZsZXg6MSAxIDE0MHB4Ij5TaGFyZeKApjwvYnV0dG9uPgogICAgPC9kaXY+CiAgPC9kaXY+CjwvZGl2Pgo=')
-          feature=dec('PHNjcmlwdCBpZD0ic2hhcmVBcHBRckxpYnJhcnkiIHNyYz0iaHR0cHM6Ly9jZG4uanNkZWxpdnIubmV0L25wbS9xcmNvZGVqc0AxLjAuMC9xcmNvZGUubWluLmpzIj48L3NjcmlwdD4KPHNjcmlwdCBpZD0ic2hhcmVBcHBGZWF0dXJlIj4KKGZ1bmN0aW9uKCl7CiAgdmFyIFNIQVJFX0FQUF9VUkw9J2h0dHBzOi8vYW5kcmV3c2Nvb2tpZXMtb3BzLmdpdGh1Yi5pby9QaG90b2dyYXBoeV9BcHAvJzsKICB2YXIgcXJSZW5kZXJlZD1mYWxzZTsKICBmdW5jdGlvbiBtb2RhbCgpeyByZXR1cm4gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3NoYXJlQXBwTW9kYWwnKTsgfQogIGZ1bmN0aW9uIHJlbmRlclFSKCl7CiAgICB2YXIgaG9zdD1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnc2hhcmVBcHBRUicpOwogICAgaWYoIWhvc3QgfHwgcXJSZW5kZXJlZCkgcmV0dXJuOwogICAgaG9zdC5pbm5lckhUTUw9Jyc7CiAgICBpZih0eXBlb2YgUVJDb2RlPT09J2Z1bmN0aW9uJyl7CiAgICAgIHRyeXsKICAgICAgICBuZXcgUVJDb2RlKGhvc3Qse3RleHQ6U0hBUkVfQVBQX1VSTCx3aWR0aDoyMjAsaGVpZ2h0OjIyMCxjb2xvckRhcms6JyMwMDAwMDAnLGNvbG9yTGlnaHQ6JyNmZmZmZmYnLGNvcnJlY3RMZXZlbDpRUkNvZGUuQ29ycmVjdExldmVsLk19KTsKICAgICAgICBxclJlbmRlcmVkPXRydWU7CiAgICAgICAgcmV0dXJuOwogICAgICB9Y2F0Y2goZSl7fQogICAgfQogICAgaG9zdC5pbm5lckhUTUw9JzxkaXYgc3R5bGU9Im1heC13aWR0aDoyMTBweDtjb2xvcjojMzMzO2ZvbnQtc2l6ZToxM3B4O2xpbmUtaGVpZ2h0OjEuNCI+UVIgY29kZSBjb3VsZCBub3QgbG9hZC4gVXNlIENvcHkgTGluayBiZWxvdy48L2Rpdj4nOwogIH0KICBmdW5jdGlvbiBvcGVuU2hhcmVBcHAoKXsKICAgIHZhciBtPW1vZGFsKCk7IGlmKCFtKSByZXR1cm47CiAgICB2YXIgaW5wdXQ9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3NoYXJlQXBwVXJsJyk7IGlmKGlucHV0KSBpbnB1dC52YWx1ZT1TSEFSRV9BUFBfVVJMOwogICAgdmFyIG1lbnU9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3NldHRpbmdzTWVudScpOyBpZihtZW51KSBtZW51LnN0eWxlLmRpc3BsYXk9J25vbmUnOwogICAgbS5zdHlsZS5kaXNwbGF5PSdmbGV4JzsKICAgIHJlbmRlclFSKCk7CiAgfQogIGZ1bmN0aW9uIGNsb3NlU2hhcmVBcHAoKXsgdmFyIG09bW9kYWwoKTsgaWYobSkgbS5zdHlsZS5kaXNwbGF5PSdub25lJzsgfQogIGZ1bmN0aW9uIGNvcGllZFN0YXRlKGJ0bil7CiAgICBpZighYnRuKSByZXR1cm47CiAgICB2YXIgb2xkPWJ0bi50ZXh0Q29udGVudDsKICAgIGJ0bi50ZXh0Q29udGVudD0nQ29waWVkISc7CiAgICBzZXRUaW1lb3V0KGZ1bmN0aW9uKCl7YnRuLnRleHRDb250ZW50PW9sZDt9LDEyMDApOwogIH0KICBmdW5jdGlvbiBjb3B5TGluaygpewogICAgdmFyIGJ0bj1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnY29weUFwcExpbmtCdG4nKTsKICAgIGlmKG5hdmlnYXRvci5jbGlwYm9hcmQgJiYgd2luZG93LmlzU2VjdXJlQ29udGV4dCl7CiAgICAgIG5hdmlnYXRvci5jbGlwYm9hcmQud3JpdGVUZXh0KFNIQVJFX0FQUF9VUkwpLnRoZW4oZnVuY3Rpb24oKXtjb3BpZWRTdGF0ZShidG4pO30sZmFsbGJhY2tDb3B5KTsKICAgIH1lbHNlIGZhbGxiYWNrQ29weSgpOwogICAgZnVuY3Rpb24gZmFsbGJhY2tDb3B5KCl7CiAgICAgIHZhciBpbnB1dD1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnc2hhcmVBcHBVcmwnKTsKICAgICAgaWYoIWlucHV0KSByZXR1cm47CiAgICAgIGlucHV0LmZvY3VzKCk7IGlucHV0LnNlbGVjdCgpOyBpbnB1dC5zZXRTZWxlY3Rpb25SYW5nZSgwLGlucHV0LnZhbHVlLmxlbmd0aCk7CiAgICAgIHRyeXsgZG9jdW1lbnQuZXhlY0NvbW1hbmQoJ2NvcHknKTsgY29waWVkU3RhdGUoYnRuKTsgfWNhdGNoKGUpe30KICAgIH0KICB9CiAgZnVuY3Rpb24gbmF0aXZlU2hhcmUoKXsKICAgIGlmKG5hdmlnYXRvci5zaGFyZSl7CiAgICAgIG5hdmlnYXRvci5zaGFyZSh7dGl0bGU6J1Bob3RvZ3JhcGh5IEFwcCcsdGV4dDonUGhvdG9ncmFwaHkgQXBwJyx1cmw6U0hBUkVfQVBQX1VSTH0pLmNhdGNoKGZ1bmN0aW9uKCl7fSk7CiAgICB9ZWxzZXsKICAgICAgY29weUxpbmsoKTsKICAgIH0KICB9CiAgZnVuY3Rpb24gYmluZCgpewogICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3NoYXJlQXBwQnRuJyk/LmFkZEV2ZW50TGlzdGVuZXIoJ2NsaWNrJyxvcGVuU2hhcmVBcHApOwogICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3NoYXJlQXBwTWVudUJ0bicpPy5hZGRFdmVudExpc3RlbmVyKCdjbGljaycsb3BlblNoYXJlQXBwKTsKICAgIGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdzaGFyZUFwcENsb3NlJyk/LmFkZEV2ZW50TGlzdGVuZXIoJ2NsaWNrJyxjbG9zZVNoYXJlQXBwKTsKICAgIGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdjb3B5QXBwTGlua0J0bicpPy5hZGRFdmVudExpc3RlbmVyKCdjbGljaycsY29weUxpbmspOwogICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ25hdGl2ZVNoYXJlQXBwQnRuJyk/LmFkZEV2ZW50TGlzdGVuZXIoJ2NsaWNrJyxuYXRpdmVTaGFyZSk7CiAgICBtb2RhbCgpPy5hZGRFdmVudExpc3RlbmVyKCdjbGljaycsZnVuY3Rpb24oZSl7aWYoZS50YXJnZXQ9PT10aGlzKWNsb3NlU2hhcmVBcHAoKTt9KTsKICAgIGRvY3VtZW50LmFkZEV2ZW50TGlzdGVuZXIoJ2tleWRvd24nLGZ1bmN0aW9uKGUpe2lmKGUua2V5PT09J0VzY2FwZScgJiYgbW9kYWwoKT8uc3R5bGUuZGlzcGxheT09PSdmbGV4JyljbG9zZVNoYXJlQXBwKCk7fSk7CiAgfQogIGlmKGRvY3VtZW50LnJlYWR5U3RhdGU9PT0nbG9hZGluZycpIGRvY3VtZW50LmFkZEV2ZW50TGlzdGVuZXIoJ0RPTUNvbnRlbnRMb2FkZWQnLGJpbmQpOyBlbHNlIGJpbmQoKTsKfSkoKTsKPC9zY3JpcHQ+')
-          s=s.replace('Version 4.3.1 — September 2026','Version 4.3.2 — September 2026')
-          if 'id="shareAppBtn"' not in s:
-              if header_old not in s: raise SystemExit('header insertion point not found')
-              s=s.replace(header_old,header_new,1)
-          if 'id="shareAppMenuBtn"' not in s:
-              if settings_old not in s: raise SystemExit('settings insertion point not found')
-              s=s.replace(settings_old,settings_new,1)
-          if 'id="shareAppModal"' not in s:
-              marker='<!-- About Modal -->'
-              if marker not in s: raise SystemExit('modal insertion point not found')
-              s=s.replace(marker,modal+marker,1)
-          s=s.replace('<button id="shareBtn" style="width:auto">Share</button>','<button id="shareBtn" style="width:auto">Share Settings</button>')
-          s=re.sub(r'<script id="shareAppFeature">.*?</script>\s*','',s,flags=re.S)
-          s=re.sub(r'<script id="shareAppQrLibrary"[^>]*></script>\s*','',s,flags=re.S)
-          s=s.replace('</body>',feature+'\n</body>')
+          feature=r'''<script id="v440AutoISO">
+(function(){
+  var AUTO_KEY='photoAppAutoISO_v1';
+  var ISO_STEPS=[25,32,40,50,64,80,100,125,160,200,250,320,400,500,640,800,1000,1250,1600,2000,2500,3200,4000,5000,6400,8000,10000,12800,16000,20000,25600,32000,40000,51200];
+  function loadAuto(){try{return localStorage.getItem(AUTO_KEY)!=='manual';}catch(e){return true;}}
+  window.__photoAutoISO=loadAuto();
+  function isAutoISO(){return currentCaptureMode()!=='film'&&window.__photoAutoISO!==false;}
+  function saveMode(){try{localStorage.setItem(AUTO_KEY,window.__photoAutoISO?'auto':'manual');}catch(e){}}
+  function setAutoISO(on){window.__photoAutoISO=!!on;saveMode();updateISOControl();}
+  function nearestISO(v){v=Math.max(ISO_STEPS[0],Math.min(ISO_STEPS[ISO_STEPS.length-1],Number(v)||400));var b=ISO_STEPS[0];for(var i=1;i<ISO_STEPS.length;i++)if(Math.abs(ISO_STEPS[i]-v)<Math.abs(b-v))b=ISO_STEPS[i];return b;}
+  function stepISO(v,dir){v=Number(v)||400;var idx=0,best=Infinity;for(var i=0;i<ISO_STEPS.length;i++){var d=Math.abs(ISO_STEPS[i]-v);if(d<best){best=d;idx=i;}}idx=Math.max(0,Math.min(ISO_STEPS.length-1,idx+dir));return ISO_STEPS[idx];}
+  function apertureTarget(lens,focal){var ci=getCI(),ap=lensApertureAtFocal(lens,focal),deep=Math.min(Math.max(11,ap.minA),ap.maxA),shallow=ap.minA;if(ci.panning)deep=Math.min(ap.maxA,deep*Math.pow(Math.SQRT2,.5));var gb=(ci.grain-.5)*.6,N=deep+(shallow-deep)*ci.blur;N=Math.max(ap.minA,Math.min(ap.maxA,N));if(Math.abs(gb)>.05){N*=Math.pow(Math.SQRT2,-gb);N=Math.max(ap.minA,Math.min(ap.maxA,N));}if(focal&&isFinite(focal)){var r=Math.max(20,Math.min(200,focal))/50;N*=Math.pow(Math.SQRT2,Math.log2(r)*.5);N=Math.max(ap.minA,Math.min(ap.maxA,N));}if(ci.aperturePickN)N=Math.max(ap.minA,Math.min(ap.maxA,ci.aperturePickN));return N;}
+  function shutterTarget(focal){var ci=getCI(),a=[1/8,1/30,1/60,1/250,1/500,1/1000],t=a[Math.max(0,Math.min(5,Math.round(ci.freeze*5)))];if(focal&&isFinite(focal))t*=Math.max(.25,Math.min(4,50/focal));if(ci.panning)t*=3;if(ci.shutterPickT)t=ci.shutterPickT;return t;}
+  function autoISOFor(ev,lens,focal,camera){var N=apertureTarget(lens,focal),t=shutterTarget(focal),e=ev+(parseFloat(document.getElementById('evBias')?.value)||0),raw=100*N*N/(Math.pow(2,e)*Math.max(t,1/8000)),lo=(camera&&camera.iso_min)||50,hi=(camera&&camera.iso_max)||12800;return nearestISO(Math.max(lo,Math.min(hi,raw)));}
+  var baseRecommend=window.recommend;
+  if(typeof baseRecommend==='function'){
+    window.recommend=function(ev,film,lens,focal,camera){
+      if(currentCaptureMode()!=='film'&&isAutoISO()){var a=autoISOFor(ev,lens,focal,camera),q=document.getElementById('quickISO'),n=document.getElementById('isoNumeric');if(q)q.value=String(a);if(n)n.value=String(a);}
+      var r=baseRecommend(ev,film,lens,focal,camera);updateISOControl();return r;
+    };
+    recommend=window.recommend;
+  }
+  function updateISOControl(){var q=document.getElementById('quickISO'),a=document.getElementById('isoAutoBtn');if(q){q.readOnly=isAutoISO();q.title=isAutoISO()?'Auto ISO is choosing this value. Tap − or + for manual ISO.':'Manual ISO';}if(a){a.classList.toggle('active',isAutoISO());a.setAttribute('aria-pressed',String(isAutoISO()));a.textContent=isAutoISO()?'AUTO':'Auto';}}
+  function buildISOControl(){var g=document.getElementById('quickISOGroup'),q=document.getElementById('quickISO');if(!g||!q)return;if(document.getElementById('isoMinusBtn')){updateISOControl();return;}q.remove();g.innerHTML='';g.classList.add('iso-control-group');var lab=document.createElement('label');lab.className='iso-control-label';lab.textContent='ISO';var row=document.createElement('div');row.className='iso-stepper';var m=document.createElement('button');m.type='button';m.id='isoMinusBtn';m.className='iso-step-btn';m.textContent='−';m.setAttribute('aria-label','Decrease ISO');var p=document.createElement('button');p.type='button';p.id='isoPlusBtn';p.className='iso-step-btn';p.textContent='+';p.setAttribute('aria-label','Increase ISO');var a=document.createElement('button');a.type='button';a.id='isoAutoBtn';a.className='iso-auto-btn';a.setAttribute('aria-label','Toggle Auto ISO');q.classList.add('iso-step-value');row.append(m,q,p,a);g.append(lab,row);m.addEventListener('click',function(){setAutoISO(false);q.value=String(stepISO(q.value,-1));var n=document.getElementById('isoNumeric');if(n)n.value=q.value;recalc();});p.addEventListener('click',function(){setAutoISO(false);q.value=String(stepISO(q.value,1));var n=document.getElementById('isoNumeric');if(n)n.value=q.value;recalc();});a.addEventListener('click',function(){setAutoISO(!isAutoISO());recalc();});q.addEventListener('input',function(){if(document.activeElement===q)setAutoISO(false);});updateISOControl();}
+  function addStyle(){if(document.getElementById('autoISOStyle'))return;var st=document.createElement('style');st.id='autoISOStyle';st.textContent='.iso-control-group{display:block!important;margin:10px 0 12px}.iso-control-label{display:block!important;max-width:none!important;margin:0 0 5px!important;font-size:12px;color:var(--muted)}.iso-stepper{display:grid;grid-template-columns:44px minmax(82px,120px) 44px minmax(62px,auto);gap:6px;align-items:center}.iso-step-btn,.iso-auto-btn{width:100%;min-height:42px;padding:8px!important;font-weight:700}.iso-step-btn{font-size:18px}.iso-auto-btn{font-size:12px;letter-spacing:.4px}.iso-auto-btn.active{background:var(--accent);color:var(--accent-contrast);border-color:var(--accent)}.iso-step-value{width:100%!important;text-align:center;font-variant-numeric:tabular-nums;font-weight:650}.iso-step-value[readonly]{background:var(--chipBg)}#lightCard .dashboard-actions{margin-top:12px;margin-bottom:8px}#lightCard #gearCard,#lightCard #creativeCard{margin:8px 0 10px;box-shadow:none}@media(max-width:420px){.iso-stepper{grid-template-columns:42px minmax(74px,1fr) 42px 62px}}';document.head.appendChild(st);}
+  function placeInputsAboveRecommendation(){var light=document.getElementById('lightCard'),rec=document.getElementById('recommendedCard'),actions=document.querySelector('.dashboard-actions'),gear=document.getElementById('gearCard'),creative=document.getElementById('creativeCard'),qg=document.getElementById('quickISOGroup');if(!light||!rec)return;if(qg&&qg.parentNode!==light){var ev=document.getElementById('evCtrl');if(ev&&ev.parentNode===light)light.insertBefore(qg,ev);else light.appendChild(qg);}if(actions&&actions.parentNode!==light)light.appendChild(actions);if(gear&&gear.parentNode!==light)light.appendChild(gear);if(creative&&creative.parentNode!==light)light.appendChild(creative);if(light.nextElementSibling!==rec)light.insertAdjacentElement('afterend',rec);}
+  document.addEventListener('DOMContentLoaded',function(){addStyle();setTimeout(function(){buildISOControl();placeInputsAboveRecommendation();var mode=document.getElementById('captureMode');if(mode&&!mode.dataset.autoIsoLayout){mode.dataset.autoIsoLayout='1';mode.addEventListener('change',function(){setTimeout(function(){buildISOControl();placeInputsAboveRecommendation();updateISOControl();recalc();},0);});}updateISOControl();recalc();},0);});
+})();
+</script>'''
+          pat=re.compile(r'<script id="v440AutoISO">.*?</script>',re.S)
+          if pat.search(s): s=pat.sub(feature,s)
+          elif '</body>' in s: s=s.replace('</body>',feature+'\n</body>',1)
+          else: s+='\n'+feature+'\n'
           p.write_text(s)
           PY
       - name: Commit app update
         shell: bash
         run: |
-          git config user.name "Photography App Maintainer"
-          git config user.email "actions@users.noreply.github.com"
+          if git diff --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Photography App v4.3.2 add app sharing QR and link" || exit 0
+          git commit -m "Enable Auto ISO and reorganize shooting controls"
           git push
