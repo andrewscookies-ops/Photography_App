@@ -1,0 +1,26 @@
+#advancedDrawer.more-tools-v445{padding:14px}
+#advancedDrawer.more-tools-v445 .mt-intro{margin:0 0 8px}
+#advancedDrawer.more-tools-v445 details{border-top:1px solid var(--border);margin:0}
+#advancedDrawer.more-tools-v445 details:last-child{border-bottom:1px solid var(--border)}
+#advancedDrawer.more-tools-v445 summary{list-style:none;display:flex;align-items:center;gap:10px;cursor:pointer;border-radius:8px;padding:12px 6px;min-height:48px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+#advancedDrawer.more-tools-v445 summary::-webkit-details-marker{display:none}
+#advancedDrawer.more-tools-v445 summary::marker{display:none}
+#advancedDrawer.more-tools-v445 summary:hover{background:var(--rowHover)}
+#advancedDrawer.more-tools-v445 .adv-chevron{flex:0 0 18px;width:18px;display:inline-flex;justify-content:center;color:var(--muted);font-size:20px;line-height:1;transition:transform .15s ease}
+#advancedDrawer.more-tools-v445 details[open]>summary .adv-chevron{transform:rotate(90deg)}
+#advancedDrawer.more-tools-v445 .summary-label{font-weight:650}
+#advancedDrawer.more-tools-v445 .mt-body{padding:2px 6px 14px 34px}
+#advancedDrawer.more-tools-v445 .mt-help{font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 10px}
+#advancedDrawer.more-tools-v445 .mt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 10px}
+#advancedDrawer.more-tools-v445 .mt-grid label{margin:0}
+#advancedDrawer.more-tools-v445 .mt-grid input,#advancedDrawer.more-tools-v445 .mt-grid select{margin-top:4px}
+#advancedDrawer.more-tools-v445 .mt-output{font-size:13px;line-height:1.5;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--chipBg);min-height:42px;overflow-wrap:anywhere}
+#advancedDrawer.more-tools-v445 .mt-output.mt-warning{color:#b00020;border-color:color-mix(in srgb,#b00020 30%,var(--border))}
+#advancedDrawer.more-tools-v445 #incidentDrawer{margin:0;padding:0;border:0;background:transparent;box-shadow:none}
+#advancedDrawer.more-tools-v445 #incidentDrawer .incident-explain{margin-top:2px}
+#advancedToggle{touch-action:manipulation}
+@media(max-width:520px){
+  #advancedDrawer.more-tools-v445{padding:10px}
+  #advancedDrawer.more-tools-v445 .mt-body{padding-left:28px;padding-right:2px}
+  #advancedDrawer.more-tools-v445 .mt-grid{grid-template-columns:1fr}
+}
