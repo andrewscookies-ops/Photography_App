@@ -482,7 +482,7 @@
     </div>
     <div style="font-size:15px;line-height:1.6">
       <b>Photography Exposure App</b><br>
-      Version 4.2.2 — September 2026<br><br>
+      Version 4.2.3 — September 2026<br><br>
       This tool helps photographers quickly determine optimal camera settings for any scene, balancing light, creative intent, and film/camera gear. All calculations run locally in your browser. No data is sent or stored externally.<br><br>
       <b>Author:</b> Andrew H.<br>
       <b>Contact:</b> <a href="mailto:ajlh.photography@gmail.com">ajlh.photography@gmail.com</a><br>
@@ -506,7 +506,7 @@
     <div class="row">
       <div class="col"><label>Camera</label><select id="cameraSelect"></select></div>
       <div class="col"><label>Lens</label><select id="lensSelect"></select></div>
-      <div class="col"><label>Focal length (mm)</label><input type="number" id="focalInput" value="50"></div>
+      <div class="col"><label>Focal length (mm)</label><input type="number" id="focalInput" value="50" inputmode="decimal" autocomplete="off"></div>
       <!-- Capture Mode moved below Gear Setup so it sits just under the card -->
       <div class="col" id="filmCol"><label>Film Brand</label><select id="filmSelect"></select></div>
       <div class="col" id="isoCol"><label>ISO</label>
@@ -1668,7 +1668,7 @@ function nearestAperture(N, lens, camera){
     var q = Math.round(log/quant) * quant;
     var snapped = Math.pow(2, q);
     // clamp to lens limits
-    var ap = lensApertureAtFocal(lens, parseFloat(document.getElementById('focalInput')?.value||'50'));
+    var ap = lensApertureAtFocal(lens, focalValueForLens(lens));
     snapped = Math.max(ap.minA, Math.min(ap.maxA, snapped));
     // round to one decimal for display consistency
     return parseFloat(snapped.toFixed(1));
@@ -2056,17 +2056,46 @@ function buildFullAlternatives(ev,film,lens,focal,camera){
   }
   return rows
 }
-// Helper: enforce focal input constraints based on lens
-function updateFocalConstraint(lens){
+// Helper: enforce focal constraints without fighting the user while they type.
+function updateFocalConstraint(lens, normalizeValue){
   var fi=document.getElementById('focalInput'); if(!fi||!lens) return;
+  var normalize = normalizeValue !== false;
   if(lens.type==='prime'){
-    fi.readOnly=true; fi.min=lens.focal_mm; fi.max=lens.focal_mm; fi.step=1; fi.value=String(lens.focal_mm);
+    fi.readOnly=true; fi.min=lens.focal_mm; fi.max=lens.focal_mm; fi.step=1;
+    fi.value=String(lens.focal_mm);
+    fi.dataset.lastValidFocal=String(lens.focal_mm);
   }else{
     fi.readOnly=false; fi.min=lens.focal_min_mm; fi.max=lens.focal_max_mm; fi.step=1;
-    var v=parseFloat(fi.value)||lens.focal_min_mm;
-    v=Math.max(lens.focal_min_mm, Math.min(lens.focal_max_mm, v));
-    fi.value=String(Math.round(v));
+    var v=parseFloat(fi.value);
+    var valid=isFinite(v) && v>=lens.focal_min_mm && v<=lens.focal_max_mm;
+    if(valid){ fi.dataset.lastValidFocal=String(v); }
+    if(normalize){
+      if(!valid){
+        var last=parseFloat(fi.dataset.lastValidFocal);
+        if(!(isFinite(last) && last>=lens.focal_min_mm && last<=lens.focal_max_mm)){
+          last=(lens.focal_min_mm+lens.focal_max_mm)/2;
+        }
+        v=last;
+      }
+      v=Math.max(lens.focal_min_mm, Math.min(lens.focal_max_mm, v));
+      fi.value=String(Math.round(v));
+      fi.dataset.lastValidFocal=fi.value;
+    }
   }
+}
+function focalValueForLens(lens){
+  var fi=document.getElementById('focalInput');
+  if(!lens) return 50;
+  if(lens.type==='prime') return lens.focal_mm;
+  var min=lens.focal_min_mm, max=lens.focal_max_mm;
+  var v=fi ? parseFloat(fi.value) : NaN;
+  if(isFinite(v) && v>=min && v<=max){
+    if(fi) fi.dataset.lastValidFocal=String(v);
+    return v;
+  }
+  var last=fi ? parseFloat(fi.dataset.lastValidFocal) : NaN;
+  if(isFinite(last) && last>=min && last<=max) return last;
+  return (min+max)/2;
 }
 // ===== Dropdowns =====
 function refreshCameras(){
@@ -2372,7 +2401,7 @@ function calcDOF(N,focal_mm,dist_m,coc_mm){
 function updateDOF(){
   var lens=findLensByName(document.getElementById('lensSelect').value);
   if(!lens){document.getElementById('dofOut').textContent='—';return}
-  var focal=(lens.type==='prime')?lens.focal_mm:(parseFloat(document.getElementById('focalInput').value)||50);
+  var focal=focalValueForLens(lens);
   var outTxt=document.getElementById('output').textContent||'';
   var N=parseFloat(outTxt.match(/f\/([0-9.]+)/)?.[1])||lens.max_aperture;
   var dist=parseFloat(document.getElementById('dofDist')?.value)||3;
@@ -2406,7 +2435,7 @@ function updateBracket(){
   var lens=findLensByName(lensName);
   var film=currentFilm();
   if(!camera||!lens||!film){document.getElementById('brOut').textContent='—';return}
-  var focal=parseFloat(document.getElementById('focalInput').value)||50;
+  var focal=focalValueForLens(lens);
   var evEff=effectiveEV();
   var base=recommend(evEff,film,lens,focal,camera);
   var seq=offs.map(function(o){
@@ -2456,7 +2485,7 @@ function updateReciprocity(){
   var camera=findCameraByName(camName);
   var lens=findLensByName(lensName);
   if(!camera||!lens){document.getElementById('recipOut').textContent='—';return}
-  var focal=parseFloat(document.getElementById('focalInput').value)||50;
+  var focal=focalValueForLens(lens);
   var evEff=effectiveEV();
   var base=recommend(evEff,film,lens,focal,camera),t=base.t,fn=RECIP_TABLE[film.name];
   if(t<1){document.getElementById('recipOut').textContent='Not needed below 1s.';return}
@@ -2565,7 +2594,9 @@ function updatePushPull(){
 
   function startDrag(clientX){
     dragging=true;
+    window.__evDragging=true;
     ctrl.classList.add('ev-dragging');
+    document.getElementById('output')?.classList.remove('flash-animate');
     setEV(tToEv(pxToT(clientX)), 'drag');
     if(tip){ tip.removeAttribute('aria-hidden'); }
   }
@@ -2573,6 +2604,7 @@ function updatePushPull(){
   function endDrag(){
     if(!dragging) return;
     dragging=false;
+    window.__evDragging=false;
     ctrl.classList.remove('ev-dragging');
     if(tip){ tip.setAttribute('aria-hidden','true'); }
     try{ recalc(); }catch(_e){}
@@ -2668,18 +2700,35 @@ function updatePushPull(){
       var lxIn=document.getElementById('luxInput');
       if(evIn){
         evIn.addEventListener('input', function(){
-          var ev = clamp(parseFloat(this.value)||0);
-          this.value = ev.toFixed(1);
+          var raw=String(this.value).trim();
+          if(raw==='' || raw==='-' || raw==='.' || raw==='-.') return;
+          var parsed=parseFloat(raw); if(!isFinite(parsed)) return;
+          var ev=clamp(parsed);
           setEV(ev, 'input');
           recalc();
+        });
+        evIn.addEventListener('blur', function(){
+          var parsed=parseFloat(this.value);
+          var fallback=parseFloat(hidden?.value);
+          var ev=clamp(isFinite(parsed)?parsed:(isFinite(fallback)?fallback:13));
+          this.value=ev.toFixed(1);
+          setEV(ev,'input'); recalc();
         });
       }
       if(lxIn){
         lxIn.addEventListener('input', function(){
-          var lx = Math.max(0, parseFloat(this.value)||0);
-          var ev = clamp(Math.log2(Math.max(1e-6,lx)/2.5));
+          var raw=String(this.value).trim(); if(raw==='') return;
+          var lx=parseFloat(raw); if(!isFinite(lx) || lx<0) return;
+          var ev=clamp(Math.log2(Math.max(1e-6,lx)/2.5));
           setEV(ev, 'input');
           recalc();
+        });
+        lxIn.addEventListener('blur', function(){
+          var lx=parseFloat(this.value);
+          if(!isFinite(lx) || lx<0){ lx=fmtLux(parseFloat(hidden?.value)||13); }
+          this.value=String(Math.round(lx));
+          var ev=clamp(Math.log2(Math.max(1e-6,lx)/2.5));
+          setEV(ev,'input'); recalc();
         });
       }
       // Also keep hidden slider in sync with custom slider
@@ -2719,30 +2768,19 @@ function recalc(){
   var camera=findCameraByName(camName),
       lens=findLensByName(lensName),
       film=requireFilm?currentFilm():null;
-  var focal=parseFloat(document.getElementById('focalInput').value)||50;
+  var focal=focalValueForLens(lens);
   var evEff=effectiveEV();
-  // Clamp focal to lens capability
-  try{
-    var fi=document.getElementById('focalInput');
-    var lensNow=lens;
-    if(lensNow && fi){
-      if(lensNow.type==='prime'){
-        fi.readOnly=true; fi.min=lensNow.focal_mm; fi.max=lensNow.focal_mm; fi.step=1; fi.value=String(lensNow.focal_mm);
-        focal=lensNow.focal_mm;
-      } else {
-        fi.readOnly=false; fi.min=lensNow.focal_min_mm; fi.max=lensNow.focal_max_mm; fi.step=1;
-        var fv=Math.max(lensNow.focal_min_mm, Math.min(lensNow.focal_max_mm, focal));
-        if(fv!==focal){ focal=fv; fi.value=String(Math.round(fv)); }
-      }
-    }
-  }catch(e){}
+  // Keep constraints current, but never rewrite a zoom value mid-keystroke.
+  try{ updateFocalConstraint(lens,false); }catch(e){}
   var rec=recommend(evEff,film,lens,focal,camera);
   var newText = 'ISO '+rec.iso+' • f/'+rec.N.toFixed(1)+' • '+fmtSh(rec.t);
   if (output.textContent !== newText) {
     output.textContent = newText;
-    output.classList.remove('flash-animate');
-    void output.offsetWidth; // force reflow
-    output.classList.add('flash-animate');
+    if(!window.__evDragging){
+      output.classList.remove('flash-animate');
+      void output.offsetWidth; // force reflow only for settled changes
+      output.classList.add('flash-animate');
+    }
   } else {
     output.textContent = newText;
   }
@@ -2819,7 +2857,6 @@ function initApp(){
   document.getElementById('evSlider').value = EV_DEFAULT;
   document.getElementById('evInput').value = EV_DEFAULT;
   document.getElementById('luxInput').value = Math.round(evToLux(EV_DEFAULT));
-  try{ document.getElementById('evSlider').focus(); }catch(e){}
   // Old EV bar/notch logic removed
   // function clampEV(v){ return Math.max(EV_MIN, Math.min(EV_MAX, v)); }
   // Already handled in initEvControl above for robust sync
@@ -2881,14 +2918,20 @@ function initApp(){
     var isoNum=document.getElementById('isoNumeric'); if(isoNum){ isoNum.addEventListener('input', recalc); }
     var showAll=document.getElementById('showAllBuiltins'); if(showAll){ showAll.addEventListener('change', function(){ try{ refreshCameras(); refreshLenses(); }catch(e){} }); }
   })();
-  document.getElementById('focalInput').addEventListener('input',function(){
-    try{
-      var lensName=document.getElementById('lensSelect').value;
-      var lens=(loadUserStore().lenses||[]).concat(lensesBuiltin).find(l=>l.name===lensName);
-      if(lens){ updateFocalConstraint(lens); }
-    }catch(e){}
-    recalc();
-  });
+  (function(){
+    var fi=document.getElementById('focalInput');
+    if(!fi) return;
+    function selectedLens(){ return findLensByName(document.getElementById('lensSelect')?.value); }
+    fi.addEventListener('input',function(){
+      try{ var lens=selectedLens(); if(lens){ updateFocalConstraint(lens,false); } }catch(e){}
+      recalc();
+    });
+    fi.addEventListener('blur',function(){
+      try{ var lens=selectedLens(); if(lens){ updateFocalConstraint(lens,true); } }catch(e){}
+      recalc();
+    });
+    fi.addEventListener('keydown',function(e){ if(e.key==='Enter'){ this.blur(); } });
+  })();
   (function(){
     var btn=document.getElementById('advancedToggle');
     var drawer=document.getElementById('advancedDrawer');
