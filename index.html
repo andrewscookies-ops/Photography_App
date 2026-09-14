@@ -437,11 +437,15 @@
   <div id="headerRecommendation" class="header-recommendation" role="status" aria-live="polite"></div>
   <div style="position:relative;display:flex;gap:8px;align-items:center">
     <button id="helpBtn" class="icon-btn" title="Quick Start & Help" aria-label="Quick Start and Help" style="font-size:18px;width:auto;">❓</button>
+    <button id="shareAppBtn" class="icon-btn" title="Share Photography App" aria-label="Share Photography App" style="width:auto;display:inline-flex;align-items:center;justify-content:center;">
+      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="m7 8 5-5 5 5"></path><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path></svg>
+    </button>
     <button id="settingsBtn" class="icon-btn" title="Settings">⋮</button>
     <div id="settingsMenu" class="settings-menu">
      <button id="manageBtn">Manage custom gear</button>
         <button id="saveAppBtn">Save updated app (embed custom gear)</button>
         <button id="themeBtn">Theme: Auto</button>
+        <button id="shareAppMenuBtn">Share app</button>
         <div class="divider"></div>
         <button id="aboutBtn">About</button>
         <button id="closeSettings">Close</button>
@@ -472,6 +476,25 @@
     </div>
   </div>
 </div>
+<!-- Share App Modal -->
+<div id="shareAppModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="shareAppTitle" style="display:none;">
+  <div class="modal-content" style="max-width:430px;text-align:center;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;text-align:left">
+      <div id="shareAppTitle" style="font-weight:650">Share Photography App</div>
+      <button id="shareAppClose" class="icon-btn" style="width:auto" aria-label="Close Share App">✕</button>
+    </div>
+    <div class="sub" style="font-size:13px;line-height:1.45;margin:0 0 12px">Scan the QR code or send the link to open the web app.</div>
+    <div id="shareAppQRWrap" style="display:flex;justify-content:center;margin:8px auto 14px;">
+      <div id="shareAppQR" style="display:inline-flex;align-items:center;justify-content:center;min-width:236px;min-height:236px;padding:8px;background:#fff;border-radius:12px;border:1px solid var(--border);"></div>
+    </div>
+    <label for="shareAppUrl" style="text-align:left">Web app link</label>
+    <input id="shareAppUrl" type="text" readonly value="https://andrewscookies-ops.github.io/Photography_App/" style="font-size:13px">
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <button id="copyAppLinkBtn" style="flex:1 1 140px">Copy Link</button>
+      <button id="nativeShareAppBtn" style="flex:1 1 140px">Share…</button>
+    </div>
+  </div>
+</div>
 <!-- About Modal -->
 <div id="aboutModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" style="display:none;">
   <div class="modal-content">
@@ -481,7 +504,7 @@
     </div>
     <div style="font-size:15px;line-height:1.6">
       <b>Photography Exposure App</b><br>
-      Version 4.3.1 — September 2026<br><br>
+      Version 4.3.2 — September 2026<br><br>
       This tool helps photographers quickly determine optimal camera settings for any scene, balancing light, creative intent, and film/camera gear. All calculations run locally in your browser. No data is sent or stored externally.<br><br>
       <b>Author:</b> Andrew H.<br>
       <b>Contact:</b> <a href="mailto:ajlh.photography@gmail.com">ajlh.photography@gmail.com</a><br>
@@ -654,7 +677,7 @@
     <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">
       <button id="altToggle" style="width:auto;flex:1 1 180px">Show Alternatives</button>
       <button id="copyBtn" style="width:auto">Copy</button>
-      <button id="shareBtn" style="width:auto">Share</button>
+      <button id="shareBtn" style="width:auto">Share Settings</button>
     </div>
     <div id="altSection" style="display:none;margin-top:8px;">
       <div class="alt-grid">
@@ -3132,6 +3155,70 @@ document.addEventListener('DOMContentLoaded',function(){try{initApp()}catch(e){a
     var fs=document.getElementById('filmSelect');if(fs&&!fs.dataset.v431){fs.dataset.v431='1';fs.addEventListener('change',function(){setTimeout(function(){var f=currentFilm(),q=document.getElementById('quickISO');if(f&&q){q.value=String(f.box_iso);var n=document.getElementById('isoNumeric');if(n)n.value=q.value;}recalc();},0);});}
     recalc();
   });
+})();
+</script>
+<script id="shareAppQrLibrary" src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script id="shareAppFeature">
+(function(){
+  var SHARE_APP_URL='https://andrewscookies-ops.github.io/Photography_App/';
+  var qrRendered=false;
+  function modal(){ return document.getElementById('shareAppModal'); }
+  function renderQR(){
+    var host=document.getElementById('shareAppQR');
+    if(!host || qrRendered) return;
+    host.innerHTML='';
+    if(typeof QRCode==='function'){
+      try{
+        new QRCode(host,{text:SHARE_APP_URL,width:220,height:220,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+        qrRendered=true;
+        return;
+      }catch(e){}
+    }
+    host.innerHTML='<div style="max-width:210px;color:#333;font-size:13px;line-height:1.4">QR code could not load. Use Copy Link below.</div>';
+  }
+  function openShareApp(){
+    var m=modal(); if(!m) return;
+    var input=document.getElementById('shareAppUrl'); if(input) input.value=SHARE_APP_URL;
+    var menu=document.getElementById('settingsMenu'); if(menu) menu.style.display='none';
+    m.style.display='flex';
+    renderQR();
+  }
+  function closeShareApp(){ var m=modal(); if(m) m.style.display='none'; }
+  function copiedState(btn){
+    if(!btn) return;
+    var old=btn.textContent;
+    btn.textContent='Copied!';
+    setTimeout(function(){btn.textContent=old;},1200);
+  }
+  function copyLink(){
+    var btn=document.getElementById('copyAppLinkBtn');
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(SHARE_APP_URL).then(function(){copiedState(btn);},fallbackCopy);
+    }else fallbackCopy();
+    function fallbackCopy(){
+      var input=document.getElementById('shareAppUrl');
+      if(!input) return;
+      input.focus(); input.select(); input.setSelectionRange(0,input.value.length);
+      try{ document.execCommand('copy'); copiedState(btn); }catch(e){}
+    }
+  }
+  function nativeShare(){
+    if(navigator.share){
+      navigator.share({title:'Photography App',text:'Photography App',url:SHARE_APP_URL}).catch(function(){});
+    }else{
+      copyLink();
+    }
+  }
+  function bind(){
+    document.getElementById('shareAppBtn')?.addEventListener('click',openShareApp);
+    document.getElementById('shareAppMenuBtn')?.addEventListener('click',openShareApp);
+    document.getElementById('shareAppClose')?.addEventListener('click',closeShareApp);
+    document.getElementById('copyAppLinkBtn')?.addEventListener('click',copyLink);
+    document.getElementById('nativeShareAppBtn')?.addEventListener('click',nativeShare);
+    modal()?.addEventListener('click',function(e){if(e.target===this)closeShareApp();});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape' && modal()?.style.display==='flex')closeShareApp();});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind); else bind();
 })();
 </script>
 </body>
