@@ -18,6 +18,9 @@
 #advancedDrawer.more-tools-v445 .mt-output.mt-warning{color:#b00020;border-color:color-mix(in srgb,#b00020 30%,var(--border))}
 #advancedDrawer.more-tools-v445 #incidentDrawer{margin:0;padding:0;border:0;background:transparent;box-shadow:none}
 #advancedDrawer.more-tools-v445 #incidentDrawer .incident-explain{margin-top:2px}
+/* The incident meter dial owns its drag gesture. Prevent mobile browsers from
+   treating that same vertical drag as a page-pan while the dial is in use. */
+#incidentDial,#advancedDrawer.more-tools-v445 #incidentDial{touch-action:none;overscroll-behavior:contain;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 #advancedToggle{touch-action:manipulation}
 @media(max-width:520px){
   #advancedDrawer.more-tools-v445{padding:10px}
