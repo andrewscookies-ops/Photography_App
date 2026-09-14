@@ -1,5 +1,5 @@
 name: Apply Photography App v4.3.3 Auto ISO
-on:
+'on':
   push:
     paths:
       - '.github/workflows/apply-v433-auto-iso.yml'
@@ -17,149 +17,13 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
-
-          p = Path('index.html')
-          s = p.read_text()
-          s = s.replace('Version 4.3.2 — September 2026', 'Version 4.3.3 — September 2026')
-          s = re.sub(r'<script id="v433AutoISO">.*?</script>\s*', '', s, flags=re.S)
-
-          feature = r'''<script id="v433AutoISO">
-(function(){
-  var AUTO_ISO_VALUES=[50,64,80,100,125,160,200,250,320,400,500,640,800,1000,1250,1600,2000,2500,3200,4000,5000,6400,8000,10000,12800];
-  var autoUiTimer=null;
-
-  function interp(vals,x){
-    x=Math.max(0,Math.min(1,x))*(vals.length-1);
-    var i=Math.floor(x),j=Math.min(vals.length-1,i+1),f=x-i;
-    return vals[i]+(vals[j]-vals[i])*f;
-  }
-  function snapISO(v){
-    v=Math.max(AUTO_ISO_VALUES[0],Math.min(AUTO_ISO_VALUES[AUTO_ISO_VALUES.length-1],v));
-    var best=AUTO_ISO_VALUES[0],d=Infinity;
-    AUTO_ISO_VALUES.forEach(function(x){var dd=Math.abs(Math.log2(x/v));if(dd<d){d=dd;best=x;}});
-    return best;
-  }
-  function autoEnabled(){
-    return currentCaptureMode()!=='film' && (document.getElementById('quickISOMode')?.value||'auto')==='auto';
-  }
-  window.isAutoISO=autoEnabled;
-
-  function chosenLensAndFocal(){
-    var lens=findLensByName(document.getElementById('lensSelect')?.value||'')||null;
-    var focal=null;
-    if(lens){ focal=focalValueForLens(lens); }
-    else{
-      var f=parseFloat(document.getElementById('focalInput')?.value);
-      if(isFinite(f)&&f>0) focal=f;
-    }
-    return {lens:lens,focal:focal};
-  }
-  function targetAperture(lens,focal,ci){
-    if(!lens) return interp([16,11,8,4,2],ci.blur);
-    var ap=lensApertureAtFocal(lens,focal||focalValueForLens(lens));
-    var deepTarget=Math.min(Math.max(11,ap.minA),ap.maxA);
-    var shallowTarget=ap.minA;
-    if(ci.panning) deepTarget=Math.min(ap.maxA,deepTarget*Math.pow(Math.SQRT2,0.5));
-    var N=deepTarget+(shallowTarget-deepTarget)*ci.blur;
-    if(focal&&isFinite(focal)){
-      var focalRatio=Math.max(20,Math.min(200,focal))/50;
-      N*=Math.pow(Math.SQRT2,Math.log2(focalRatio)*0.5);
-    }
-    return Math.max(ap.minA,Math.min(ap.maxA,N));
-  }
-  function targetShutter(lens,focal,ci){
-    var t;
-    if(lens){
-      var targets=[1/8,1/30,1/60,1/250,1/500,1/1000];
-      t=targets[Math.max(0,Math.min(5,Math.round(ci.freeze*5)))];
-    }else{
-      t=interp([1/15,1/30,1/125,1/500,1/1000],ci.freeze);
-    }
-    if(focal&&isFinite(focal)) t*=Math.max(0.25,Math.min(4,50/focal));
-    if(ci.panning) t*=3;
-    return t;
-  }
-  function computeAutoISO(){
-    var ev=effectiveEV()+(parseFloat(document.getElementById('evBias')?.value)||0);
-    var ci=getCI();
-    var lf=chosenLensAndFocal(),N=targetAperture(lf.lens,lf.focal,ci),t=targetShutter(lf.lens,lf.focal,ci);
-    var raw=100*(N*N)/(Math.pow(2,ev)*t);
-    // Grain/noise preference can steer Auto ISO modestly: cleaner lowers ISO, textured raises it.
-    raw*=Math.pow(2,(ci.grain-0.5)*1.5);
-    var clamped=raw<AUTO_ISO_VALUES[0]?'low':(raw>AUTO_ISO_VALUES[AUTO_ISO_VALUES.length-1]?'high':'');
-    var iso=snapISO(raw);
-    window.__autoISO=iso;
-    window.__autoISOClamp=clamped;
-    return iso;
-  }
-  function manualISO(){
-    return Math.max(1,parseInt(document.getElementById('quickISO')?.value,10)||parseInt(document.getElementById('isoNumeric')?.value,10)||400);
-  }
-  function scheduleAutoUi(){
-    if(autoUiTimer!==null) return;
-    autoUiTimer=setTimeout(function(){autoUiTimer=null;updateAutoUi();},0);
-  }
-  function updateAutoUi(){
-    var mode=document.getElementById('quickISOMode'),wrap=document.getElementById('quickISOManualWrap'),read=document.getElementById('autoISOReadout');
-    var isAuto=autoEnabled();
-    if(wrap) wrap.style.display=isAuto?'none':'block';
-    if(read){
-      read.style.display=isAuto?'block':'none';
-      if(isAuto) read.textContent='Auto ISO → '+(window.__autoISO||computeAutoISO());
-    }
-    var why=document.getElementById('whyDetails');
-    if(why){
-      why.querySelectorAll('[data-auto-iso-note]').forEach(function(n){n.remove();});
-      if(isAuto){
-        var ul=why.querySelector('ul');
-        if(ul){
-          var li=document.createElement('li');li.setAttribute('data-auto-iso-note','1');
-          li.textContent='Auto ISO selected ISO '+(window.__autoISO||computeAutoISO())+' from the current light, depth-of-field target, motion target'+(parseFloat(document.getElementById('focalInput')?.value)>0?', and focal length':'')+'.';
-          ul.appendChild(li);
-        }
-      }
-    }
-    var warning=document.getElementById('warning');
-    if(warning&&isAuto&&window.__autoISOClamp){
-      var msg=window.__autoISOClamp==='high'?'Auto ISO reached the app’s general ISO 12800 ceiling. A wider aperture, slower shutter, or more light may be needed.':'Auto ISO reached ISO 50. A smaller aperture, faster shutter, or ND filter may be needed.';
-      if(!warning.textContent.includes(msg)) warning.textContent=(warning.textContent?warning.textContent+' • ':'')+msg;
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded',function(){
-    var qg=document.getElementById('quickISOGroup');
-    if(qg){
-      var old=parseInt(document.getElementById('quickISO')?.value,10)||400;
-      qg.innerHTML='<label style="max-width:150px">ISO mode<select id="quickISOMode"><option value="auto" selected>Auto</option><option value="manual">Manual</option></select></label>'+
-        '<label id="quickISOManualWrap" style="max-width:150px;display:none">ISO<input type="number" id="quickISO" value="'+old+'" min="1" step="1" inputmode="numeric"></label>'+
-        '<div id="autoISOReadout" class="sub" style="align-self:center;font-weight:650;white-space:nowrap"></div>';
-    }
-
-    var previousGetSelectedISO=getSelectedISO;
-    getSelectedISO=function(){
-      if(currentCaptureMode()==='film'){
-        return Math.max(1,parseInt(document.getElementById('isoSelect')?.value,10)||(currentFilm()?.box_iso)||400);
-      }
-      if(autoEnabled()){
-        var v=computeAutoISO();scheduleAutoUi();return v;
-      }
-      return manualISO();
-    };
-
-    document.getElementById('quickISOMode')?.addEventListener('change',function(){updateAutoUi();recalc();});
-    document.getElementById('quickISO')?.addEventListener('input',function(){var n=document.getElementById('isoNumeric');if(n)n.value=this.value;recalc();});
-    document.getElementById('captureMode')?.addEventListener('change',function(){setTimeout(function(){updateAutoUi();recalc();},0);});
-
-    var oldRecalc=recalc;
-    recalc=function(){oldRecalc();scheduleAutoUi();};
-    updateAutoUi();
-    recalc();
-  });
-})();
-</script>'''
-
-          s=s.replace('</body>', feature+'\n</body>')
+          import re, base64
+          p=Path('index.html')
+          s=p.read_text()
+          s=s.replace('Version 4.3.2 — September 2026','Version 4.3.3 — September 2026')
+          s=re.sub(r'<script id="v433AutoISO">.*?</script>\s*','',s,flags=re.S)
+          feature=base64.b64decode('PHNjcmlwdCBpZD0idjQzM0F1dG9JU08iPgooZnVuY3Rpb24oKXsKICB2YXIgQVVUT19JU09fVkFMVUVTPVs1MCw2NCw4MCwxMDAsMTI1LDE2MCwyMDAsMjUwLDMyMCw0MDAsNTAwLDY0MCw4MDAsMTAwMCwxMjUwLDE2MDAsMjAwMCwyNTAwLDMyMDAsNDAwMCw1MDAwLDY0MDAsODAwMCwxMDAwMCwxMjgwMF07CiAgdmFyIGF1dG9VaVRpbWVyPW51bGw7CgogIGZ1bmN0aW9uIGludGVycCh2YWxzLHgpewogICAgeD1NYXRoLm1heCgwLE1hdGgubWluKDEseCkpKih2YWxzLmxlbmd0aC0xKTsKICAgIHZhciBpPU1hdGguZmxvb3IoeCksaj1NYXRoLm1pbih2YWxzLmxlbmd0aC0xLGkrMSksZj14LWk7CiAgICByZXR1cm4gdmFsc1tpXSsodmFsc1tqXS12YWxzW2ldKSpmOwogIH0KICBmdW5jdGlvbiBzbmFwSVNPKHYpewogICAgdj1NYXRoLm1heChBVVRPX0lTT19WQUxVRVNbMF0sTWF0aC5taW4oQVVUT19JU09fVkFMVUVTW0FVVE9fSVNPX1ZBTFVFUy5sZW5ndGgtMV0sdikpOwogICAgdmFyIGJlc3Q9QVVUT19JU09fVkFMVUVTWzBdLGQ9SW5maW5pdHk7CiAgICBBVVRPX0lTT19WQUxVRVMuZm9yRWFjaChmdW5jdGlvbih4KXt2YXIgZGQ9TWF0aC5hYnMoTWF0aC5sb2cyKHgvdikpO2lmKGRkPGQpe2Q9ZGQ7YmVzdD14O319KTsKICAgIHJldHVybiBiZXN0OwogIH0KICBmdW5jdGlvbiBhdXRvRW5hYmxlZCgpewogICAgcmV0dXJuIGN1cnJlbnRDYXB0dXJlTW9kZSgpIT09J2ZpbG0nICYmIChkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgncXVpY2tJU09Nb2RlJyk/LnZhbHVlfHwnYXV0bycpPT09J2F1dG8nOwogIH0KICB3aW5kb3cuaXNBdXRvSVNPPWF1dG9FbmFibGVkOwoKICBmdW5jdGlvbiBjaG9zZW5MZW5zQW5kRm9jYWwoKXsKICAgIHZhciBsZW5zPWZpbmRMZW5zQnlOYW1lKGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdsZW5zU2VsZWN0Jyk/LnZhbHVlfHwnJyl8fG51bGw7CiAgICB2YXIgZm9jYWw9bnVsbDsKICAgIGlmKGxlbnMpeyBmb2NhbD1mb2NhbFZhbHVlRm9yTGVucyhsZW5zKTsgfQogICAgZWxzZXsKICAgICAgdmFyIGY9cGFyc2VGbG9hdChkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnZm9jYWxJbnB1dCcpPy52YWx1ZSk7CiAgICAgIGlmKGlzRmluaXRlKGYpJiZmPjApIGZvY2FsPWY7CiAgICB9CiAgICByZXR1cm4ge2xlbnM6bGVucyxmb2NhbDpmb2NhbH07CiAgfQogIGZ1bmN0aW9uIHRhcmdldEFwZXJ0dXJlKGxlbnMsZm9jYWwsY2kpewogICAgaWYoIWxlbnMpIHJldHVybiBpbnRlcnAoWzE2LDExLDgsNCwyXSxjaS5ibHVyKTsKICAgIHZhciBhcD1sZW5zQXBlcnR1cmVBdEZvY2FsKGxlbnMsZm9jYWx8fGZvY2FsVmFsdWVGb3JMZW5zKGxlbnMpKTsKICAgIHZhciBkZWVwVGFyZ2V0PU1hdGgubWluKE1hdGgubWF4KDExLGFwLm1pbkEpLGFwLm1heEEpOwogICAgdmFyIHNoYWxsb3dUYXJnZXQ9YXAubWluQTsKICAgIGlmKGNpLnBhbm5pbmcpIGRlZXBUYXJnZXQ9TWF0aC5taW4oYXAubWF4QSxkZWVwVGFyZ2V0Kk1hdGgucG93KE1hdGguU1FSVDIsMC41KSk7CiAgICB2YXIgTj1kZWVwVGFyZ2V0KyhzaGFsbG93VGFyZ2V0LWRlZXBUYXJnZXQpKmNpLmJsdXI7CiAgICBpZihmb2NhbCYmaXNGaW5pdGUoZm9jYWwpKXsKICAgICAgdmFyIGZvY2FsUmF0aW89TWF0aC5tYXgoMjAsTWF0aC5taW4oMjAwLGZvY2FsKSkvNTA7CiAgICAgIE4qPU1hdGgucG93KE1hdGguU1FSVDIsTWF0aC5sb2cyKGZvY2FsUmF0aW8pKjAuNSk7CiAgICB9CiAgICByZXR1cm4gTWF0aC5tYXgoYXAubWluQSxNYXRoLm1pbihhcC5tYXhBLE4pKTsKICB9CiAgZnVuY3Rpb24gdGFyZ2V0U2h1dHRlcihsZW5zLGZvY2FsLGNpKXsKICAgIHZhciB0OwogICAgaWYobGVucyl7CiAgICAgIHZhciB0YXJnZXRzPVsxLzgsMS8zMCwxLzYwLDEvMjUwLDEvNTAwLDEvMTAwMF07CiAgICAgIHQ9dGFyZ2V0c1tNYXRoLm1heCgwLE1hdGgubWluKDUsTWF0aC5yb3VuZChjaS5mcmVlemUqNSkpKV07CiAgICB9ZWxzZXsKICAgICAgdD1pbnRlcnAoWzEvMTUsMS8zMCwxLzEyNSwxLzUwMCwxLzEwMDBdLGNpLmZyZWV6ZSk7CiAgICB9CiAgICBpZihmb2NhbCYmaXNGaW5pdGUoZm9jYWwpKSB0Kj1NYXRoLm1heCgwLjI1LE1hdGgubWluKDQsNTAvZm9jYWwpKTsKICAgIGlmKGNpLnBhbm5pbmcpIHQqPTM7CiAgICByZXR1cm4gdDsKICB9CiAgZnVuY3Rpb24gY29tcHV0ZUF1dG9JU08oKXsKICAgIHZhciBldj1lZmZlY3RpdmVFVigpKyhwYXJzZUZsb2F0KGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdldkJpYXMnKT8udmFsdWUpfHwwKTsKICAgIHZhciBjaT1nZXRDSSgpOwogICAgdmFyIGxmPWNob3NlbkxlbnNBbmRGb2NhbCgpLE49dGFyZ2V0QXBlcnR1cmUobGYubGVucyxsZi5mb2NhbCxjaSksdD10YXJnZXRTaHV0dGVyKGxmLmxlbnMsbGYuZm9jYWwsY2kpOwogICAgdmFyIHJhdz0xMDAqKE4qTikvKE1hdGgucG93KDIsZXYpKnQpOwogICAgcmF3Kj1NYXRoLnBvdygyLChjaS5ncmFpbi0wLjUpKjEuNSk7CiAgICB2YXIgY2xhbXBlZD1yYXc8QVVUT19JU09fVkFMVUVTWzBdPydsb3cnOihyYXc+QVVUT19JU09fVkFMVUVTW0FVVE9fSVNPX1ZBTFVFUy5sZW5ndGgtMV0/J2hpZ2gnOicnKTsKICAgIHZhciBpc289c25hcElTTyhyYXcpOwogICAgd2luZG93Ll9fYXV0b0lTTz1pc287CiAgICB3aW5kb3cuX19hdXRvSVNPQ2xhbXA9Y2xhbXBlZDsKICAgIHJldHVybiBpc287CiAgfQogIGZ1bmN0aW9uIG1hbnVhbElTTygpewogICAgcmV0dXJuIE1hdGgubWF4KDEscGFyc2VJbnQoZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3F1aWNrSVNPJyk/LnZhbHVlLDEwKXx8cGFyc2VJbnQoZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2lzb051bWVyaWMnKT8udmFsdWUsMTApfHw0MDApOwogIH0KICBmdW5jdGlvbiBzY2hlZHVsZUF1dG9VaSgpewogICAgaWYoYXV0b1VpVGltZXIhPT1udWxsKSByZXR1cm47CiAgICBhdXRvVWlUaW1lcj1zZXRUaW1lb3V0KGZ1bmN0aW9uKCl7YXV0b1VpVGltZXI9bnVsbDt1cGRhdGVBdXRvVWkoKTt9LDApOwogIH0KICBmdW5jdGlvbiB1cGRhdGVBdXRvVWkoKXsKICAgIHZhciB3cmFwPWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdxdWlja0lTT01hbnVhbFdyYXAnKSxyZWFkPWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdhdXRvSVNPUmVhZG91dCcpOwogICAgdmFyIGlzQXV0bz1hdXRvRW5hYmxlZCgpOwogICAgaWYod3JhcCkgd3JhcC5zdHlsZS5kaXNwbGF5PWlzQXV0bz8nbm9uZSc6J2Jsb2NrJzsKICAgIGlmKHJlYWQpewogICAgICByZWFkLnN0eWxlLmRpc3BsYXk9aXNBdXRvPydibG9jayc6J25vbmUnOwogICAgICBpZihpc0F1dG8pIHJlYWQudGV4dENvbnRlbnQ9J0F1dG8gSVNPIOKGkiAnKyh3aW5kb3cuX19hdXRvSVNPfHxjb21wdXRlQXV0b0lTTygpKTsKICAgIH0KICAgIHZhciB3aHk9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3doeURldGFpbHMnKTsKICAgIGlmKHdoeSl7CiAgICAgIHdoeS5xdWVyeVNlbGVjdG9yQWxsKCdbZGF0YS1hdXRvLWlzby1ub3RlXScpLmZvckVhY2goZnVuY3Rpb24obil7bi5yZW1vdmUoKTt9KTsKICAgICAgaWYoaXNBdXRvKXsKICAgICAgICB2YXIgdWw9d2h5LnF1ZXJ5U2VsZWN0b3IoJ3VsJyk7CiAgICAgICAgaWYodWwpewogICAgICAgICAgdmFyIGxpPWRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2xpJyk7bGkuc2V0QXR0cmlidXRlKCdkYXRhLWF1dG8taXNvLW5vdGUnLCcxJyk7CiAgICAgICAgICBsaS50ZXh0Q29udGVudD0nQXV0byBJU08gc2VsZWN0ZWQgSVNPICcrKHdpbmRvdy5fX2F1dG9JU098fGNvbXB1dGVBdXRvSVNPKCkpKycgZnJvbSB0aGUgY3VycmVudCBsaWdodCwgZGVwdGgtb2YtZmllbGQgdGFyZ2V0LCBtb3Rpb24gdGFyZ2V0JysocGFyc2VGbG9hdChkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnZm9jYWxJbnB1dCcpPy52YWx1ZSk+MD8nLCBhbmQgZm9jYWwgbGVuZ3RoJzonJykrJy4nOwogICAgICAgICAgdWwuYXBwZW5kQ2hpbGQobGkpOwogICAgICAgIH0KICAgICAgfQogICAgfQogICAgdmFyIHdhcm5pbmc9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3dhcm5pbmcnKTsKICAgIGlmKHdhcm5pbmcmJmlzQXV0byYmd2luZG93Ll9fYXV0b0lTT0NsYW1wKXsKICAgICAgdmFyIG1zZz13aW5kb3cuX19hdXRvSVNPQ2xhbXA9PT0naGlnaCc/J0F1dG8gSVNPIHJlYWNoZWQgdGhlIGFwcOKAmXMgZ2VuZXJhbCBJU08gMTI4MDAgY2VpbGluZy4gQSB3aWRlciBhcGVydHVyZSwgc2xvd2VyIHNodXR0ZXIsIG9yIG1vcmUgbGlnaHQgbWF5IGJlIG5lZWRlZC4nOidBdXRvIElTTyByZWFjaGVkIElTTyA1MC4gQSBzbWFsbGVyIGFwZXJ0dXJlLCBmYXN0ZXIgc2h1dHRlciwgb3IgTkQgZmlsdGVyIG1heSBiZSBuZWVkZWQuJzsKICAgICAgaWYoIXdhcm5pbmcudGV4dENvbnRlbnQuaW5jbHVkZXMobXNnKSkgd2FybmluZy50ZXh0Q29udGVudD0od2FybmluZy50ZXh0Q29udGVudD93YXJuaW5nLnRleHRDb250ZW50Kycg4oCiICc6JycpK21zZzsKICAgIH0KICB9CgogIGRvY3VtZW50LmFkZEV2ZW50TGlzdGVuZXIoJ0RPTUNvbnRlbnRMb2FkZWQnLGZ1bmN0aW9uKCl7CiAgICB2YXIgcWc9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3F1aWNrSVNPR3JvdXAnKTsKICAgIGlmKHFnKXsKICAgICAgdmFyIG9sZD1wYXJzZUludChkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgncXVpY2tJU08nKT8udmFsdWUsMTApfHw0MDA7CiAgICAgIHFnLmlubmVySFRNTD0nPGxhYmVsIHN0eWxlPSJtYXgtd2lkdGg6MTUwcHgiPklTTyBtb2RlPHNlbGVjdCBpZD0icXVpY2tJU09Nb2RlIj48b3B0aW9uIHZhbHVlPSJhdXRvIiBzZWxlY3RlZD5BdXRvPC9vcHRpb24+PG9wdGlvbiB2YWx1ZT0ibWFudWFsIj5NYW51YWw8L29wdGlvbj48L3NlbGVjdD48L2xhYmVsPicrCiAgICAgICAgJzxsYWJlbCBpZD0icXVpY2tJU09NYW51YWxXcmFwIiBzdHlsZT0ibWF4LXdpZHRoOjE1MHB4O2Rpc3BsYXk6bm9uZSI+SVNPPGlucHV0IHR5cGU9Im51bWJlciIgaWQ9InF1aWNrSVNPIiB2YWx1ZT0iJytvbGQrJyIgbWluPSIxIiBzdGVwPSIxIiBpbnB1dG1vZGU9Im51bWVyaWMiPjwvbGFiZWw+JysKICAgICAgICAnPGRpdiBpZD0iYXV0b0lTT1JlYWRvdXQiIGNsYXNzPSJzdWIiIHN0eWxlPSJhbGlnbi1zZWxmOmNlbnRlcjtmb250LXdlaWdodDo2NTA7d2hpdGUtc3BhY2U6bm93cmFwIj48L2Rpdj4nOwogICAgfQoKICAgIGdldFNlbGVjdGVkSVNPPWZ1bmN0aW9uKCl7CiAgICAgIGlmKGN1cnJlbnRDYXB0dXJlTW9kZSgpPT09J2ZpbG0nKXsKICAgICAgICByZXR1cm4gTWF0aC5tYXgoMSxwYXJzZUludChkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnaXNvU2VsZWN0Jyk/LnZhbHVlLDEwKXx8KGN1cnJlbnRGaWxtKCk/LmJveF9pc28pfHw0MDApOwogICAgICB9CiAgICAgIGlmKGF1dG9FbmFibGVkKCkpewogICAgICAgIHZhciB2PWNvbXB1dGVBdXRvSVNPKCk7c2NoZWR1bGVBdXRvVWkoKTtyZXR1cm4gdjsKICAgICAgfQogICAgICByZXR1cm4gbWFudWFsSVNPKCk7CiAgICB9OwoKICAgIGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdxdWlja0lTT01vZGUnKT8uYWRkRXZlbnRMaXN0ZW5lcignY2hhbmdlJyxmdW5jdGlvbigpe3VwZGF0ZUF1dG9VaSgpO3JlY2FsYygpO30pOwogICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3F1aWNrSVNPJyk/LmFkZEV2ZW50TGlzdGVuZXIoJ2lucHV0JyxmdW5jdGlvbigpe3ZhciBuPWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdpc29OdW1lcmljJyk7aWYobiluLnZhbHVlPXRoaXMudmFsdWU7cmVjYWxjKCk7fSk7CiAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnY2FwdHVyZU1vZGUnKT8uYWRkRXZlbnRMaXN0ZW5lcignY2hhbmdlJyxmdW5jdGlvbigpe3NldFRpbWVvdXQoZnVuY3Rpb24oKXt1cGRhdGVBdXRvVWkoKTtyZWNhbGMoKTt9LDApO30pOwoKICAgIHZhciBvbGRSZWNhbGM9cmVjYWxjOwogICAgcmVjYWxjPWZ1bmN0aW9uKCl7b2xkUmVjYWxjKCk7c2NoZWR1bGVBdXRvVWkoKTt9OwogICAgdXBkYXRlQXV0b1VpKCk7CiAgICByZWNhbGMoKTsKICB9KTsKfSkoKTsKPC9zY3JpcHQ+').decode()
+          s=s.replace('</body>',feature+'\n</body>')
           p.write_text(s)
           PY
       - name: Commit app update
