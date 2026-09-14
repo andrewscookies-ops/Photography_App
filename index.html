@@ -217,9 +217,8 @@
   position:absolute; top:50%; width:6px; height:30px; transform:translate(-50%,-50%);
   background:var(--accent); border-radius:8px; box-shadow:0 0 6px 6px var(--ring);
 }
-@media (prefers-reduced-motion: no-preference){
-  .ev-control .ev-handle{ transition:left .06s linear; }
-}
+.ev-control .ev-handle{ transition:none; will-change:left; }
+.ev-control.ev-dragging{ cursor:grabbing; }
 
 /* Rectangular thumb for precise alignment */
 .ev-slider input[type=range]::-webkit-slider-thumb{
@@ -474,11 +473,11 @@
     </div>
     <div style="font-size:15px;line-height:1.6">
       <b>Photography Exposure App</b><br>
-      Version 4.0.8 — October 2025<br><br>
+      Version 4.0.9 — September 2026<br><br>
       This tool helps photographers quickly determine optimal camera settings for any scene, balancing light, creative intent, and film/camera gear. All calculations run locally in your browser. No data is sent or stored externally.<br><br>
       <b>Author:</b> Andrew H.<br>
       <b>Contact:</b> <a href="mailto:ajlh.photography@gmail.com">ajlh.photography@gmail.com</a><br>
-      <b>Source:</b> <a href="https://github.com/andrewh/photo-exposure-app" target="_blank">GitHub</a><br>
+      <b>Source:</b> <a href="https://github.com/andrewscookies-ops/Photography_App" target="_blank">GitHub</a><br>
       <b>Credits:</b> Made with AI Assistance
     </div>
   </div>
@@ -492,7 +491,6 @@
       <select id="captureMode" aria-label="Capture mode">
         <option value="film" selected>Film</option>
         <option value="digital">Digital</option>
-        <option value="all">All built-ins</option>
       </select>
     </div>
     
@@ -623,7 +621,9 @@
     </style>
     <div id="warning" class="warning"></div>
     <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">
-      <button id="altToggle">Show Alternatives</button>
+      <button id="altToggle" style="width:auto;flex:1 1 180px">Show Alternatives</button>
+      <button id="copyBtn" style="width:auto">Copy</button>
+      <button id="shareBtn" style="width:auto">Share</button>
     </div>
     <div id="altSection" style="display:none;margin-top:8px;">
       <div class="alt-grid">
@@ -817,16 +817,6 @@ document.getElementById('shareBtn')?.addEventListener('click',function(){
     inner.querySelector('#closeShareDlg').onclick=function(){document.body.removeChild(dlg);};
   }
 });
-// Help modal open/close logic
-document.getElementById('helpBtn')?.addEventListener('click',function(){ openModal('helpModal'); });
-document.getElementById('helpClose')?.addEventListener('click',function(){ closeModal('helpModal'); });
-// Close help modal on Escape key
-document.addEventListener('keydown',function(e){
-  var modal=document.getElementById('helpModal');
-  if(modal && modal.style.display==='flex' && (e.key==='Escape'||e.key==='Esc')){
-    closeModal('helpModal');
-  }
-});
   function hiddenNumber(id,val){
     if(document.getElementById(id)) return;
     var i=document.createElement('input');
@@ -924,24 +914,32 @@ function getEmbeddedNode(){
   }
   return n;
 }
+var USER_STORE_KEY='photoAppUserGear_v2';
+function normalizeUserStore(obj){
+  if(!obj||typeof obj!=='object') obj={};
+  obj.cameras=Array.isArray(obj.cameras)?obj.cameras:[];
+  obj.lenses=Array.isArray(obj.lenses)?obj.lenses:[];
+  obj.films=Array.isArray(obj.films)?obj.films:[];
+  return obj;
+}
 function loadUserStore(){
+  try{
+    var saved=localStorage.getItem(USER_STORE_KEY);
+    if(saved){ return normalizeUserStore(JSON.parse(saved)); }
+  }catch(e){}
   try{
     var n=getEmbeddedNode();
     var txt=n.textContent||n.innerText||'{}';
-    var obj=JSON.parse(txt);
-    if(!obj||typeof obj!=='object') obj={};
-    obj.cameras=obj.cameras||[]; obj.lenses=obj.lenses||[]; obj.films=obj.films||[];
-    return obj;
+    return normalizeUserStore(JSON.parse(txt));
   }catch(e){ return {cameras:[],lenses:[],films:[]}; }
 }
 function saveUserStore(obj){
   try{
+    var clean=normalizeUserStore(obj);
+    var payload=JSON.stringify({cameras:clean.cameras,lenses:clean.lenses,films:clean.films});
     var n=getEmbeddedNode();
-    n.textContent=JSON.stringify({
-      cameras: obj.cameras||[],
-      lenses: obj.lenses||[],
-      films: obj.films||[]
-    });
+    n.textContent=payload;
+    try{ localStorage.setItem(USER_STORE_KEY,payload); }catch(_e){}
   }catch(e){}
 }
 // Download a new HTML with embedded customs
@@ -952,7 +950,7 @@ function downloadUpdatedHTML(){
     var blob=new Blob([html],{type:'text/html'});
     var a=document.createElement('a');
     var ts=new Date().toISOString().replace(/[:.]/g,'-');
-    a.download='Photography_App_V2_custom_'+ts+'.html';
+    a.download='Photography_App_custom_'+ts+'.html';
     a.href=URL.createObjectURL(blob);
     document.body.appendChild(a); a.click();
     setTimeout(function(){URL.revokeObjectURL(a.href); a.remove();},0);
@@ -1598,30 +1596,6 @@ function getSelectedISO(){
   }
 }
 
-(function(){
-  var modeSel=document.getElementById('captureMode');
-  var filmCol=document.getElementById('filmCol');
-  var isoSel=document.getElementById('isoSelect');
-  var isoNum=document.getElementById('isoNumeric');
-  if(!modeSel) return;
-  function setMode(){
-    var m=modeSel.value;
-    if(m==='digital'){
-      if(filmCol) filmCol.style.display='none';
-      if(isoSel) isoSel.style.display='none';
-      if(isoNum) isoNum.style.display='inline-block';
-    }else{
-      if(filmCol) filmCol.style.display='';
-      if(isoSel) isoSel.style.display='';
-      if(isoNum) isoNum.style.display='none';
-    }
-    try{ recalc(); }catch(e){}
-  }
-  modeSel.addEventListener('change', setMode);
-  if(isoSel) isoSel.addEventListener('change', function(){ try{ recalc(); }catch(e){} });
-  if(isoNum) isoNum.addEventListener('input', function(){ try{ recalc(); }catch(e){} });
-  setMode();
-})();
 function recommend(ev,film,lens,focal,camera){
   ev = ev + (parseFloat(document.getElementById('evBias')?.value)||0);
   var ci=getCI();
@@ -2064,7 +2038,7 @@ function openCustom(type){
   var menu=document.getElementById('settingsMenu');
   btn.addEventListener('click',function(){menu.style.display=menu.style.display==='block'?'none':'block'});
   document.getElementById('closeSettings').addEventListener('click',function(){menu.style.display='none'});
-  document.getElementById('aboutBtn').addEventListener('click',function(){menu.style.display='none';alert('© 2025 Andrew Harris. Created with AI assistance.')});
+  document.getElementById('aboutBtn').addEventListener('click',function(){menu.style.display='none';});
   var saveBtn=document.getElementById('saveAppBtn');
   if(saveBtn){ saveBtn.addEventListener('click',function(){ menu.style.display='none'; downloadUpdatedHTML(); }); }
   // Theme toggle
@@ -2300,7 +2274,7 @@ function updatePushPull(){
     updateEvDescriptor(ev);
     updateIncidentNote();
     if(source==='drag'){
-      scheduleDragRecalc();
+      // Drag stays visually immediate; full exposure recalculation happens on release.
     }else if(source==='kb'){
       try{ recalc(); }catch(_e){}
     }else if(source!=='input' && hidden){
@@ -2320,16 +2294,18 @@ function updatePushPull(){
   }
 
   function startDrag(clientX){
+    dragging=true;
+    ctrl.classList.add('ev-dragging');
     setEV(tToEv(pxToT(clientX)), 'drag');
     if(tip){ tip.removeAttribute('aria-hidden'); }
-    dragging=true;
   }
   function moveDrag(clientX){ if(dragging) setEV(tToEv(pxToT(clientX)), 'drag'); }
   function endDrag(){
     if(!dragging) return;
     dragging=false;
+    ctrl.classList.remove('ev-dragging');
     if(tip){ tip.setAttribute('aria-hidden','true'); }
-    scheduleDragRecalc();
+    try{ recalc(); }catch(_e){}
   }
 
   function bind(){
@@ -2385,6 +2361,8 @@ function updatePushPull(){
     ctrl.addEventListener('pointermove', pointerMoveHandler);
     ctrl.addEventListener('pointerup', pointerUpHandler);
     ctrl.addEventListener('pointercancel', pointerCancelHandler);
+    ctrl.addEventListener('touchstart', function(e){ if(e.cancelable) e.preventDefault(); }, {passive:false});
+    ctrl.addEventListener('touchmove', function(e){ if(e.cancelable) e.preventDefault(); }, {passive:false});
 
     ctrl.addEventListener('keydown', function(e){
       var step = (e.shiftKey?1:0.1);
@@ -2580,7 +2558,6 @@ function initApp(){
   })();
   // Already handled in initEvControl above for robust sync
   initIncidentDial();
-  var isoSel=document.getElementById('isoSelect'); if(isoSel){ isoSel.addEventListener('change',recalc) }
   // EI controls: show/hide Rated EI when 'Rate this roll' is on
   function updateEIRow(){
     var rr=document.getElementById('rateRoll'); var wrap=document.getElementById('eiWrap');
