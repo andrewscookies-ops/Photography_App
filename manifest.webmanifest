@@ -1,0 +1,25 @@
+{
+  "id": "./",
+  "name": "Photography App",
+  "short_name": "Photography",
+  "description": "A fast photography exposure and creative-intent companion.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f7f9",
+  "theme_color": "#0b2a5b",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any"
+    }
+  ]
+}

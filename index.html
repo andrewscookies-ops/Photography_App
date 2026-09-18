@@ -3,7 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Photography App — FULL</title>
+<title>Photography App</title>
+<meta name="theme-color" content="#0b2a5b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Photography App">
+<link rel="manifest" href="manifest.webmanifest?v=447">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=447">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=447">
 <link rel="stylesheet" href="rapid-tap-v444.css?v=444">
 <link rel="stylesheet" href="more-tools-v445.css?v=446">
 <style>
@@ -448,6 +455,7 @@
         <button id="saveAppBtn">Save updated app (embed custom gear)</button>
         <button id="themeBtn">Theme: Auto</button>
         <button id="shareAppMenuBtn">Share app</button>
+        <button id="installHelpBtn">Install / Home Screen</button>
         <div class="divider"></div>
         <button id="aboutBtn">About</button>
         <button id="closeSettings">Close</button>
@@ -497,6 +505,36 @@
     </div>
   </div>
 </div>
+<!-- Install / Home Screen Modal -->
+<div id="installHelpModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="installHelpTitle" style="display:none;">
+  <div class="modal-content" style="max-width:500px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px">
+      <div id="installHelpTitle" style="font-weight:650">Install Photography App</div>
+      <button id="installHelpClose" class="icon-btn" style="width:auto" aria-label="Close install help">✕</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      <img src="apple-touch-icon.png?v=447" alt="Photography App icon" width="72" height="72" style="border-radius:16px;flex:0 0 auto">
+      <div class="sub" style="font-size:13px;line-height:1.45;margin:0">Save the app to your Home Screen to launch it like an app. The Pentax K1000 icon shown here is the Home Screen icon.</div>
+    </div>
+    <div style="font-size:14px;line-height:1.55">
+      <strong>iPhone / iPad — Safari</strong>
+      <ol style="margin-top:6px;padding-left:22px">
+        <li>Open this page in Safari.</li>
+        <li>Tap the Share button.</li>
+        <li>Tap <strong>Add to Home Screen</strong>.</li>
+        <li>Tap <strong>Add</strong>.</li>
+      </ol>
+      <strong>Android — Chrome</strong>
+      <ol style="margin-top:6px;padding-left:22px">
+        <li>Open this page in Chrome.</li>
+        <li>Tap the ⋮ menu.</li>
+        <li>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li>
+        <li>Confirm <strong>Install</strong> or <strong>Add</strong>.</li>
+      </ol>
+      <div class="sub">Menu wording can vary slightly by browser and Android version.</div>
+    </div>
+  </div>
+</div>
 <!-- About Modal -->
 <div id="aboutModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" style="display:none;">
   <div class="modal-content">
@@ -506,7 +544,7 @@
     </div>
     <div style="font-size:15px;line-height:1.6">
       <b>Photography Exposure App</b><br>
-      Version 4.4.6 — September 2026<br><br>
+      Version 4.4.7 — September 2026<br><br>
       This tool helps photographers quickly determine optimal camera settings for any scene, balancing light, creative intent, and film/camera gear. All calculations run locally in your browser. No data is sent or stored externally.<br><br>
       <b>Author:</b> Andrew H.<br>
       <b>Contact:</b> <a href="mailto:ajlh.photography@gmail.com">ajlh.photography@gmail.com</a><br>
@@ -3227,6 +3265,24 @@ document.addEventListener('DOMContentLoaded',function(){try{initApp()}catch(e){a
     document.getElementById('nativeShareAppBtn')?.addEventListener('click',nativeShare);
     modal()?.addEventListener('click',function(e){if(e.target===this)closeShareApp();});
     document.addEventListener('keydown',function(e){if(e.key==='Escape' && modal()?.style.display==='flex')closeShareApp();});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind); else bind();
+})();
+</script>
+<script id="installHelpFeature">
+(function(){
+  function modal(){return document.getElementById('installHelpModal');}
+  function openInstallHelp(){
+    var m=modal(); if(!m) return;
+    var menu=document.getElementById('settingsMenu'); if(menu) menu.style.display='none';
+    m.style.display='flex';
+  }
+  function closeInstallHelp(){var m=modal(); if(m) m.style.display='none';}
+  function bind(){
+    document.getElementById('installHelpBtn')?.addEventListener('click',openInstallHelp);
+    document.getElementById('installHelpClose')?.addEventListener('click',closeInstallHelp);
+    modal()?.addEventListener('click',function(e){if(e.target===this)closeInstallHelp();});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&modal()?.style.display==='flex')closeInstallHelp();});
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind); else bind();
 })();
