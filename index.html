@@ -1426,10 +1426,12 @@ var incidentEvStored = null;
 var exposureMeterSource = 'scene';
 var headerRecommendationObserver = null;
 function storeAmbientEV(ev){
-  ambientEvStored = Math.max(EV_MIN, Math.min(EV_MAX, parseFloat(ev)||ambientEvStored));
+  var n=parseFloat(ev);
+  if(Number.isFinite(n)) ambientEvStored = Math.max(EV_MIN, Math.min(EV_MAX,n));
 }
 function ambientEV(){
-  return Math.max(EV_MIN, Math.min(EV_MAX, parseFloat(document.getElementById('evInput')?.value)||ambientEvStored));
+  var n=parseFloat(document.getElementById('evInput')?.value);
+  return Math.max(EV_MIN, Math.min(EV_MAX,Number.isFinite(n)?n:ambientEvStored));
 }
 function incidentEV(){
   return isFinite(incidentEvStored)?incidentEvStored:null;
