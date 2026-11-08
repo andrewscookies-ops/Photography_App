@@ -13,6 +13,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=447">
 <link rel="stylesheet" href="rapid-tap-v444.css?v=444">
 <link rel="stylesheet" href="more-tools-v445.css?v=446">
+<link rel="stylesheet" href="camera-meter-v448.css?v=448">
 <style>
   /* Creative Intent toggle button */
   #creativeToggle {
@@ -486,6 +487,37 @@
     </div>
   </div>
 </div>
+
+<!-- Optional Phone Camera Meter -->
+<div id="cameraMeterModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="cameraMeterTitle" style="display:none">
+  <div class="modal-content" style="max-width:550px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px">
+      <div id="cameraMeterTitle" style="font-weight:650">Phone Camera Light Meter</div>
+      <button type="button" class="icon-btn" id="cameraMeterClose" style="width:auto" aria-label="Close camera meter">✕</button>
+    </div>
+    <p class="sub" style="font-size:13px;line-height:1.45;margin:0 0 10px">
+      Point your camera at the scene. This is a reflected-light reading; the center circle helps with aiming, but your phone may meter a wider area.
+    </p>
+    <div class="phone-meter-video">
+      <video id="cameraMeterVideo" playsinline muted autoplay aria-label="Rear camera preview"></video>
+      <div class="phone-meter-reticle" aria-hidden="true"></div>
+    </div>
+    <div class="phone-meter-reading">
+      <div id="cameraMeterValue" class="phone-meter-value">EV —</div>
+      <div id="cameraMeterStatus" class="phone-meter-status" role="status">Camera has not been opened.</div>
+      <div id="cameraMeterMeta" class="phone-meter-meta"></div>
+    </div>
+    <div class="phone-meter-actions">
+      <button type="button" id="cameraMeterMeasure">Measure live</button>
+      <button type="button" id="cameraMeterTakePhoto">Take meter photo</button>
+      <button type="button" id="cameraMeterUse" disabled>Use reading</button>
+    </div>
+    <input type="file" id="cameraMeterFile" accept="image/jpeg,image/*" capture="environment" style="display:none" aria-label="Take photo for light measurement">
+    <p class="phone-meter-caveat">
+      On some phones, Take meter photo provides exposure information that live preview cannot. EV is calculated from the phone’s recorded aperture, shutter, and ISO—not from screen brightness. If the browser hides those settings, no invented EV is shown. The reading is an estimate based on the phone’s reflected-light autoexposure. Photos stay on your device and are never uploaded.
+    </p>
+  </div>
+</div>
 <!-- Share App Modal -->
 <div id="shareAppModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="shareAppTitle" style="display:none;">
   <div class="modal-content" style="max-width:430px;text-align:center;">
@@ -544,7 +576,7 @@
     </div>
     <div style="font-size:15px;line-height:1.6">
       <b>Photography Exposure App</b><br>
-      Version 4.4.7 — September 2026<br><br>
+      Version 4.4.8 — November 2026<br><br>
       This tool helps photographers quickly determine optimal camera settings for any scene, balancing light, creative intent, and film/camera gear. All calculations run locally in your browser. No data is sent or stored externally.<br><br>
       <b>Author:</b> Andrew H.<br>
       <b>Contact:</b> <a href="mailto:ajlh.photography@gmail.com">ajlh.photography@gmail.com</a><br>
@@ -641,6 +673,7 @@
     </div>
     <input type="range" id="evSlider" min="-4" max="16" step="0.1" value="13"
       style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" aria-hidden="true">
+    <div class="phone-meter-launch"><button type="button" id="cameraMeterOpen" aria-haspopup="dialog">Use phone camera</button></div>
 
     <div id="evDescriptor" class="ev-descriptor">
       <div class="ev-headline">
@@ -1411,10 +1444,12 @@ function updateMeterSourceUI(){
   if(!line) return;
   var inc=incidentEV();
   var usingIncident=(exposureMeterSource==='incident' && inc!==null);
+  var fromPhone=!usingIncident && typeof window.__phoneMeterEV==='number' && isFinite(window.__phoneMeterEV);
   line.textContent=usingIncident
     ? 'Using incident meter reading (EV '+inc.toFixed(1)+') for recommendations'
+    : fromPhone ? 'Using phone camera reading (EV '+window.__phoneMeterEV.toFixed(1)+') for recommendations'
     : 'Using scene-light estimate for recommendations';
-  line.classList.toggle('incident-active',usingIncident);
+  line.classList.toggle('incident-active',usingIncident||fromPhone);
 }
 function updateIncidentNote(){
   var note=document.getElementById('incidentNote');
@@ -3287,5 +3322,6 @@ document.addEventListener('DOMContentLoaded',function(){try{initApp()}catch(e){a
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind); else bind();
 })();
 </script>
+<script src="camera-meter-v448.js?v=448"></script>
 </body>
 </html>

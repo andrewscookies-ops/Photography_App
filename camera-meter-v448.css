@@ -1,0 +1,21 @@
+
+/* Phone camera meter v4.4.8 */
+.phone-meter-launch{display:flex;justify-content:flex-end;margin:9px 0 3px}
+.phone-meter-launch button{width:auto;padding:9px 14px;font-weight:650;touch-action:manipulation}
+.phone-meter-video{position:relative;overflow:hidden;border-radius:12px;aspect-ratio:4/3;background:#090c14;border:1px solid var(--border)}
+.phone-meter-video video{width:100%;height:100%;display:block;object-fit:cover;background:#090c14}
+.phone-meter-reticle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);height:88px;width:88px;border:2px solid rgba(255,255,255,.92);border-radius:50%;box-shadow:0 0 0 1px #0006,inset 0 0 0 1px #0005;pointer-events:none}
+.phone-meter-reticle:after{content:'+';font-size:26px;color:#fff;text-shadow:0 1px 3px #000;position:absolute;left:50%;top:50%;transform:translate(-50%,-52%)}
+.phone-meter-reading{border:1px solid var(--border);background:var(--chipBg);border-radius:11px;padding:12px;margin-top:10px}
+.phone-meter-value{font-size:25px;font-weight:750;font-variant-numeric:tabular-nums}
+.phone-meter-status{font-size:13px;line-height:1.5;margin-top:4px;color:var(--muted);min-height:34px}
+.phone-meter-meta{font-size:12px;color:var(--muted);margin-top:7px;overflow-wrap:anywhere}
+.phone-meter-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.phone-meter-actions button{flex:1 1 120px;touch-action:manipulation}
+.phone-meter-caveat{font-size:12px;line-height:1.5;color:var(--muted);margin-top:10px}
+@media(max-width:560px){
+ .phone-meter-launch button{width:100%}
+ .phone-meter-video{aspect-ratio:3/4}
+ .phone-meter-actions{display:grid;grid-template-columns:1fr 1fr}
+ .phone-meter-actions button:last-child{grid-column:1/-1}
+}
